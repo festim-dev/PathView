@@ -1,0 +1,98 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "custom",
+      "position": {
+        "x": 292.4587105571342,
+        "y": 363.69738918312294
+      },
+      "data": {
+        "label": "Blanket",
+        "residence_time": 5,
+        "initial_value": 0,
+        "source_term": 2.2
+      },
+      "measured": {
+        "width": 200,
+        "height": 68
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "custom",
+      "position": {
+        "x": 669.0956306401249,
+        "y": 508.44832128486587
+      },
+      "data": {
+        "label": "TES",
+        "residence_time": 3,
+        "initial_value": 0,
+        "source_term": 0
+      },
+      "measured": {
+        "width": 200,
+        "height": 68
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "custom",
+      "position": {
+        "x": 716.8220557903593,
+        "y": 744.1422473772328
+      },
+      "data": {
+        "label": "Storage",
+        "residence_time": "",
+        "initial_value": 20,
+        "source_term": -2
+      },
+      "measured": {
+        "width": 200,
+        "height": 68
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "type": "smoothstep",
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-3",
+      "source": "2",
+      "target": "3",
+      "type": "smoothstep",
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ]
+}

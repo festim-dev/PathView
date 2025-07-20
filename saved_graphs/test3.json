@@ -1,0 +1,136 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "initial_value": 0,
+        "label": "Blanket",
+        "residence_time": 5,
+        "source_term": 2.2
+      },
+      "dragging": false,
+      "id": "1",
+      "measured": {
+        "height": 68,
+        "width": 200
+      },
+      "position": {
+        "x": 292.4587105571342,
+        "y": 363.69738918312294
+      },
+      "selected": false,
+      "type": "custom"
+    },
+    {
+      "data": {
+        "initial_value": 0,
+        "label": "TES",
+        "residence_time": 3,
+        "source_term": 0
+      },
+      "dragging": false,
+      "id": "2",
+      "measured": {
+        "height": 68,
+        "width": 200
+      },
+      "position": {
+        "x": 505.76229730679165,
+        "y": 507.6149879515325
+      },
+      "selected": false,
+      "type": "custom"
+    },
+    {
+      "data": {
+        "initial_value": 20,
+        "label": "Storage",
+        "residence_time": "",
+        "source_term": -2
+      },
+      "dragging": false,
+      "id": "3",
+      "measured": {
+        "height": 68,
+        "width": 200
+      },
+      "position": {
+        "x": 645.988722457026,
+        "y": 724.1422473772329
+      },
+      "selected": false,
+      "type": "custom"
+    },
+    {
+      "id": "4",
+      "type": "custom",
+      "position": {
+        "x": -37.499999999999545,
+        "y": 286.6666666666665
+      },
+      "data": {
+        "label": "External T bottle",
+        "residence_time": "1",
+        "source_term": "",
+        "initial_value": "5",
+        "output": "Invalid input"
+      },
+      "measured": {
+        "width": 200,
+        "height": 68
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "1",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "2",
+      "type": "smoothstep",
+      "selected": false
+    },
+    {
+      "id": "e2-3",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "2",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "3",
+      "type": "smoothstep"
+    },
+    {
+      "id": "e4-1",
+      "source": "4",
+      "target": "1",
+      "type": "smoothstep",
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ]
+}

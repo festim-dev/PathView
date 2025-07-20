@@ -126,7 +126,7 @@ export default function App() {
       id: newNodeId,
       type: 'custom',
       position: { x: 200 + nodes.length * 50, y: 200 },
-      data: { label: `Node ${newNodeId}`, a: '', b: '', output: null },
+      data: { label: `Node ${newNodeId}`, residence_time: '', source_term: '', initial_value: '' },
     };
     setNodes((nds) => [...nds, newNode]);
   };
