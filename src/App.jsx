@@ -131,6 +131,16 @@ export default function App() {
     setNodes((nds) => [...nds, newNode]);
   };
 
+  // Function to delete the selected node
+  const deleteSelectedNode = () => {
+    if (selectedNode) {
+      setNodes((nds) => nds.filter((node) => node.id !== selectedNode.id));
+      setEdges((eds) =>
+        eds.filter((edge) => edge.source !== selectedNode.id && edge.target !== selectedNode.id)
+      );
+      setSelectedNode(null);
+    }
+  };
 
   const computeOutput = async (node) => {
     const params = { ...node.data };
@@ -307,6 +317,12 @@ export default function App() {
             onClick={() => setSelectedNode(null)}
           >
             Close
+          </button>
+          <button
+            style={{ marginTop: 10 }}
+            onClick={deleteSelectedNode}
+          >
+            Delete Node
           </button>
         </div>
       )}
