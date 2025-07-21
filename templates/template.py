@@ -1,9 +1,12 @@
 import pathsim
+import numpy as np
+import matplotlib.pyplot as plt
 
 from pathsim import Simulation, Connection
 from pathsim.blocks import ODE, Source, Scope, Block, Pulse
 from pathsim.solvers import RKBS32, RKF21
 from pathsim.events import ZeroCrossingDown, ZeroCrossingUp
+
 
 class Process(ODE):
     def __init__(self, alpha=0, betas=[], gen=0, ic=0, name=None):
@@ -16,48 +19,48 @@ class Process(ODE):
             initial_value=ic,
         )
 
+
+# Create Process blocks
 {% for block in blocks %}
 {{ block["data"]["label"] }} = Process(
-    name="{{block["data"]["label"]}}",
-    alpha={% if block.data.residence_time != "" %}-1 / float({{block["data"]["residence_time"]}}){% else %}0{% endif %},
-    betas=[],  # TODO implement this
-    gen={% if block.data.source_term != "" %}{{block["data"]["source_term"]}}{% else %}0{% endif %},
-    ic={% if block.data.initial_value != "" %}{{block["data"]["initial_value"]}}{% else %}0{% endif %},
+    name="{{ block["data"]["label"] }}",
+    alpha={% if block["data"]["residence_time"] != "" %}-1 / {{ block["data"]["residence_time"] }}{% else %}0{% endif %},
+    betas=[{% for beta in block["betas"] %}{{ beta }}{% if not loop.last %}, {% endif %}{% endfor %}],
+    gen={% if block["data"]["source_term"] != "" %}{{ block["data"]["source_term"] }}{% else %}0{% endif %},
+    ic={% if block["data"]["initial_value"] != "" %}{{ block["data"]["initial_value"] }}{% else %}0{% endif %},
 )
 {% endfor %}
 
-
-Sco = Scope(
-    labels=[
-        {% for block in blocks %}"{{ block["data"]["label"] }}",{% endfor %}
-    ]
+# Create Scope block
+scope = Scope(
+    labels=[{% for block in blocks %}"{{ block["data"]["label"] }}"{% if not loop.last %}, {% endif %}{% endfor %}],
 )
+scope.id = "scope"
 
+# Create blocks list
 blocks = [
-    {% for block in blocks %}{{ block["data"]["label"] }},{% endfor %}
+    {% for block in blocks %}{{ block["data"]["label"] }},
+    {% endfor %}scope,
 ]
 
-
+# Create connections
 connections = [
-    {% for connection in connections %}Connection({{ find_node_by_id(connection["source"])["data"]["label"] }}, {{ find_node_by_id(connection["target"])["data"]["label"] }}),
-    {% endfor %}{% for block in blocks %}Connection({{ block["data"]["label"] }}, Sco[{{ loop.index0 }}]),
-    {% endfor -%}
-]
+    # Process-to-process connections
+{% for conn in connection_data %}    Connection({{ conn["source"] }}, {{ conn["target"] }}[{{ conn["target_input_index"] }}]),
+{% endfor %}
+    # Process-to-scope connections
+{% for block in blocks %}    Connection({{ block["data"]["label"] }}, scope[{{ loop.index0 }}]),
+{% endfor %}]
 
-Sim = Simulation(
-    blocks,
-    connections,
-    log=True,
-    Solver=RKF21,
-    tolerance_lte_rel=1e-4,
-    tolerance_lte_abs=1e-9,
-)
+# Create simulation
+my_simulation = Simulation(blocks, connections, log=False)
+
 
 if __name__ == "__main__":
-    Sim.run(10)
-
-    Sim.save("model.mdl")
-
-    fig, ax = Sco.plot()
-
+    my_simulation.run(50)
+    
+    my_simulation.save("simple.mdl")
+    
+    fig, ax = scope.plot()
+    
     plt.show()

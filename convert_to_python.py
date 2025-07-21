@@ -1,33 +1,100 @@
 from jinja2 import Environment, FileSystemLoader
-
-
-environment = Environment(loader=FileSystemLoader("templates/"))
-template = environment.get_template("template.py")
-
-
-results_filename = "generated_script.py"
-
 import json
 
-data = json.load(open("saved_graphs/test3.json"))
 
-for block in data["nodes"]:
-    block["data"]["label"] = block["data"]["label"].lower().replace(" ", "_")
+def process_graph_data(json_file: str) -> dict:
+    """Process the JSON graph data and prepare it for template rendering."""
+    data = json.load(open(json_file))
 
+    # Clean up labels for variable names
+    for block in data["nodes"]:
+        block["data"]["label"] = block["data"]["label"].lower().replace(" ", "_")
 
-def find_node_by_id(node_id: str) -> dict:
+    def find_node_by_id(node_id: str) -> dict:
+        for node in data["nodes"]:
+            if node["id"] == node_id:
+                return node
+        return None
+
+    # Process each node to determine its incoming connections and betas
+    processed_blocks = []
+
     for node in data["nodes"]:
-        if node["id"] == node_id:
-            return node
-    return None
+        # Find all incoming edges to this node
+        incoming_edges = [
+            edge for edge in data["edges"] if edge["target"] == node["id"]
+        ]
+
+        # Sort incoming edges by source id to ensure consistent ordering
+        incoming_edges.sort(key=lambda x: x["source"])
+
+        # Calculate betas and source blocks for this node
+        betas = []
+        source_block_labels = []
+
+        for edge in incoming_edges:
+            source_node = find_node_by_id(edge["source"])
+            f = 1  # default transfer fraction
+
+            # Calculate beta value
+            if source_node["data"]["residence_time"] != "":
+                beta_value = f / float(source_node["data"]["residence_time"])
+            else:
+                beta_value = 0
+
+            betas.append(beta_value)
+            source_block_labels.append(source_node["data"]["label"])
+
+        # Create processed block info
+        processed_block = {
+            "id": node["id"],
+            "data": node["data"],
+            "betas": betas,
+            "source_block_labels": source_block_labels,
+            "incoming_edges": incoming_edges,
+        }
+        processed_blocks.append(processed_block)
+
+    # Create connection data with proper indexing
+    connection_data = []
+    next_outputs = {block["data"]["label"]: 0 for block in processed_blocks}
+
+    for edge in data["edges"]:
+        source_label = find_node_by_id(edge["source"])["data"]["label"]
+        target_label = find_node_by_id(edge["target"])["data"]["label"]
+        target_input_index = next_outputs[target_label]
+
+        connection_data.append(
+            {
+                "source": source_label,
+                "target": target_label,
+                "target_input_index": target_input_index,
+            }
+        )
+
+        next_outputs[target_label] += 1
+
+    return {
+        "blocks": processed_blocks,
+        "connection_data": connection_data,
+        "find_node_by_id": find_node_by_id,
+    }
 
 
-context = {
-    "blocks": data["nodes"],
-    "connections": data["edges"],
-    "find_node_by_id": find_node_by_id,
-}
+def main():
+    environment = Environment(loader=FileSystemLoader("templates/"))
+    template = environment.get_template("template.py")
 
-with open(results_filename, mode="w", encoding="utf-8") as results:
-    results.write(template.render(context))
-    print(f"... wrote {results_filename}")
+    results_filename = "generated_script.py"
+
+    # Process the graph data
+    context = process_graph_data("saved_graphs/test3.json")
+
+    # Render the template
+    with open(results_filename, mode="w", encoding="utf-8") as results:
+        results.write(template.render(context))
+        print(f"... wrote {results_filename}")
+
+
+if __name__ == "__main__":
+    main()
