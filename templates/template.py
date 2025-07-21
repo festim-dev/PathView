@@ -35,7 +35,6 @@ class Process(ODE):
 scope = Scope(
     labels=[{% for block in blocks %}"{{ block["data"]["label"] }}"{% if not loop.last %}, {% endif %}{% endfor %}],
 )
-scope.id = "scope"
 
 # Create blocks list
 blocks = [
