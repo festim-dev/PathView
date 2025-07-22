@@ -15,35 +15,6 @@ CORS(
     supports_credentials=True,
 )
 
-
-# Function to compute functions in the nodes
-@app.route("/compute", methods=["POST"])
-def compute():
-    data = request.json
-    node_id = data.get("id")
-    params = data.get("params", {})
-    incoming_outputs = data.get("incomingOutputs", [])
-
-    # Convert parameters to floats
-    values = []
-    for val in params.values():
-        try:
-            values.append(float(val))
-        except ValueError:
-            return jsonify({"id": node_id, "output": "Invalid input"})
-
-    # Add outputs from incoming nodes
-    for val in incoming_outputs:
-        try:
-            values.append(float(val))
-        except ValueError:
-            continue
-
-    total = sum(values)
-
-    return jsonify({"id": node_id, "output": total})
-
-
 # Creates directory for saved graphs
 SAVE_DIR = "saved_graphs"
 os.makedirs(SAVE_DIR, exist_ok=True)

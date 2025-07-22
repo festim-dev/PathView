@@ -4,8 +4,7 @@
       "data": {
         "a": "2",
         "b": "3",
-        "label": "Storage",
-        "output": 5
+        "label": "Storage"
       },
       "id": "1",
       "measured": {
@@ -22,8 +21,7 @@
     {
       "data": {
         "c": "4",
-        "label": "Plasma",
-        "output": 9
+        "label": "Plasma"
       },
       "dragging": false,
       "id": "2",
@@ -42,8 +40,7 @@
       "data": {
         "a": "3",
         "b": "4",
-        "label": "Tritium Extraction System",
-        "output": 7
+        "label": "Tritium Extraction System"
       },
       "id": "3",
       "measured": {
@@ -60,8 +57,7 @@
       "data": {
         "a": "3",
         "b": "2",
-        "label": "Breeding Blanket",
-        "output": 9
+        "label": "Breeding Blanket"
       },
       "dragging": false,
       "id": "4",
@@ -80,8 +76,7 @@
       "data": {
         "a": "4",
         "b": "5",
-        "label": "new node",
-        "output": 18
+        "label": "new node"
       },
       "dragging": false,
       "id": "5",
