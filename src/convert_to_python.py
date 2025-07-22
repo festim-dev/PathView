@@ -98,7 +98,6 @@ def process_graph_data_from_dict(data: dict) -> dict:
                     "value": f,
                     "source_label": source_node["data"]["label"],
                     "target_label": node["data"]["label"],
-                    "source_has_tau": source_node["data"]["residence_time"] != "",
                 }
             )
             source_block_labels.append(source_node["data"]["label"])
@@ -141,7 +140,6 @@ def process_graph_data_from_dict(data: dict) -> dict:
         "blocks": processed_blocks,
         "connection_data": connection_data,
         "transfer_fractions": all_transfer_fractions,
-        "find_node_by_id": find_node_by_id,
     }
 
 
