@@ -80,8 +80,10 @@ def process_graph_data_from_dict(data: dict) -> dict:
 
         for edge in incoming_edges:
             source_node = find_node_by_id(edge["source"])
-            f = 1  # default transfer fraction
-
+            outgoing_edges = [
+                edge for edge in data["edges"] if edge["source"] == source_node["id"]
+            ]
+            f = 1 / len(outgoing_edges)  # default transfer fraction split equally
             # Calculate beta value
             if source_node["data"]["residence_time"] != "":
                 beta_value = f / float(source_node["data"]["residence_time"])
