@@ -71,8 +71,7 @@
         "label": "External T bottle",
         "residence_time": "1",
         "source_term": "",
-        "initial_value": "5",
-        "output": "Invalid input"
+        "initial_value": "5"
       },
       "measured": {
         "width": 200,

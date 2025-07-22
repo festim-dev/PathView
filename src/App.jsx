@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -33,6 +33,9 @@ export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [activeTab, setActiveTab] = useState('graph');
+  const [simulationResults, setSimulationResults] = useState(null);
+  const [selectedEdge, setSelectedEdge] = useState(null);
 
   // Function to save a graph
   const saveGraph = async () => {
@@ -92,6 +95,78 @@ export default function App() {
     setSelectedNode(null);
   };
 
+  // Allows user to save to python script
+  const saveToPython = async () => {
+    try {
+      const graphData = {
+        nodes,
+        edges
+      };
+
+      const response = await fetch('http://localhost:8000/convert-to-python', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ graph: graphData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Create a downloadable file with the generated Python script
+        const blob = new Blob([result.script], { type: 'text/python' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'generated_fuel_cycle_script.py';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('Python script generated and downloaded successfully!');
+      } else {
+        alert(`Error generating Python script: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to generate Python script. Make sure the backend is running.');
+    }
+  };
+
+  // Function to run pathsim simulation
+  const runPathsim = async () => {
+    try {
+      const graphData = {
+        nodes,
+        edges
+      };
+
+      const response = await fetch('http://localhost:8000/run-pathsim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ graph: graphData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Store results and switch to results tab
+        setSimulationResults(result.plot);
+        setActiveTab('results');
+        alert('Pathsim simulation completed successfully! Check the Results tab.');
+      } else {
+        alert(`Error running Pathsim simulation: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to run Pathsim simulation. Make sure the backend is running.');
+    }
+  };
+
   // When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
@@ -108,7 +183,66 @@ export default function App() {
   // Function that when we click on a node, sets that node as the selected node
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
+    setSelectedEdge(null); // Clear selected edge when selecting a node
+    // Reset all edge styles when selecting a node
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: {
+          ...e.style,
+          strokeWidth: 2,
+          stroke: '#ECDFCC',
+        },
+        markerEnd: {
+          ...e.markerEnd,
+          color: '#ECDFCC',
+        },
+      }))
+    );
   };
+
+  // Function that when we click on an edge, sets that edge as the selected edge
+  const onEdgeClick = (event, edge) => {
+    setSelectedEdge(edge);
+    setSelectedNode(null); // Clear selected node when selecting an edge
+    // Update edge styles to highlight the selected edge
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: {
+          ...e.style,
+          strokeWidth: e.id === edge.id ? 3 : 2,
+          stroke: e.id === edge.id ? '#ffd700' : '#ECDFCC',
+        },
+        markerEnd: {
+          ...e.markerEnd,
+          color: e.id === edge.id ? '#ffd700' : '#ECDFCC',
+        },
+      }))
+    );
+  };
+
+  // Function to deselect everything when clicking on the background
+  const onPaneClick = () => {
+    setSelectedNode(null);
+    setSelectedEdge(null);
+    // Reset all edge styles when deselecting
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: {
+          ...e.style,
+          strokeWidth: 2,
+          stroke: '#ECDFCC',
+        },
+        markerEnd: {
+          ...e.markerEnd,
+          color: '#ECDFCC',
+        },
+      }))
+    );
+  };
+
   // Function to add a new node to the graph
   const addNode = () => {
     const newNodeId = (nodes.length + 1).toString();
@@ -131,6 +265,52 @@ export default function App() {
       setSelectedNode(null);
     }
   };
+
+  // Function to delete the selected edge
+  const deleteSelectedEdge = () => {
+    if (selectedEdge) {
+      setEdges((eds) => {
+        const filteredEdges = eds.filter((edge) => edge.id !== selectedEdge.id);
+        // Reset styles for remaining edges
+        return filteredEdges.map((e) => ({
+          ...e,
+          style: {
+            ...e.style,
+            strokeWidth: 2,
+            stroke: '#ECDFCC',
+          },
+          markerEnd: {
+            ...e.markerEnd,
+            color: '#ECDFCC',
+          },
+        }));
+      });
+      setSelectedEdge(null);
+    }
+  };
+
+  // Keyboard event handler for deleting selected items
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Don't trigger deletion if user is typing in an input field
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
+      
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (selectedEdge) {
+          deleteSelectedEdge();
+        } else if (selectedNode) {
+          deleteSelectedNode();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedEdge, selectedNode]);
 
   const computeOutput = async (node) => {
     const params = { ...node.data };
@@ -174,106 +354,223 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-        nodeTypes={nodeTypes}
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
+      {/* Tab Navigation */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '50px',
+        backgroundColor: '#2c2c2c',
+        display: 'flex',
+        alignItems: 'center',
+        zIndex: 15,
+        borderBottom: '1px solid #ccc'
+      }}>
         <button
           style={{
-            position: 'absolute',
-            left: 20,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
           }}
-          onClick={addNode}
+          onClick={() => setActiveTab('graph')}
         >
-          Add Node
+          Graph Editor
         </button>
         <button
           style={{
-            position: 'absolute',
-            right: 20,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
           }}
-          onClick={saveGraph}
+          onClick={() => setActiveTab('results')}
         >
-          Save File
+          Results
         </button>
-        <button
-          style={{
-            position: 'absolute',
-            right: 140,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={loadGraph}
-        >
-          Load File
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            left: 130,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={resetGraph}
-        >
-          Reset Graph
-        </button>
-      </ReactFlow>
-      {selectedNode && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            height: '100vh',
-            width: '300px',
-            background: '#1e1e2f',
-            color: '#ffffff',
-            borderLeft: '1px solid #ccc',
-            padding: '20px',
+      </div>
+
+      {/* Graph Editor Tab */}
+      {activeTab === 'graph' && (
+        <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onEdgeClick={onEdgeClick}
+            onPaneClick={onPaneClick}
+            nodeTypes={nodeTypes}
+          >
+            <Controls />
+            <MiniMap />
+            <Background variant="dots" gap={12} size={1} />
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 70,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: selectedEdge ? 'pointer' : 'not-allowed',
+              }}
+              onClick={deleteSelectedEdge}
+              disabled={!selectedEdge}
+            >
+              Delete Edge
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 120,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: selectedNode ? 'pointer' : 'not-allowed',
+              }}
+              onClick={deleteSelectedNode}
+              disabled={!selectedNode}
+            >
+              Delete Node
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={addNode}
+            >
+              Add Node
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={saveGraph}
+            >
+              Save File
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 140,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={loadGraph}
+            >
+              Load File
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 130,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={resetGraph}
+            >
+              Reset Graph
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 80,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={saveToPython}
+            >
+              Save to <br />Python
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 150,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={runPathsim}
+            >
+              Run
+            </button>
+          </ReactFlow>
+          {selectedNode && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 50,
+                height: 'calc(100vh - 50px)',
+                width: '300px',
+                background: '#1e1e2f',
+                color: '#ffffff',
+                borderLeft: '1px solid #ccc',
+                padding: '20px',
             boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
             zIndex: 10,
           }}
         >
           <h3>{selectedNode.data.label}</h3>
           {Object.entries(selectedNode.data)
-            .filter(([key]) => key !== 'output')
             .map(([key, value]) => (
               <div key={key} style={{ marginBottom: '10px' }}>
                 <label>{key}:</label>
@@ -294,7 +591,6 @@ export default function App() {
                     );
                     setSelectedNode(updatedNode);
 
-                    computeOutput(updatedNode); // Trigger output computation (to backend)
                   }}
                   style={{ width: '100%', marginTop: 4 }}
                 />
@@ -308,18 +604,109 @@ export default function App() {
           >
             Close
           </button>
+        </div>
+      )}
+      {selectedEdge && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 20,
+            height: '100vh',
+            width: '300px',
+            background: '#2c2c54',
+            color: '#ffffff',
+            borderLeft: '1px solid #ccc',
+            padding: '20px',
+            boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
+            zIndex: 10,
+          }}
+        >
+          <h3>Selected Edge</h3>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>ID:</strong> {selectedEdge.id}
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Source:</strong> {selectedEdge.source}
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Target:</strong> {selectedEdge.target}
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Type:</strong> {selectedEdge.type}
+          </div>
+          
+          <br />
           <button
-            style={{ marginTop: 10 }}
-            onClick={deleteSelectedNode}
+            style={{ 
+              marginTop: 10,
+              marginRight: 10,
+              padding: '8px 12px',
+              backgroundColor: '#78A083',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setSelectedEdge(null)}
           >
-            Delete Node
+            Close
           </button>
+          <button
+            style={{ 
+              marginTop: 10,
+              padding: '8px 12px',
+              backgroundColor: '#e74c3c',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={deleteSelectedEdge}
+          >
+            Delete Edge
+          </button>
+        </div>
+      )}
+        </div>
+      )}
+
+      {/* Results Tab */}
+      {activeTab === 'results' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#f5f5f5',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            padding: '20px',
+            textAlign: 'center',
+          }}>
+            <h1 style={{ color: '#333', marginBottom: '20px' }}>
+              Pathsim Simulation Results
+            </h1>
+            {simulationResults ? (
+              <img
+                src={`data:image/png;base64,${simulationResults}`}
+                alt="Simulation Plot"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '1px solid #ccc',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                  borderRadius: '5px',
+                }}
+              />
+            ) : (
+              <p style={{ color: '#666', fontSize: '18px' }}>
+                No simulation results yet. Run a simulation from the Graph Editor tab to see results here.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
-
 }
-
-
-
