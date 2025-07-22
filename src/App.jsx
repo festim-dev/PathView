@@ -142,6 +142,73 @@ export default function App() {
     }
   };
 
+  // Function to run pathsim simulation
+  const runPathsim = async () => {
+    try {
+      const graphData = {
+        nodes,
+        edges
+      };
+
+      const response = await fetch('http://localhost:8000/run-pathsim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ graph: graphData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Create a new window to display the plot
+        const plotWindow = window.open('', '_blank', 'width=800,height=600');
+        plotWindow.document.write(`
+          <html>
+            <head>
+              <title>Pathsim Simulation Results</title>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 20px;
+                  font-family: Arial, sans-serif;
+                  background-color: #f5f5f5;
+                }
+                .container {
+                  max-width: 100%;
+                  text-align: center;
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                  border: 1px solid #ccc;
+                  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+                h1 {
+                  color: #333;
+                  margin-bottom: 20px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Pathsim Simulation Results</h1>
+                <img src="data:image/png;base64,${result.plot}" alt="Simulation Plot" />
+              </div>
+            </body>
+          </html>
+        `);
+        plotWindow.document.close();
+        
+      } else {
+        alert(`Error running Pathsim simulation: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to run Pathsim simulation. Make sure the backend is running.');
+    }
+  };
+
   // When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
@@ -321,6 +388,23 @@ export default function App() {
           onClick={saveToPython}
         >
           Save to <br />Python
+        </button>
+        <button
+          style={{
+            position: 'absolute',
+            right: 20,
+            top: 150,
+            zIndex: 10,
+            padding: '8px 12px',
+            backgroundColor: '#78A083',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={runPathsim}
+        >
+          Run
         </button>
       </ReactFlow>
       {selectedNode && (
