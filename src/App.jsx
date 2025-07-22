@@ -621,7 +621,7 @@ export default function App() {
           style={{
             position: 'absolute',
             right: 0,
-            top: 0,
+            top: 20,
             height: '100vh',
             width: '300px',
             background: '#2c2c54',
