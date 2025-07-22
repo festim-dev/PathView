@@ -320,7 +320,7 @@ export default function App() {
           }}
           onClick={saveToPython}
         >
-          To Python Script
+          Save to <br />Python
         </button>
       </ReactFlow>
       {selectedNode && (
