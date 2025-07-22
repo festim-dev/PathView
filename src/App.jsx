@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -43,6 +43,7 @@ export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedEdge, setSelectedEdge] = useState(null);
 
   // Function to save a graph
   const saveGraph = async () => {
@@ -118,7 +119,15 @@ export default function App() {
   // Function that when we click on a node, sets that node as the selected node
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
+    setSelectedEdge(null); // Clear selected edge when selecting a node
   };
+
+  // Function that when we click on an edge, sets that edge as the selected edge
+  const onEdgeClick = (event, edge) => {
+    setSelectedEdge(edge);
+    setSelectedNode(null); // Clear selected node when selecting an edge
+  };
+
   // Function to add a new node to the graph
   const addNode = () => {
     const newNodeId = (nodes.length + 1).toString();
@@ -141,6 +150,32 @@ export default function App() {
       setSelectedNode(null);
     }
   };
+
+  // Function to delete the selected edge
+  const deleteSelectedEdge = () => {
+    if (selectedEdge) {
+      setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge.id));
+      setSelectedEdge(null);
+    }
+  };
+
+  // Keyboard event handler for deleting selected items
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (selectedEdge) {
+          deleteSelectedEdge();
+        } else if (selectedNode) {
+          deleteSelectedNode();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedEdge, selectedNode]);
 
   const computeOutput = async (node) => {
     const params = { ...node.data };
@@ -191,11 +226,30 @@ export default function App() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
         nodeTypes={nodeTypes}
       >
         <Controls />
         <MiniMap />
         <Background variant="dots" gap={12} size={1} />
+        <button
+          style={{
+            position: 'absolute',
+            left: 20,
+            top: 70,
+            zIndex: 10,
+            padding: '8px 12px',
+            backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: selectedEdge ? 'pointer' : 'not-allowed',
+          }}
+          onClick={deleteSelectedEdge}
+          disabled={!selectedEdge}
+        >
+          Delete Edge
+        </button>
         <button
           style={{
             position: 'absolute',
@@ -323,6 +377,68 @@ export default function App() {
             onClick={deleteSelectedNode}
           >
             Delete Node
+          </button>
+        </div>
+      )}
+      {selectedEdge && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            height: '100vh',
+            width: '300px',
+            background: '#2c2c54',
+            color: '#ffffff',
+            borderLeft: '1px solid #ccc',
+            padding: '20px',
+            boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
+            zIndex: 10,
+          }}
+        >
+          <h3>Selected Edge</h3>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>ID:</strong> {selectedEdge.id}
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Source:</strong> {selectedEdge.source}
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Target:</strong> {selectedEdge.target}
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>Type:</strong> {selectedEdge.type}
+          </div>
+          
+          <br />
+          <button
+            style={{ 
+              marginTop: 10,
+              marginRight: 10,
+              padding: '8px 12px',
+              backgroundColor: '#78A083',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setSelectedEdge(null)}
+          >
+            Close
+          </button>
+          <button
+            style={{ 
+              marginTop: 10,
+              padding: '8px 12px',
+              backgroundColor: '#e74c3c',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={deleteSelectedEdge}
+          >
+            Delete Edge
           </button>
         </div>
       )}
