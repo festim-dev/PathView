@@ -83,7 +83,7 @@ def process_graph_data(json_file: str) -> dict:
 
 
 def main():
-    environment = Environment(loader=FileSystemLoader("../templates/"))
+    environment = Environment(loader=FileSystemLoader("templates/"))
     template = environment.get_template("template.py")
 
     results_filename = "../generated_script.py"
@@ -103,7 +103,7 @@ def convert_graph_to_python(
     """Convert graph data to Python script and return the generated code."""
     # Get the directory of this file to properly reference templates
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    templates_dir = os.path.join(current_dir, "..", "templates")
+    templates_dir = os.path.join(current_dir, "templates")
 
     environment = Environment(loader=FileSystemLoader(templates_dir))
     template = environment.get_template("template.py")
