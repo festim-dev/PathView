@@ -120,18 +120,63 @@ export default function App() {
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
     setSelectedEdge(null); // Clear selected edge when selecting a node
+    // Reset all edge styles when selecting a node
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: {
+          ...e.style,
+          strokeWidth: 2,
+          stroke: '#ECDFCC',
+        },
+        markerEnd: {
+          ...e.markerEnd,
+          color: '#ECDFCC',
+        },
+      }))
+    );
   };
 
   // Function that when we click on an edge, sets that edge as the selected edge
   const onEdgeClick = (event, edge) => {
     setSelectedEdge(edge);
     setSelectedNode(null); // Clear selected node when selecting an edge
+    // Update edge styles to highlight the selected edge
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: {
+          ...e.style,
+          strokeWidth: e.id === edge.id ? 3 : 2,
+          stroke: e.id === edge.id ? '#ffd700' : '#ECDFCC',
+        },
+        markerEnd: {
+          ...e.markerEnd,
+          color: e.id === edge.id ? '#ffd700' : '#ECDFCC',
+        },
+      }))
+    );
   };
 
   // Function to deselect everything when clicking on the background
   const onPaneClick = () => {
     setSelectedNode(null);
     setSelectedEdge(null);
+    // Reset all edge styles when deselecting
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        style: {
+          ...e.style,
+          strokeWidth: 2,
+          stroke: '#ECDFCC',
+        },
+        markerEnd: {
+          ...e.markerEnd,
+          color: '#ECDFCC',
+        },
+      }))
+    );
   };
 
   // Function to add a new node to the graph
@@ -160,7 +205,22 @@ export default function App() {
   // Function to delete the selected edge
   const deleteSelectedEdge = () => {
     if (selectedEdge) {
-      setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge.id));
+      setEdges((eds) => {
+        const filteredEdges = eds.filter((edge) => edge.id !== selectedEdge.id);
+        // Reset styles for remaining edges
+        return filteredEdges.map((e) => ({
+          ...e,
+          style: {
+            ...e.style,
+            strokeWidth: 2,
+            stroke: '#ECDFCC',
+          },
+          markerEnd: {
+            ...e.markerEnd,
+            color: '#ECDFCC',
+          },
+        }));
+      });
       setSelectedEdge(null);
     }
   };
