@@ -128,6 +128,12 @@ export default function App() {
     setSelectedNode(null); // Clear selected node when selecting an edge
   };
 
+  // Function to deselect everything when clicking on the background
+  const onPaneClick = () => {
+    setSelectedNode(null);
+    setSelectedEdge(null);
+  };
+
   // Function to add a new node to the graph
   const addNode = () => {
     const newNodeId = (nodes.length + 1).toString();
@@ -227,6 +233,7 @@ export default function App() {
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         onEdgeClick={onEdgeClick}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
       >
         <Controls />
@@ -249,6 +256,24 @@ export default function App() {
           disabled={!selectedEdge}
         >
           Delete Edge
+        </button>
+        <button
+          style={{
+            position: 'absolute',
+            left: 20,
+            top: 120,
+            zIndex: 10,
+            padding: '8px 12px',
+            backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: selectedNode ? 'pointer' : 'not-allowed',
+          }}
+          onClick={deleteSelectedNode}
+          disabled={!selectedNode}
+        >
+          Delete Node
         </button>
         <button
           style={{
@@ -371,12 +396,6 @@ export default function App() {
             onClick={() => setSelectedNode(null)}
           >
             Close
-          </button>
-          <button
-            style={{ marginTop: 10 }}
-            onClick={deleteSelectedNode}
-          >
-            Delete Node
           </button>
         </div>
       )}
