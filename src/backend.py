@@ -139,7 +139,12 @@ def run_pathsim():
 
             # Find all the edges connected to this node
             for edge in edges:
-                f = 1  # default value for f
+                source_node = find_node_by_id(edge["source"])
+                outgoing_edges = [
+                    edge for edge in edges if edge["source"] == source_node["id"]
+                ]
+                f = 1 / len(outgoing_edges)  # default transfer fraction split equally
+
                 if edge["target"] == node["id"]:
                     source_node = find_node_by_id(edge["source"])
                     if source_node and source_node["data"].get("residence_time"):
