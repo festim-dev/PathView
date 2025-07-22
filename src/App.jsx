@@ -43,6 +43,8 @@ export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [activeTab, setActiveTab] = useState('graph');
+  const [simulationResults, setSimulationResults] = useState(null);
 
   // Function to save a graph
   const saveGraph = async () => {
@@ -161,45 +163,10 @@ export default function App() {
       const result = await response.json();
 
       if (result.success) {
-        // Create a new window to display the plot
-        const plotWindow = window.open('', '_blank', 'width=800,height=600');
-        plotWindow.document.write(`
-          <html>
-            <head>
-              <title>Pathsim Simulation Results</title>
-              <style>
-                body {
-                  margin: 0;
-                  padding: 20px;
-                  font-family: Arial, sans-serif;
-                  background-color: #f5f5f5;
-                }
-                .container {
-                  max-width: 100%;
-                  text-align: center;
-                }
-                img {
-                  max-width: 100%;
-                  height: auto;
-                  border: 1px solid #ccc;
-                  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                }
-                h1 {
-                  color: #333;
-                  margin-bottom: 20px;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <h1>Pathsim Simulation Results</h1>
-                <img src="data:image/png;base64,${result.plot}" alt="Simulation Plot" />
-              </div>
-            </body>
-          </html>
-        `);
-        plotWindow.document.close();
-        
+        // Store results and switch to results tab
+        setSimulationResults(result.plot);
+        setActiveTab('results');
+        alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
         alert(`Error running Pathsim simulation: ${result.error}`);
       }
@@ -291,181 +258,266 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-        nodeTypes={nodeTypes}
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
+      {/* Tab Navigation */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '50px',
+        backgroundColor: '#2c2c2c',
+        display: 'flex',
+        alignItems: 'center',
+        zIndex: 15,
+        borderBottom: '1px solid #ccc'
+      }}>
         <button
           style={{
-            position: 'absolute',
-            left: 20,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
           }}
-          onClick={addNode}
+          onClick={() => setActiveTab('graph')}
         >
-          Add Node
+          Graph Editor
         </button>
         <button
           style={{
-            position: 'absolute',
-            right: 20,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
           }}
-          onClick={saveGraph}
+          onClick={() => setActiveTab('results')}
         >
-          Save File
+          Results
         </button>
-        <button
-          style={{
-            position: 'absolute',
-            right: 140,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={loadGraph}
-        >
-          Load File
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            left: 130,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={resetGraph}
-        >
-          Reset Graph
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            position: 'absolute',
-            right: 20,
-            top: 80,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={saveToPython}
-        >
-          Save to <br />Python
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            right: 20,
-            top: 150,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={runPathsim}
-        >
-          Run
-        </button>
-      </ReactFlow>
-      {selectedNode && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            height: '100vh',
-            width: '300px',
-            background: '#1e1e2f',
-            color: '#ffffff',
-            borderLeft: '1px solid #ccc',
+      </div>
+
+      {/* Graph Editor Tab */}
+      {activeTab === 'graph' && (
+        <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+          >
+            <Controls />
+            <MiniMap />
+            <Background variant="dots" gap={12} size={1} />
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={addNode}
+            >
+              Add Node
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={saveGraph}
+            >
+              Save File
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 140,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={loadGraph}
+            >
+              Load File
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 130,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={resetGraph}
+            >
+              Reset Graph
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 80,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={saveToPython}
+            >
+              Save to <br />Python
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 150,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={runPathsim}
+            >
+              Run
+            </button>
+          </ReactFlow>
+          {selectedNode && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 50,
+                height: 'calc(100vh - 50px)',
+                width: '300px',
+                background: '#1e1e2f',
+                color: '#ffffff',
+                borderLeft: '1px solid #ccc',
+                padding: '20px',
+                boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
+                zIndex: 10,
+                overflow: 'auto',
+              }}
+            >
+              <h3>{selectedNode.data.label}</h3>
+              {Object.entries(selectedNode.data)
+                .filter(([key]) => key !== 'output')
+                .map(([key, value]) => (
+                  <div key={key} style={{ marginBottom: '10px' }}>
+                    <label>{key}:</label>
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+                        const updatedNode = {
+                          ...selectedNode,
+                          data: { ...selectedNode.data, [key]: newValue },
+                        };
+
+                        setNodes((nds) =>
+                          nds.map((node) =>
+                            node.id === selectedNode.id ? updatedNode : node
+                          )
+                        );
+                        setSelectedNode(updatedNode);
+
+                        computeOutput(updatedNode);
+                      }}
+                      style={{ width: '100%', marginTop: 4 }}
+                    />
+                  </div>
+                ))}
+
+              <br />
+              <button
+                style={{ marginTop: 10, marginRight: 10 }}
+                onClick={() => setSelectedNode(null)}
+              >
+                Close
+              </button>
+              <button
+                style={{ marginTop: 10 }}
+                onClick={deleteSelectedNode}
+              >
+                Delete Node
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Results Tab */}
+      {activeTab === 'results' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#f5f5f5',
+          overflow: 'auto',
+        }}>
+          <div style={{
             padding: '20px',
-            boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
-            zIndex: 10,
-          }}
-        >
-          <h3>{selectedNode.data.label}</h3>
-          {Object.entries(selectedNode.data)
-            .filter(([key]) => key !== 'output')
-            .map(([key, value]) => (
-              <div key={key} style={{ marginBottom: '10px' }}>
-                <label>{key}:</label>
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    const updatedNode = {
-                      ...selectedNode,
-                      data: { ...selectedNode.data, [key]: newValue },
-                    };
-
-                    setNodes((nds) =>
-                      nds.map((node) =>
-                        node.id === selectedNode.id ? updatedNode : node
-                      )
-                    );
-                    setSelectedNode(updatedNode);
-
-                    computeOutput(updatedNode); // Trigger output computation (to backend)
-                  }}
-                  style={{ width: '100%', marginTop: 4 }}
-                />
-              </div>
-            ))}
-
-          <br />
-          <button
-            style={{ marginTop: 10 }}
-            onClick={() => setSelectedNode(null)}
-          >
-            Close
-          </button>
-          <button
-            style={{ marginTop: 10 }}
-            onClick={deleteSelectedNode}
-          >
-            Delete Node
-          </button>
+            textAlign: 'center',
+          }}>
+            <h1 style={{ color: '#333', marginBottom: '20px' }}>
+              Pathsim Simulation Results
+            </h1>
+            {simulationResults ? (
+              <img
+                src={`data:image/png;base64,${simulationResults}`}
+                alt="Simulation Plot"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '1px solid #ccc',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                  borderRadius: '5px',
+                }}
+              />
+            ) : (
+              <p style={{ color: '#666', fontSize: '18px' }}>
+                No simulation results yet. Run a simulation from the Graph Editor tab to see results here.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
