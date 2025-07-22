@@ -11,13 +11,17 @@ def process_graph_data(json_file: str) -> dict:
 
 
 def main():
-    environment = Environment(loader=FileSystemLoader("templates/"))
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    templates_dir = os.path.join(current_dir, "templates")
+
+    environment = Environment(loader=FileSystemLoader(templates_dir))
     template = environment.get_template("template.py")
 
-    results_filename = "../generated_script.py"
+    results_filename = os.path.join(current_dir, "..", "generated_script.py")
 
     # Process the graph data
-    context = process_graph_data("../saved_graphs/test3.json")
+    test_file_path = os.path.join(current_dir, "..", "saved_graphs", "test3.json")
+    context = process_graph_data(test_file_path)
 
     # Render the template
     with open(results_filename, mode="w", encoding="utf-8") as results:
@@ -74,8 +78,8 @@ def process_graph_data_from_dict(data: dict) -> dict:
         # Sort incoming edges by source id to ensure consistent ordering
         incoming_edges.sort(key=lambda x: x["source"])
 
-        # Calculate betas and source blocks for this node
-        betas = []
+        # Calculate transfer fractions and source blocks for this node
+        transfer_fractions = []
         source_block_labels = []
 
         for edge in incoming_edges:
@@ -84,24 +88,35 @@ def process_graph_data_from_dict(data: dict) -> dict:
                 edge for edge in data["edges"] if edge["source"] == source_node["id"]
             ]
             f = 1 / len(outgoing_edges)  # default transfer fraction split equally
-            # Calculate beta value
-            if source_node["data"]["residence_time"] != "":
-                beta_value = f / float(source_node["data"]["residence_time"])
-            else:
-                beta_value = 0
 
-            betas.append(beta_value)
+            # Create transfer fraction variable name
+            f_var_name = f"f_{source_node['data']['label']}_{node['data']['label']}"
+
+            transfer_fractions.append(
+                {
+                    "var_name": f_var_name,
+                    "value": f,
+                    "source_label": source_node["data"]["label"],
+                    "target_label": node["data"]["label"],
+                    "source_has_tau": source_node["data"]["residence_time"] != "",
+                }
+            )
             source_block_labels.append(source_node["data"]["label"])
 
         # Create processed block info
         processed_block = {
             "id": node["id"],
             "data": node["data"],
-            "betas": betas,
+            "transfer_fractions": transfer_fractions,
             "source_block_labels": source_block_labels,
             "incoming_edges": incoming_edges,
         }
         processed_blocks.append(processed_block)
+
+    # Collect all transfer fractions for global variable generation
+    all_transfer_fractions = []
+    for block in processed_blocks:
+        all_transfer_fractions.extend(block["transfer_fractions"])
 
     # Create connection data with proper indexing
     connection_data = []
@@ -125,6 +140,7 @@ def process_graph_data_from_dict(data: dict) -> dict:
     return {
         "blocks": processed_blocks,
         "connection_data": connection_data,
+        "transfer_fractions": all_transfer_fractions,
         "find_node_by_id": find_node_by_id,
     }
 

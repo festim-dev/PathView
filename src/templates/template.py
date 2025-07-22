@@ -25,13 +25,17 @@ class Process(ODE):
 {% if block["data"]["residence_time"] != "" -%}
 tau_{{ block["data"]["label"] }} = {{ block["data"]["residence_time"] }}
 {% endif -%}
-
 {%- endfor %}
+
+{% for tf in transfer_fractions -%}
+{{ tf["var_name"] }} = {{ tf["value"] }}
+{% endfor %}
+
 {% for block in blocks %}
 {{ block["data"]["label"] }} = Process(
     name="{{ block["data"]["label"] }}",
     alpha={% if block["data"]["residence_time"] != "" %}-1 / tau_{{ block["data"]["label"] }}{% else %}0{% endif %},
-    betas=[{% for beta in block["betas"] %}{{ beta }}{% if not loop.last %}, {% endif %}{% endfor %}],
+    betas=[{% for tf in block["transfer_fractions"] %}{% if tf["source_has_tau"] %}{{ tf["var_name"] }} / tau_{{ tf["source_label"] }}{% else %}{{ tf["var_name"] }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}],
     gen={% if block["data"]["source_term"] != "" %}{{ block["data"]["source_term"] }}{% else %}0{% endif %},
     ic={% if block["data"]["initial_value"] != "" %}{{ block["data"]["initial_value"] }}{% else %}0{% endif %},
 )
@@ -68,4 +72,5 @@ if __name__ == "__main__":
     
     fig, ax = scope.plot()
     
+    plt.show()
     plt.show()
