@@ -427,7 +427,6 @@ export default function App() {
         >
           <h3>{selectedNode.data.label}</h3>
           {Object.entries(selectedNode.data)
-            .filter(([key]) => key !== 'output')
             .map(([key, value]) => (
               <div key={key} style={{ marginBottom: '10px' }}>
                 <label>{key}:</label>
@@ -448,7 +447,6 @@ export default function App() {
                     );
                     setSelectedNode(updatedNode);
 
-                    computeOutput(updatedNode); // Trigger output computation (to backend)
                   }}
                   style={{ width: '100%', marginTop: 4 }}
                 />
