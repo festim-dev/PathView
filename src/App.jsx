@@ -228,6 +228,11 @@ export default function App() {
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Don't trigger deletion if user is typing in an input field
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
+      
       if (event.key === 'Delete' || event.key === 'Backspace') {
         if (selectedEdge) {
           deleteSelectedEdge();
