@@ -43,6 +43,8 @@ export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [activeTab, setActiveTab] = useState('graph');
+  const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
 
   // Function to save a graph
@@ -140,6 +142,38 @@ export default function App() {
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to generate Python script. Make sure the backend is running.');
+    }
+  };
+
+  // Function to run pathsim simulation
+  const runPathsim = async () => {
+    try {
+      const graphData = {
+        nodes,
+        edges
+      };
+
+      const response = await fetch('http://localhost:8000/run-pathsim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ graph: graphData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Store results and switch to results tab
+        setSimulationResults(result.plot);
+        setActiveTab('results');
+        alert('Pathsim simulation completed successfully! Check the Results tab.');
+      } else {
+        alert(`Error running Pathsim simulation: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
 
@@ -330,155 +364,217 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-        onEdgeClick={onEdgeClick}
-        onPaneClick={onPaneClick}
-        nodeTypes={nodeTypes}
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
+      {/* Tab Navigation */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '50px',
+        backgroundColor: '#2c2c2c',
+        display: 'flex',
+        alignItems: 'center',
+        zIndex: 15,
+        borderBottom: '1px solid #ccc'
+      }}>
         <button
           style={{
-            position: 'absolute',
-            left: 20,
-            top: 70,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: selectedEdge ? 'pointer' : 'not-allowed',
-          }}
-          onClick={deleteSelectedEdge}
-          disabled={!selectedEdge}
-        >
-          Delete Edge
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            left: 20,
-            top: 120,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: selectedNode ? 'pointer' : 'not-allowed',
-          }}
-          onClick={deleteSelectedNode}
-          disabled={!selectedNode}
-        >
-          Delete Node
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            left: 20,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
           }}
-          onClick={addNode}
+          onClick={() => setActiveTab('graph')}
         >
-          Add Node
+          Graph Editor
         </button>
         <button
           style={{
-            position: 'absolute',
-            right: 20,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
           }}
-          onClick={saveGraph}
+          onClick={() => setActiveTab('results')}
         >
-          Save File
+          Results
         </button>
-        <button
-          style={{
-            position: 'absolute',
-            right: 140,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={loadGraph}
-        >
-          Load File
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            left: 130,
-            top: 20,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={resetGraph}
-        >
-          Reset Graph
-        </button>
-        <button
-          style={{
-            position: 'absolute',
-            position: 'absolute',
-            right: 20,
-            top: 80,
-            zIndex: 10,
-            padding: '8px 12px',
-            backgroundColor: '#78A083',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={saveToPython}
-        >
-          Save to <br />Python
-        </button>
-      </ReactFlow>
-      {selectedNode && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            height: '100vh',
-            width: '300px',
-            background: '#1e1e2f',
-            color: '#ffffff',
-            borderLeft: '1px solid #ccc',
-            padding: '20px',
+      </div>
+
+      {/* Graph Editor Tab */}
+      {activeTab === 'graph' && (
+        <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onEdgeClick={onEdgeClick}
+            onPaneClick={onPaneClick}
+            nodeTypes={nodeTypes}
+          >
+            <Controls />
+            <MiniMap />
+            <Background variant="dots" gap={12} size={1} />
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 70,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: selectedEdge ? 'pointer' : 'not-allowed',
+              }}
+              onClick={deleteSelectedEdge}
+              disabled={!selectedEdge}
+            >
+              Delete Edge
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 120,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: selectedNode ? 'pointer' : 'not-allowed',
+              }}
+              onClick={deleteSelectedNode}
+              disabled={!selectedNode}
+            >
+              Delete Node
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 20,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={addNode}
+            >
+              Add Node
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={saveGraph}
+            >
+              Save File
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 140,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={loadGraph}
+            >
+              Load File
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                left: 130,
+                top: 20,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={resetGraph}
+            >
+              Reset Graph
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 80,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={saveToPython}
+            >
+              Save to <br />Python
+            </button>
+            <button
+              style={{
+                position: 'absolute',
+                right: 20,
+                top: 150,
+                zIndex: 10,
+                padding: '8px 12px',
+                backgroundColor: '#78A083',
+                color: 'white',
+                border: 'none',
+                borderRadius: 5,
+                cursor: 'pointer',
+              }}
+              onClick={runPathsim}
+            >
+              Run
+            </button>
+          </ReactFlow>
+          {selectedNode && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 50,
+                height: 'calc(100vh - 50px)',
+                width: '300px',
+                background: '#1e1e2f',
+                color: '#ffffff',
+                borderLeft: '1px solid #ccc',
+                padding: '20px',
             boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
             zIndex: 10,
           }}
@@ -525,7 +621,7 @@ export default function App() {
           style={{
             position: 'absolute',
             right: 0,
-            top: 0,
+            top: 20,
             height: '100vh',
             width: '300px',
             background: '#2c2c54',
@@ -582,10 +678,45 @@ export default function App() {
           </button>
         </div>
       )}
+        </div>
+      )}
+
+      {/* Results Tab */}
+      {activeTab === 'results' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#f5f5f5',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            padding: '20px',
+            textAlign: 'center',
+          }}>
+            <h1 style={{ color: '#333', marginBottom: '20px' }}>
+              Pathsim Simulation Results
+            </h1>
+            {simulationResults ? (
+              <img
+                src={`data:image/png;base64,${simulationResults}`}
+                alt="Simulation Plot"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '1px solid #ccc',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                  borderRadius: '5px',
+                }}
+              />
+            ) : (
+              <p style={{ color: '#666', fontSize: '18px' }}>
+                No simulation results yet. Run a simulation from the Graph Editor tab to see results here.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
-
 }
-
-
-
