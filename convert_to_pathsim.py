@@ -49,7 +49,6 @@ connections = {node["id"]: [] for node in data["nodes"]}
 blocks = []
 for node in data["nodes"]:
     print(f"Processing node {node['id']}")
-    connections[node["id"]] = []
     betas = []
 
     # Find all the edges connected to this node
@@ -57,12 +56,13 @@ for node in data["nodes"]:
     for edge in data["edges"]:
         f = 1  # default value for f
         if edge["target"] == node["id"]:
-            print(f"Found {edge["source"]} is connected to this node")
+            print(f"Found {edge['source']} is connected to this node")
             source_node = find_node_by_id(edge["source"])
             betas.append(f / float(source_node["data"]["residence_time"]))
 
             connections[edge["source"]].append(edge["target"])
-
+            print(f"Adding connection from {edge['source']} to {edge['target']}")
+            print(connections)
     block = Process(
         alpha=(
             -1 / float(node["data"]["residence_time"])
@@ -122,7 +122,6 @@ my_simulation = Simulation(blocks, connections_pathsim, log=False)
 
 
 if __name__ == "__main__":
-
     my_simulation.run(50)
 
     my_simulation.save("simple.mdl")

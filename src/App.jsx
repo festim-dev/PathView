@@ -103,6 +103,46 @@ export default function App() {
     setSelectedNode(null);
   };
 
+  // Allows user to save to python script
+  const saveToPython = async () => {
+    try {
+      const graphData = {
+        nodes,
+        edges
+      };
+
+      const response = await fetch('http://localhost:8000/convert-to-python', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ graph: graphData }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Create a downloadable file with the generated Python script
+        const blob = new Blob([result.script], { type: 'text/python' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'generated_fuel_cycle_script.py';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('Python script generated and downloaded successfully!');
+      } else {
+        alert(`Error generating Python script: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to generate Python script. Make sure the backend is running.');
+    }
+  };
+
   // When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
@@ -407,6 +447,24 @@ export default function App() {
           onClick={resetGraph}
         >
           Reset Graph
+        </button>
+        <button
+          style={{
+            position: 'absolute',
+            position: 'absolute',
+            right: 20,
+            top: 80,
+            zIndex: 10,
+            padding: '8px 12px',
+            backgroundColor: '#78A083',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={saveToPython}
+        >
+          Save to <br />Python
         </button>
       </ReactFlow>
       {selectedNode && (

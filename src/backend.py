@@ -2,7 +2,7 @@ import os
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from datetime import datetime
+from convert_to_python import convert_graph_to_python
 
 
 # app = Flask(__name__)
@@ -54,6 +54,31 @@ def load_graph():
         graph_data = json.load(f)
 
     return jsonify(graph_data)
+
+
+# Function to convert graph to Python script
+@app.route("/convert-to-python", methods=["POST"])
+def convert_to_python():
+    try:
+        data = request.json
+        graph_data = data.get("graph")
+
+        if not graph_data:
+            return jsonify({"error": "No graph data provided"}), 400
+
+        # Generate the Python script directly using the imported function
+        script_content = convert_graph_to_python(graph_data)
+
+        return jsonify(
+            {
+                "success": True,
+                "script": script_content,
+                "message": "Python script generated successfully",
+            }
+        )
+
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
