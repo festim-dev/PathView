@@ -22,20 +22,10 @@ const nodeTypes = {
 };
 
 // Defining initial nodes. In the data section, we have label, but also parameters specific to the node.
-const initialNodes = [
-  // { id: '1', type: 'custom', position: { x: 300, y: 100 }, data: { label: 'Storage', a: '', b: '', output: null } },
-  // { id: '2', type: 'custom', position: { x: 500, y: 100 }, data: { label: 'Plasma', c: '', output: null } },
-  // { id: '3', type: 'custom', position: { x: 300, y: 250 }, data: { label: 'Tritium Extraction System', a: '', b: '', output: null } },
-  // { id: '4', type: 'custom', position: { x: 500, y: 250 }, data: { label: 'Breeding Blanket', a: '', b: '', output: null } },
-];
+const initialNodes = [];
 
 // Defining initial edges
-const initialEdges = [
-  // makeEdge({ id: 'e1-2', source: '1', target: '2' }),
-  // makeEdge({ id: 'e3-1', source: '3', target: '1' }),
-  // makeEdge({ id: 'e4-3', source: '4', target: '3' }),
-  // makeEdge({ id: 'e2-4', source: '2', target: '4' }),
-];
+const initialEdges = [];
 
 // Main App component
 export default function App() {
