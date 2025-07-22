@@ -216,46 +216,6 @@ export default function App() {
     }
   };
 
-  const computeOutput = async (node) => {
-    const params = { ...node.data };
-    delete params.label;
-    delete params.output;
-
-    // Finds incoming nodes
-    const incomingNodeIds = edges
-      .filter((edge) => edge.target === node.id)
-      .map((edge) => edge.source);
-    // Outputs of incoming nodes
-    const incomingOutputs = nodes
-      .filter((n) => incomingNodeIds.includes(n.id))
-      .map((n) => n.data.output)
-      .filter((output) => output !== null); // Ignores nonexistent outputs
-
-    try {
-      const response = await fetch('http://localhost:8000/compute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: node.id,
-          params,
-          incomingOutputs,
-        }),
-      });
-
-      const result = await response.json();
-
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === node.id
-            ? { ...n, data: { ...n.data, output: result.output } }
-            : n
-        )
-      );
-    } catch (error) {
-      console.error('Error computing output:', error);
-    }
-  };
-
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       {/* Tab Navigation */}
@@ -431,56 +391,53 @@ export default function App() {
                 color: '#ffffff',
                 borderLeft: '1px solid #ccc',
                 padding: '20px',
-                boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
-                zIndex: 10,
-                overflow: 'auto',
-              }}
-            >
-              <h3>{selectedNode.data.label}</h3>
-              {Object.entries(selectedNode.data)
-                .filter(([key]) => key !== 'output')
-                .map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '10px' }}>
-                    <label>{key}:</label>
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e) => {
-                        const newValue = e.target.value;
-                        const updatedNode = {
-                          ...selectedNode,
-                          data: { ...selectedNode.data, [key]: newValue },
-                        };
+            boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
+            zIndex: 10,
+          }}
+        >
+          <h3>{selectedNode.data.label}</h3>
+          {Object.entries(selectedNode.data)
+            .map(([key, value]) => (
+              <div key={key} style={{ marginBottom: '10px' }}>
+                <label>{key}:</label>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    const updatedNode = {
+                      ...selectedNode,
+                      data: { ...selectedNode.data, [key]: newValue },
+                    };
 
-                        setNodes((nds) =>
-                          nds.map((node) =>
-                            node.id === selectedNode.id ? updatedNode : node
-                          )
-                        );
-                        setSelectedNode(updatedNode);
+                    setNodes((nds) =>
+                      nds.map((node) =>
+                        node.id === selectedNode.id ? updatedNode : node
+                      )
+                    );
+                    setSelectedNode(updatedNode);
 
-                        computeOutput(updatedNode);
-                      }}
-                      style={{ width: '100%', marginTop: 4 }}
-                    />
-                  </div>
-                ))}
+                  }}
+                  style={{ width: '100%', marginTop: 4 }}
+                />
+              </div>
+            ))}
 
-              <br />
-              <button
-                style={{ marginTop: 10, marginRight: 10 }}
-                onClick={() => setSelectedNode(null)}
-              >
-                Close
-              </button>
-              <button
-                style={{ marginTop: 10 }}
-                onClick={deleteSelectedNode}
-              >
-                Delete Node
-              </button>
-            </div>
-          )}
+          <br />
+          <button
+            style={{ marginTop: 10 }}
+            onClick={() => setSelectedNode(null)}
+          >
+            Close
+          </button>
+          <button
+            style={{ marginTop: 10 }}
+            onClick={deleteSelectedNode}
+          >
+            Delete Node
+          </button>
+        </div>
+      )}
         </div>
       )}
 
@@ -522,8 +479,4 @@ export default function App() {
       )}
     </div>
   );
-
 }
-
-
-
