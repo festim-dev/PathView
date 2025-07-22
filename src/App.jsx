@@ -142,46 +142,6 @@ export default function App() {
     }
   };
 
-  const computeOutput = async (node) => {
-    const params = { ...node.data };
-    delete params.label;
-    delete params.output;
-
-    // Finds incoming nodes
-    const incomingNodeIds = edges
-      .filter((edge) => edge.target === node.id)
-      .map((edge) => edge.source);
-    // Outputs of incoming nodes
-    const incomingOutputs = nodes
-      .filter((n) => incomingNodeIds.includes(n.id))
-      .map((n) => n.data.output)
-      .filter((output) => output !== null); // Ignores nonexistent outputs
-
-    try {
-      const response = await fetch('http://localhost:8000/compute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: node.id,
-          params,
-          incomingOutputs,
-        }),
-      });
-
-      const result = await response.json();
-
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === node.id
-            ? { ...n, data: { ...n.data, output: result.output } }
-            : n
-        )
-      );
-    } catch (error) {
-      console.error('Error computing output:', error);
-    }
-  };
-
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       <ReactFlow
@@ -283,7 +243,6 @@ export default function App() {
         >
           <h3>{selectedNode.data.label}</h3>
           {Object.entries(selectedNode.data)
-            .filter(([key]) => key !== 'output')
             .map(([key, value]) => (
               <div key={key} style={{ marginBottom: '10px' }}>
                 <label>{key}:</label>
@@ -304,7 +263,6 @@ export default function App() {
                     );
                     setSelectedNode(updatedNode);
 
-                    computeOutput(updatedNode); // Trigger output computation (to backend)
                   }}
                   style={{ width: '100%', marginTop: 4 }}
                 />
