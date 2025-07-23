@@ -87,7 +87,8 @@ def process_graph_data_from_dict(data: dict) -> dict:
             outgoing_edges = [
                 edge for edge in data["edges"] if edge["source"] == source_node["id"]
             ]
-            f = 1 / len(outgoing_edges)  # default transfer fraction split equally
+            # default transfer fraction split equally
+            f = edge["data"].get("weight", 1 / len(outgoing_edges))
 
             # Create transfer fraction variable name
             f_var_name = f"f_{source_node['data']['label']}_{node['data']['label']}"

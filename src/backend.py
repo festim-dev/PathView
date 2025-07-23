@@ -80,7 +80,6 @@ def load_graph():
     return jsonify(graph_data)
 
 
-
 # Function to convert graph to Python script
 @app.route("/convert-to-python", methods=["POST"])
 def convert_to_python():
@@ -147,7 +146,8 @@ def run_pathsim():
                 outgoing_edges = [
                     edge for edge in edges if edge["source"] == source_node["id"]
                 ]
-                f = 1 / len(outgoing_edges)  # default transfer fraction split equally
+                # default transfer fraction split equally
+                f = edge["data"].get("weight", 1 / len(outgoing_edges))
 
                 if source_node and source_node["data"].get("residence_time"):
                     betas.append(f / float(source_node["data"]["residence_time"]))
