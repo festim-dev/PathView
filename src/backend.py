@@ -131,25 +131,25 @@ def run_pathsim():
             return None
 
         # Create blocks
-        connections = {node["id"]: [] for node in nodes}
         blocks = []
 
         for node in nodes:
             betas = []
 
-            # Find all the edges connected to this node
-            for edge in edges:
+            # Find all incoming edges to this node and sort by source id for consistent ordering
+            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+            incoming_edges.sort(key=lambda x: x["source"])
+
+            # Process incoming edges in sorted order to build betas
+            for edge in incoming_edges:
                 source_node = find_node_by_id(edge["source"])
                 outgoing_edges = [
                     edge for edge in edges if edge["source"] == source_node["id"]
                 ]
                 f = 1 / len(outgoing_edges)  # default transfer fraction split equally
 
-                if edge["target"] == node["id"]:
-                    source_node = find_node_by_id(edge["source"])
-                    if source_node and source_node["data"].get("residence_time"):
-                        betas.append(f / float(source_node["data"]["residence_time"]))
-                    connections[edge["source"]].append(edge["target"])
+                if source_node and source_node["data"].get("residence_time"):
+                    betas.append(f / float(source_node["data"]["residence_time"]))
 
             block = Process(
                 alpha=(
@@ -183,27 +183,35 @@ def run_pathsim():
         scope.id = "scope"
         blocks.append(scope)
 
-        next_outputs = {block.id: 0 for block in blocks}
-
-        # Create connections based on the edges
+        # Create connections based on the sorted edges to match beta order
         connections_pathsim = []
-        for source, targets in connections.items():
-            source_block = find_block_by_id(source)
-            for target in targets:
-                target_block = find_block_by_id(target)
+
+        # Process each node and its sorted incoming edges to create connections
+        for node in nodes:
+            # Find all incoming edges to this node and sort by source id (same as for betas)
+            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+            incoming_edges.sort(key=lambda x: x["source"])
+
+            target_block = find_block_by_id(node["id"])
+            target_input_index = 0
+
+            # Create connections in the same order as betas were created
+            for edge in incoming_edges:
+                source_block = find_block_by_id(edge["source"])
                 if source_block and target_block:
                     connection = Connection(
-                        source_block, target_block[next_outputs[target_block.id]]
+                        source_block, target_block[target_input_index]
                     )
                     connections_pathsim.append(connection)
-                    next_outputs[target_block.id] += 1
+                    target_input_index += 1
 
         # Add connections to scope
+        scope_input_index = 0
         for block in blocks:
             if block.id != "scope":
-                connection = Connection(block, scope[next_outputs[scope.id]])
+                connection = Connection(block, scope[scope_input_index])
                 connections_pathsim.append(connection)
-                next_outputs[scope.id] += 1
+                scope_input_index += 1
 
         # Create the simulation
         my_simulation = Simulation(blocks, connections_pathsim, log=False)
