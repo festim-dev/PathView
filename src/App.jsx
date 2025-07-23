@@ -38,8 +38,12 @@ export default function App() {
 
   // Function to save a graph
   const saveGraph = async () => {
-    const filename = prompt("Your file will be saved in the saved_graphs folder. Enter a name for your file:") || "file_1";
-
+    const filename = prompt("Your file will be saved in the saved_graphs folder. Enter a name for your file:");
+    // if user cancels the prompt, filename will be null
+    if (!filename) {
+      alert("Save cancelled.");
+      return;
+    }
     const graphData = {
       nodes,
       edges,
@@ -172,14 +176,14 @@ export default function App() {
       const outgoingEdgesFromSource = edges.filter(e => e.source === params.source);
       const newOutgoingCount = outgoingEdgesFromSource.length + 1;
       const defaultWeight = 1 / newOutgoingCount;
-  
+
       // Update existing outgoing edges to divide up the new weight
       const updatedEdges = edges.map((e) =>
         e.source === params.source
           ? {
-              ...e,
-              data: { ...e.data, weight: defaultWeight },
-            }
+            ...e,
+            data: { ...e.data, weight: defaultWeight },
+          }
           : e
       );
       const newEdge = makeEdge({
@@ -188,7 +192,7 @@ export default function App() {
         target: params.target,
         weight: defaultWeight,
       });
-  
+
       setEdges([...updatedEdges, newEdge]);
     },
     [edges, setEdges]
