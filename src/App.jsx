@@ -34,6 +34,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('graph');
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
+  const [nodeCounter, setNodeCounter] = useState(1);
 
   // Function to save a graph
   const saveGraph = async () => {
@@ -42,6 +43,7 @@ export default function App() {
     const graphData = {
       nodes,
       edges,
+      nodeCounter
     };
 
     try {
@@ -81,6 +83,7 @@ export default function App() {
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       setSelectedNode(null);
+      setNodeCounter(nodeCounter ?? loadedNodes.length);
     } catch (error) {
       console.error('Error loading graph:', error);
     }
@@ -90,13 +93,15 @@ export default function App() {
     setNodes(initialNodes);
     setEdges(initialEdges);
     setSelectedNode(null);
+    setNodeCounter(0);
   };
   // Allows user to save to python script
   const saveToPython = async () => {
     try {
       const graphData = {
         nodes,
-        edges
+        edges,
+        nodeCounter
       };
 
       const response = await fetch('http://localhost:8000/convert-to-python', {
@@ -250,7 +255,7 @@ export default function App() {
   };
   // Function to add a new node to the graph
   const addNode = () => {
-    const newNodeId = (nodes.length + 1).toString();
+    const newNodeId = nodeCounter.toString();
     const newNode = {
       id: newNodeId,
       type: 'custom',
@@ -258,6 +263,7 @@ export default function App() {
       data: { label: `Node ${newNodeId}`, residence_time: '', source_term: '', initial_value: '' },
     };
     setNodes((nds) => [...nds, newNode]);
+    setNodeCounter((count) => count + 1);
   };
   // Function to delete the selected node
   const deleteSelectedNode = () => {
