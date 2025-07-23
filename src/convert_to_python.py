@@ -119,22 +119,25 @@ def process_graph_data_from_dict(data: dict) -> dict:
 
     # Create connection data with proper indexing
     connection_data = []
-    next_outputs = {block["data"]["label"]: 0 for block in processed_blocks}
 
-    for edge in data["edges"]:
-        source_label = find_node_by_id(edge["source"])["data"]["label"]
-        target_label = find_node_by_id(edge["target"])["data"]["label"]
-        target_input_index = next_outputs[target_label]
+    # for nodes with several inputs, the order of the connection needs to
+    # be the same as the order of the transfer fractions (which are sorted by source id)
+    for block in processed_blocks:
+        target_input_index = 0
+        # Use the sorted incoming edges from each block to maintain order consistency
+        for edge in block["incoming_edges"]:
+            source_label = find_node_by_id(edge["source"])["data"]["label"]
+            target_label = block["data"]["label"]
 
-        connection_data.append(
-            {
-                "source": source_label,
-                "target": target_label,
-                "target_input_index": target_input_index,
-            }
-        )
+            connection_data.append(
+                {
+                    "source": source_label,
+                    "target": target_label,
+                    "target_input_index": target_input_index,
+                }
+            )
 
-        next_outputs[target_label] += 1
+            target_input_index += 1
 
     return {
         "blocks": processed_blocks,
