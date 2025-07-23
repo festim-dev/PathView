@@ -56,3 +56,32 @@ npm run dev
 npm run start:backend
 ```
 
+
+# Building the documentation
+
+The project uses Sphinx to generate documentation from the reStructuredText files in the `docs/` directory.
+
+## Prerequisites
+Make sure you have Sphinx installed:
+```bash
+pip install sphinx sphinx-book-theme
+```
+
+## Building HTML Documentation
+To build the HTML documentation:
+```bash
+cd docs
+make html
+```
+
+The generated documentation will be available in `docs/_build/html/index.html`.
+
+## Viewing the Documentation
+After building, you can view the documentation by opening `docs/_build/html/index.html` in your web browser, or serve it locally:
+```bash
+# From the docs/_build/html directory
+python -m http.server 8080
+```
+Then visit http://localhost:8080 in your browser.
+
+
