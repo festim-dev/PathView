@@ -21,10 +21,8 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
-// Defining initial nodes. In the data section, we have label, but also parameters specific to the node.
+// Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
 const initialNodes = [];
-
-// Defining initial edges
 const initialEdges = [];
 
 // Main App component
@@ -87,14 +85,12 @@ export default function App() {
       console.error('Error loading graph:', error);
     }
   };
-
   // Allows user to clear user inputs and go back to default settings
   const resetGraph = () => {
     setNodes(initialNodes);
     setEdges(initialEdges);
     setSelectedNode(null);
   };
-
   // Allows user to save to python script
   const saveToPython = async () => {
     try {
@@ -124,7 +120,7 @@ export default function App() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         alert('Python script generated and downloaded successfully!');
       } else {
         alert(`Error generating Python script: ${result.error}`);
@@ -134,7 +130,6 @@ export default function App() {
       alert('Failed to generate Python script. Make sure the backend is running.');
     }
   };
-
   // Function to run pathsim simulation
   const runPathsim = async () => {
     try {
@@ -166,20 +161,33 @@ export default function App() {
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
-
-  // When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
+  //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function, default weight 1/n
   const onConnect = useCallback(
     (params) => {
+      const outgoingEdgesFromSource = edges.filter(e => e.source === params.source);
+      const newOutgoingCount = outgoingEdgesFromSource.length + 1;
+      const defaultWeight = 1 / newOutgoingCount;
+  
+      // Update existing outgoing edges to divide up the new weight
+      const updatedEdges = edges.map((e) =>
+        e.source === params.source
+          ? {
+              ...e,
+              data: { ...e.data, weight: defaultWeight },
+            }
+          : e
+      );
       const newEdge = makeEdge({
         id: `e${params.source}-${params.target}`,
         source: params.source,
         target: params.target,
+        weight: defaultWeight,
       });
-      setEdges((eds) => [...eds, newEdge]);
+  
+      setEdges([...updatedEdges, newEdge]);
     },
-    [setEdges]
+    [edges, setEdges]
   );
-
   // Function that when we click on a node, sets that node as the selected node
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
@@ -200,7 +208,6 @@ export default function App() {
       }))
     );
   };
-
   // Function that when we click on an edge, sets that edge as the selected edge
   const onEdgeClick = (event, edge) => {
     setSelectedEdge(edge);
@@ -221,7 +228,6 @@ export default function App() {
       }))
     );
   };
-
   // Function to deselect everything when clicking on the background
   const onPaneClick = () => {
     setSelectedNode(null);
@@ -242,7 +248,6 @@ export default function App() {
       }))
     );
   };
-
   // Function to add a new node to the graph
   const addNode = () => {
     const newNodeId = (nodes.length + 1).toString();
@@ -254,7 +259,6 @@ export default function App() {
     };
     setNodes((nds) => [...nds, newNode]);
   };
-
   // Function to delete the selected node
   const deleteSelectedNode = () => {
     if (selectedNode) {
@@ -265,7 +269,6 @@ export default function App() {
       setSelectedNode(null);
     }
   };
-
   // Function to delete the selected edge
   const deleteSelectedEdge = () => {
     if (selectedEdge) {
@@ -288,7 +291,6 @@ export default function App() {
       setSelectedEdge(null);
     }
   };
-
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -296,7 +298,7 @@ export default function App() {
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
         return;
       }
-      
+
       if (event.key === 'Delete' || event.key === 'Backspace') {
         if (selectedEdge) {
           deleteSelectedEdge();
@@ -321,11 +323,20 @@ export default function App() {
     const incomingNodeIds = edges
       .filter((edge) => edge.target === node.id)
       .map((edge) => edge.source);
-    // Outputs of incoming nodes
-    const incomingOutputs = nodes
-      .filter((n) => incomingNodeIds.includes(n.id))
-      .map((n) => n.data.output)
-      .filter((output) => output !== null); // Ignores nonexistent outputs
+
+    // Collects outputs of incoming nodes by iterating through edges
+    const incomingOutputs = incomingEdges.map((edge) => {
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const output = sourceNode?.data?.output;
+      // If output is null or undefined, returns 0
+      if (output === null || output === undefined) return 0;
+
+      // Collects weight from the edge data and multiples output by that
+      const weight = edge.data?.weight;
+      if (weight != null) {
+        return output * weight;
+      }
+    });
 
     try {
       const response = await fetch('http://localhost:8000/compute', {
@@ -565,109 +576,153 @@ export default function App() {
                 color: '#ffffff',
                 borderLeft: '1px solid #ccc',
                 padding: '20px',
-            boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
-            zIndex: 10,
-          }}
-        >
-          <h3>{selectedNode.data.label}</h3>
-          {Object.entries(selectedNode.data)
-            .map(([key, value]) => (
-              <div key={key} style={{ marginBottom: '10px' }}>
-                <label>{key}:</label>
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    const updatedNode = {
-                      ...selectedNode,
-                      data: { ...selectedNode.data, [key]: newValue },
-                    };
+                boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
+                zIndex: 10,
+              }}
+            >
+              <h3>{selectedNode.data.label}</h3>
+              {Object.entries(selectedNode.data)
+                .map(([key, value]) => (
+                  <div key={key} style={{ marginBottom: '10px' }}>
+                    <label>{key}:</label>
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+                        const updatedNode = {
+                          ...selectedNode,
+                          data: { ...selectedNode.data, [key]: newValue },
+                        };
 
-                    setNodes((nds) =>
-                      nds.map((node) =>
-                        node.id === selectedNode.id ? updatedNode : node
-                      )
-                    );
-                    setSelectedNode(updatedNode);
+                        setNodes((nds) =>
+                          nds.map((node) =>
+                            node.id === selectedNode.id ? updatedNode : node
+                          )
+                        );
+                        setSelectedNode(updatedNode);
 
-                  }}
-                  style={{ width: '100%', marginTop: 4 }}
-                />
+                      }}
+
+                      style={{ width: '100%', marginTop: 4 }}
+                    />
+                  </div>
+                ))}
+              {edges
+                .filter((edge) => edge.source === selectedNode.id)
+                .map((edge) => (
+                  <div key={edge.id} style={{ marginBottom: 10 }}>
+                    <label>Fraction to node {edge.target}:</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      value={edge.data?.weight ?? ''}
+                      onChange={(e) => {
+                        const newWeight = parseFloat(e.target.value);
+
+                        if (newWeight > 1) {
+                          alert('Please enter a value between 0 and 1.');
+                        } else {
+                          setEdges((eds) =>
+                            eds.map((ed) =>
+                              ed.id === edge.id
+                                ? { ...ed, data: { ...ed.data, weight: isNaN(newWeight) ? null : newWeight } }
+                                : ed
+                            )
+                          );
+                        }
+                      }}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                ))}
+              {(() => {
+                const outgoingEdges = edges.filter(e => e.source === selectedNode.id);
+                const totalWeight = outgoingEdges.reduce((sum, e) => sum + (e.data?.weight ?? 0), 0);
+
+                if (outgoingEdges.length > 0 && totalWeight !== 1) {
+                  return (
+                    <div style={{ color: 'red', fontSize: '0.85em', marginTop: 10 }}>
+                      Warning: f values should add up to 1 (currently {totalWeight.toFixed(2)})
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
+              <br />
+              <button
+                style={{ marginTop: 10 }}
+                onClick={() => setSelectedNode(null)}
+              >
+                Close
+              </button>
+            </div>
+          )}
+          {selectedEdge && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 20,
+                height: '100vh',
+                width: '300px',
+                background: '#2c2c54',
+                color: '#ffffff',
+                borderLeft: '1px solid #ccc',
+                padding: '20px',
+                boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
+                zIndex: 10,
+              }}
+            >
+              <h3>Selected Edge</h3>
+              <div style={{ marginBottom: '10px' }}>
+                <strong>ID:</strong> {selectedEdge.id}
               </div>
-            ))}
+              <div style={{ marginBottom: '10px' }}>
+                <strong>Source:</strong> {selectedEdge.source}
+              </div>
+              <div style={{ marginBottom: '10px' }}>
+                <strong>Target:</strong> {selectedEdge.target}
+              </div>
+              <div style={{ marginBottom: '10px' }}>
+                <strong>Type:</strong> {selectedEdge.type}
+              </div>
 
-          <br />
-          <button
-            style={{ marginTop: 10 }}
-            onClick={() => setSelectedNode(null)}
-          >
-            Close
-          </button>
-        </div>
-      )}
-      {selectedEdge && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 20,
-            height: '100vh',
-            width: '300px',
-            background: '#2c2c54',
-            color: '#ffffff',
-            borderLeft: '1px solid #ccc',
-            padding: '20px',
-            boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
-            zIndex: 10,
-          }}
-        >
-          <h3>Selected Edge</h3>
-          <div style={{ marginBottom: '10px' }}>
-            <strong>ID:</strong> {selectedEdge.id}
-          </div>
-          <div style={{ marginBottom: '10px' }}>
-            <strong>Source:</strong> {selectedEdge.source}
-          </div>
-          <div style={{ marginBottom: '10px' }}>
-            <strong>Target:</strong> {selectedEdge.target}
-          </div>
-          <div style={{ marginBottom: '10px' }}>
-            <strong>Type:</strong> {selectedEdge.type}
-          </div>
-          
-          <br />
-          <button
-            style={{ 
-              marginTop: 10,
-              marginRight: 10,
-              padding: '8px 12px',
-              backgroundColor: '#78A083',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={() => setSelectedEdge(null)}
-          >
-            Close
-          </button>
-          <button
-            style={{ 
-              marginTop: 10,
-              padding: '8px 12px',
-              backgroundColor: '#e74c3c',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={deleteSelectedEdge}
-          >
-            Delete Edge
-          </button>
-        </div>
-      )}
+              <br />
+              <button
+                style={{
+                  marginTop: 10,
+                  marginRight: 10,
+                  padding: '8px 12px',
+                  backgroundColor: '#78A083',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 5,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setSelectedEdge(null)}
+              >
+                Close
+              </button>
+              <button
+                style={{
+                  marginTop: 10,
+                  padding: '8px 12px',
+                  backgroundColor: '#e74c3c',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 5,
+                  cursor: 'pointer',
+                }}
+                onClick={deleteSelectedEdge}
+              >
+                Delete Edge
+              </button>
+            </div>
+          )}
         </div>
       )}
 
