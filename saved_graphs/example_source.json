@@ -1,0 +1,293 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "initial_value": "1.5",
+        "label": "Storage",
+        "residence_time": "",
+        "source_term": ""
+      },
+      "dragging": false,
+      "id": "1",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 302,
+        "y": 651
+      },
+      "selected": true,
+      "type": "custom"
+    },
+    {
+      "data": {
+        "label": "Source",
+        "value": "1"
+      },
+      "dragging": false,
+      "id": "4",
+      "measured": {
+        "height": 53,
+        "width": 205
+      },
+      "position": {
+        "x": 454.40000000000003,
+        "y": 76.19999999999999
+      },
+      "selected": false,
+      "type": "source"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "Breeding blanket",
+        "residence_time": "2",
+        "source_term": ""
+      },
+      "dragging": false,
+      "id": "3",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 876,
+        "y": 395
+      },
+      "selected": false,
+      "type": "custom"
+    },
+    {
+      "data": {
+        "gain": "1.05",
+        "label": "TBR"
+      },
+      "dragging": false,
+      "id": "5",
+      "measured": {
+        "height": 85,
+        "width": 135
+      },
+      "position": {
+        "x": 721,
+        "y": 178
+      },
+      "selected": false,
+      "type": "amplifier"
+    },
+    {
+      "data": {
+        "gain": "-1",
+        "label": "Injection rate"
+      },
+      "dragging": false,
+      "id": "6",
+      "measured": {
+        "height": 85,
+        "width": 135
+      },
+      "position": {
+        "x": 363,
+        "y": 195
+      },
+      "selected": false,
+      "type": "amplifier"
+    },
+    {
+      "data": {
+        "gain": "0.9",
+        "label": "Pump rate"
+      },
+      "dragging": false,
+      "id": "7",
+      "measured": {
+        "height": 85,
+        "width": 135
+      },
+      "position": {
+        "x": 575,
+        "y": 284
+      },
+      "selected": false,
+      "type": "amplifier"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "Pump",
+        "residence_time": "1",
+        "source_term": ""
+      },
+      "dragging": false,
+      "id": "2",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 553,
+        "y": 449
+      },
+      "selected": false,
+      "type": "custom"
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "weight": 0.3333333333333333
+      },
+      "id": "e4-5",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "4",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "5",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 1
+      },
+      "id": "e5-3",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "5",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "3",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.3333333333333333
+      },
+      "id": "e4-7",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "4",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "7",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 1
+      },
+      "id": "e7-2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "7",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "2",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.3333333333333333
+      },
+      "id": "e4-6",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "4",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "6",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 1
+      },
+      "id": "e6-1",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "6",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "1",
+      "type": "smoothstep"
+    },
+    {
+      "id": "e3-1",
+      "source": "3",
+      "target": "1",
+      "type": "smoothstep",
+      "data": {
+        "weight": 1
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      },
+      "selected": false
+    },
+    {
+      "id": "e2-1",
+      "source": "2",
+      "target": "1",
+      "type": "smoothstep",
+      "data": {
+        "weight": 1
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 1
+}
