@@ -620,34 +620,39 @@ export default function App() {
                 ))}
               {edges
                 .filter((edge) => edge.source === selectedNode.id)
-                .map((edge) => (
-                  <div key={edge.id} style={{ marginBottom: 10 }}>
-                    <label>Fraction to node {edge.target}:</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="1"
-                      value={edge.data?.weight ?? ''}
-                      onChange={(e) => {
-                        const newWeight = parseFloat(e.target.value);
+                .map((edge) => {
+                  const targetNode = nodes.find((n) => n.id === edge.target);
+                  const targetLabel = targetNode?.data?.label || `Node ${edge.target}`;
 
-                        if (newWeight > 1) {
-                          alert('Please enter a value between 0 and 1.');
-                        } else {
-                          setEdges((eds) =>
-                            eds.map((ed) =>
-                              ed.id === edge.id
-                                ? { ...ed, data: { ...ed.data, weight: isNaN(newWeight) ? null : newWeight } }
-                                : ed
-                            )
-                          );
-                        }
-                      }}
-                      style={{ width: '100%' }}
-                    />
-                  </div>
-                ))}
+                  return (
+                    <div key={edge.id} style={{ marginBottom: 10 }}>
+                      <label>Fraction to {targetLabel}:</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="1"
+                        value={edge.data?.weight ?? ''}
+                        onChange={(e) => {
+                          const newWeight = parseFloat(e.target.value);
+
+                          if (newWeight > 1) {
+                            alert('Please enter a value between 0 and 1.');
+                          } else {
+                            setEdges((eds) =>
+                              eds.map((ed) =>
+                                ed.id === edge.id
+                                  ? { ...ed, data: { ...ed.data, weight: isNaN(newWeight) ? null : newWeight } }
+                                  : ed
+                              )
+                            );
+                          }
+                        }}
+                        style={{ width: '100%' }}
+                      />
+                    </div>
+                  );
+                })}
               {(() => {
                 const outgoingEdges = edges.filter(e => e.source === selectedNode.id);
                 const totalWeight = outgoingEdges.reduce((sum, e) => sum + (e.data?.weight ?? 0), 0);
@@ -659,7 +664,7 @@ export default function App() {
                     </div>
                   );
                 }
-
+                
                 return null;
               })()}
               <br />
