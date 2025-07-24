@@ -11,7 +11,7 @@ import io
 import base64
 
 from pathsim import Simulation, Connection
-from pathsim.blocks import ODE, Scope, Block, Constant, Amplifier
+from pathsim.blocks import ODE, Scope, Block, Constant, Amplifier, Adder, Integrator
 
 
 # app = Flask(__name__)
@@ -160,6 +160,24 @@ def run_pathsim():
             block.label = node["data"]["label"]
             blocks.append(block)
             continue
+        elif node["type"] == "adder":
+            # TODO handle custom operations
+            block = Adder()
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
+        elif node["type"] == "integrator":
+            block = Integrator(
+                initial_value=float(node["data"]["initial_value"])
+                if node["data"].get("initial_value")
+                and node["data"]["initial_value"] != ""
+                else 0.0,
+            )
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
 
         betas = []
 
@@ -181,7 +199,7 @@ def run_pathsim():
                 if source_node and source_node["data"].get("residence_time"):
                     betas.append(f / float(source_node["data"]["residence_time"]))
 
-            elif source_node["type"] in ["source", "amplifier"]:
+            elif source_node["type"] in ["source", "amplifier", "adder", "integrator"]:
                 betas.append(1)
             else:
                 raise ValueError(f"Unsupported source type: {source_node['type']}")

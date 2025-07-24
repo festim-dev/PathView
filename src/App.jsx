@@ -16,6 +16,8 @@ import './App.css';
 import CustomNode from './CustomNode';
 import SourceNode from './SourceNode';
 import AmplifierNode from './AmplifierNode';
+import IntegratorNode from './IntegratorNode';
+import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
 import { makeEdge } from './CustomEdge';
 
@@ -24,6 +26,8 @@ const nodeTypes = {
   custom: CustomNode,
   source: SourceNode,
   amplifier: AmplifierNode,
+  integrator: IntegratorNode,
+  adder: AdderNode,
   scope: ScopeNode,
 };
 
