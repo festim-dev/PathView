@@ -6,22 +6,19 @@ export default function SourceNode({ data }) {
     <div
       style={{
         width: 180,
-        background: '#28a745',
-        color: 'white',
+        background: '#DDE6ED',
+        color: 'black',
         borderRadius: 12,
         padding: 10,
         fontWeight: 'bold',
         position: 'relative',
         cursor: 'pointer',
+        border: '3px solid #2563eb',
       }}
     >
       <div style={{ marginBottom: 4 }}>{data.label}</div>
 
-      <Handle 
-        type="source" 
-        position="bottom" 
-        style={{ background: '#555' }} 
-      />
+      <Handle type="source" position="bottom" style={{ background: '#555' }} />
     </div>
   );
 }
