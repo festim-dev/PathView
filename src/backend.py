@@ -145,6 +145,22 @@ def run_pathsim():
             block.id = node["id"]
             block.label = node["data"]["label"]
             continue
+        elif node["type"] == "scope":
+            # Find all incoming edges to this node and sort by source id for consistent ordering
+            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+            incoming_edges.sort(key=lambda x: x["source"])
+            labels = [
+                find_node_by_id(edge["source"])["data"]["label"]
+                for edge in incoming_edges
+            ]
+            block = Scope(
+                labels=labels,
+            )
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
+
         betas = []
 
         # Find all incoming edges to this node and sort by source id for consistent ordering
@@ -194,12 +210,15 @@ def run_pathsim():
         block.label = node["data"]["label"]
         blocks.append(block)
 
-    # Add a Scope block
-    scope = Scope(
-        labels=[node["data"]["label"] for node in nodes],
-    )
-    scope.id = "scope"
-    blocks.append(scope)
+    # Add a Scope block if none exists
+    # This ensures that there is always a scope to collect outputs
+    scope_default = None
+    if not any(isinstance(block, Scope) for block in blocks):
+        scope_default = Scope(
+            labels=[node["data"]["label"] for node in nodes],
+        )
+        scope_default.id = "scope_default"
+        blocks.append(scope_default)
 
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
@@ -222,12 +241,14 @@ def run_pathsim():
                 target_input_index += 1
 
     # Add connections to scope
-    scope_input_index = 0
-    for block in blocks:
-        if block.id != "scope":
-            connection = Connection(block, scope[scope_input_index])
-            connections_pathsim.append(connection)
-            scope_input_index += 1
+    if scope_default:
+        scope_input_index = 0
+        for block in blocks:
+            if block.id != "scope_default":
+                connection = Connection(block, scope_default[scope_input_index])
+                connections_pathsim.append(connection)
+                scope_input_index += 1
+
     # Create the simulation
     my_simulation = Simulation(blocks, connections_pathsim, log=False)
 
@@ -235,7 +256,18 @@ def run_pathsim():
     my_simulation.run(50)
 
     # Generate the plot
-    fig, ax = scope.plot()
+    scopes = [block for block in blocks if isinstance(block, Scope)]
+    fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
+    for i, scope in enumerate(scopes):
+        plt.sca(axs[i] if len(scopes) > 1 else axs)
+        # scope.plot()
+        time, data = scope.read()
+        # plot the recorded data
+        for p, d in enumerate(data):
+            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+            plt.plot(time, d, label=lb)
+        plt.legend()
+        plt.title(scope.label)
 
     # Convert plot to base64 string
     buffer = io.BytesIO()

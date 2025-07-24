@@ -1,0 +1,156 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "initial_value": "10",
+        "label": "Node 0",
+        "residence_time": "2",
+        "source_term": ""
+      },
+      "id": "0",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 200,
+        "y": 200
+      },
+      "type": "custom"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "Node 1",
+        "residence_time": "",
+        "source_term": ""
+      },
+      "dragging": false,
+      "id": "1",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 359,
+        "y": 429
+      },
+      "selected": true,
+      "type": "custom"
+    },
+    {
+      "data": {
+        "label": "Scope"
+      },
+      "dragging": false,
+      "id": "2",
+      "measured": {
+        "height": 120,
+        "width": 200
+      },
+      "position": {
+        "x": 673,
+        "y": 226
+      },
+      "selected": false,
+      "type": "scope"
+    },
+    {
+      "data": {
+        "label": "Scope2"
+      },
+      "dragging": false,
+      "id": "3",
+      "measured": {
+        "height": 120,
+        "width": 200
+      },
+      "position": {
+        "x": 671,
+        "y": 570
+      },
+      "selected": false,
+      "type": "scope"
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "weight": 0.3333333333333333
+      },
+      "id": "e0-1",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "0",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "1",
+      "type": "smoothstep"
+    },
+    {
+      "id": "e0-2",
+      "source": "0",
+      "target": "2",
+      "type": "smoothstep",
+      "data": {
+        "weight": 0.3333333333333333
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e0-3",
+      "source": "0",
+      "target": "3",
+      "type": "smoothstep",
+      "data": {
+        "weight": 0.3333333333333333
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      },
+      "selected": false
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "type": "smoothstep",
+      "data": {
+        "weight": 1
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 3
+}

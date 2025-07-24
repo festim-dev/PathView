@@ -16,6 +16,7 @@ import './App.css';
 import CustomNode from './CustomNode';
 import SourceNode from './SourceNode';
 import AmplifierNode from './AmplifierNode';
+import ScopeNode from './ScopeNode';
 import { makeEdge } from './CustomEdge';
 
 // Add CustomNode as a node type for this script
@@ -23,6 +24,7 @@ const nodeTypes = {
   custom: CustomNode,
   source: SourceNode,
   amplifier: AmplifierNode,
+  scope: ScopeNode,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
