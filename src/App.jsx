@@ -19,12 +19,14 @@ import AmplifierNode from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
+import StepSourceNode from './StepSourceNode';
 import { makeEdge } from './CustomEdge';
 
 // Add CustomNode as a node type for this script
 const nodeTypes = {
   custom: CustomNode,
   source: SourceNode,
+  stepsource: StepSourceNode,
   amplifier: AmplifierNode,
   integrator: IntegratorNode,
   adder: AdderNode,

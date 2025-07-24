@@ -11,7 +11,16 @@ import io
 import base64
 
 from pathsim import Simulation, Connection
-from pathsim.blocks import ODE, Scope, Block, Constant, Amplifier, Adder, Integrator
+from pathsim.blocks import (
+    ODE,
+    Scope,
+    Block,
+    Constant,
+    StepSource,
+    Amplifier,
+    Adder,
+    Integrator,
+)
 
 
 # app = Flask(__name__)
@@ -135,6 +144,15 @@ def run_pathsim():
     for node in nodes:
         if node["type"] == "source":
             block = Constant(value=float(node["data"]["value"]))
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
+        elif node["type"] == "stepsource":
+            block = StepSource(
+                amplitude=float(node["data"]["amplitude"]),
+                tau=float(node["data"]["delay"]),
+            )
             block.id = node["id"]
             block.label = node["data"]["label"]
             blocks.append(block)
