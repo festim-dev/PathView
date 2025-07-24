@@ -26,3 +26,8 @@ dist-ssr
 venv/
 
 docs/_build
+
+# Ignore contents of saved_graphs folder
+saved_graphs/*
+!saved_graphs/.gitkeep
+
