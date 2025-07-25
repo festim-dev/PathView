@@ -14,7 +14,6 @@ import base64
 
 from pathsim import Simulation, Connection
 from pathsim.blocks import (
-    ODE,
     Scope,
     Block,
     Constant,
@@ -28,6 +27,7 @@ from pathsim.blocks import (
     RNG,
     PID,
 )
+from custom_pathsim_blocks import Process
 
 
 # app = Flask(__name__)
@@ -39,29 +39,6 @@ CORS(
     resources={r"/*": {"origins": "http://localhost:5173"}},
     supports_credentials=True,
 )
-
-
-# CUSTOM BLOCK ==========================================================================
-
-
-class Process(ODE):
-    def __init__(self, residence_time=0, ic=0, gen=0):
-        alpha = -1 / residence_time if residence_time != 0 else 0
-        super().__init__(
-            func=lambda x, u, t: x * alpha + sum(u) + gen, initial_value=ic
-        )
-        self.residence_time = residence_time
-        self.ic = ic
-        self.gen = gen
-
-    def update(self, t):
-        x = self.engine.get()
-        if self.residence_time == 0:
-            mass_rate = 0
-        else:
-            mass_rate = x / self.residence_time
-        # first output is the state, second is the rate of change (mass rate)
-        self.outputs.update_from_array([x, mass_rate])
 
 
 # Creates directory for saved graphs
