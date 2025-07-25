@@ -16,7 +16,7 @@
         "y": 100
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -34,7 +34,7 @@
         "y": 86
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -51,7 +51,7 @@
         "x": 300,
         "y": 250
       },
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -70,7 +70,7 @@
         "y": 305
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -89,7 +89,7 @@
         "y": 191
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     }
   ],
   "edges": [

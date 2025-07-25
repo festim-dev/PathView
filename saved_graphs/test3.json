@@ -18,7 +18,7 @@
         "y": 363.69738918312294
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -38,7 +38,7 @@
         "y": 507.6149879515325
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -58,11 +58,11 @@
         "y": 724.1422473772329
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "id": "4",
-      "type": "custom",
+      "type": "process",
       "position": {
         "x": -37.499999999999545,
         "y": 286.6666666666665

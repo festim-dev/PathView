@@ -2,7 +2,7 @@
   "nodes": [
     {
       "id": "1",
-      "type": "custom",
+      "type": "process",
       "position": {
         "x": 300,
         "y": 100
@@ -17,7 +17,7 @@
     },
     {
       "id": "2",
-      "type": "custom",
+      "type": "process",
       "position": {
         "x": 750,
         "y": 104
@@ -34,7 +34,7 @@
     },
     {
       "id": "3",
-      "type": "custom",
+      "type": "process",
       "position": {
         "x": 300,
         "y": 250
@@ -49,7 +49,7 @@
     },
     {
       "id": "4",
-      "type": "custom",
+      "type": "process",
       "position": {
         "x": 757,
         "y": 250

@@ -12,8 +12,8 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 
 
-// Importing CustomNode component
-import CustomNode from './CustomNode';
+// Importing node components
+import ProcessNode from './ProcessNode';
 import SourceNode from './SourceNode';
 import AmplifierNode from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
@@ -25,9 +25,9 @@ import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
 
-// Add CustomNode as a node type for this script
+// Add nodes as a node type for this script
 const nodeTypes = {
-  custom: CustomNode,
+  process: ProcessNode,
   delay: DefaultNode,
   source: SourceNode,
   stepsource: StepSourceNode,
@@ -210,6 +210,8 @@ export default function App() {
         id: `e${params.source}-${params.target}`,
         source: params.source,
         target: params.target,
+        sourceHandle: params.sourceHandle,
+        targetHandle: params.targetHandle,
         weight: defaultWeight,
       });
 
@@ -282,7 +284,7 @@ export default function App() {
     const newNodeId = nodeCounter.toString();
     const newNode = {
       id: newNodeId,
-      type: 'custom',
+      type: 'process',
       position: { x: 200 + nodes.length * 50, y: 200 },
       data: { label: `Node ${newNodeId}`, residence_time: '', source_term: '', initial_value: '' },
     };
@@ -638,7 +640,7 @@ export default function App() {
                     />
                   </div>
                 ))}
-              {selectedNode.type === 'custom' && edges
+              {selectedNode.type === 'process' && edges
                 .filter((edge) => edge.source === selectedNode.id)
                 .map((edge) => {
                   const targetNode = nodes.find((n) => n.id === edge.target);
@@ -673,7 +675,7 @@ export default function App() {
                     </div>
                   );
                 })}
-              {selectedNode.type === 'custom' && (() => {
+              {selectedNode.type === 'process' && (() => {
                 const outgoingEdges = edges.filter(e => e.source === selectedNode.id);
                 const totalWeight = outgoingEdges.reduce((sum, e) => sum + (e.data?.weight ?? 0), 0);
 

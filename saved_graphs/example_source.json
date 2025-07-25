@@ -18,7 +18,7 @@
         "y": 651
       },
       "selected": true,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -56,7 +56,7 @@
         "y": 395
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -130,7 +130,7 @@
         "y": 449
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     }
   ],
   "edges": [
