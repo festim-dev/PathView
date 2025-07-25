@@ -19,6 +19,7 @@ from pathsim.blocks import (
     StepSource,
     Amplifier,
     Adder,
+    Multiplier,
     Integrator,
     Function,
     Delay,
@@ -170,6 +171,8 @@ def run_pathsim():
         elif node["type"] == "adder":
             # TODO handle custom operations
             block = Adder()
+        elif node["type"] == "multiplier":
+            block = Multiplier()
         elif node["type"] == "integrator":
             block = Integrator(
                 initial_value=float(node["data"]["initial_value"])

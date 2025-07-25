@@ -23,6 +23,7 @@ import StepSourceNode from './StepSourceNode';
 import FunctionNode from './FunctionNode';
 import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
+import MultiplierNode from './MultiplierNode';
 
 // Add CustomNode as a node type for this script
 const nodeTypes = {
@@ -33,6 +34,7 @@ const nodeTypes = {
   amplifier: AmplifierNode,
   integrator: IntegratorNode,
   adder: AdderNode,
+  multiplier: MultiplierNode,
   scope: ScopeNode,
   function: FunctionNode,
   rng: DefaultNode,
