@@ -164,19 +164,22 @@ def run_pathsim():
 
             # create labels for the scope based on incoming edges
             labels = []
+            duplicate_labels = []
             for edge in incoming_edges:
                 label = find_node_by_id(edge["source"])["data"]["label"]
 
                 # If the label already exists, try to append the source handle to it (if it exists)
-                if label in labels:
+                if label in labels or label in duplicate_labels:
+                    duplicate_labels.append(label)
                     if edge["sourceHandle"]:
                         new_label = label + f" ({edge['sourceHandle']})"
-                        idx = labels.index(label)
-                        labels[idx] = (
-                            label + f" ({incoming_edges[idx]['sourceHandle']})"
-                        )
                         label = new_label
                 labels.append(label)
+
+            for i, (edge, label) in enumerate(zip(incoming_edges, labels)):
+                if label in duplicate_labels:
+                    if edge["sourceHandle"]:
+                        labels[i] += f" ({edge['sourceHandle']})"
 
             block = Scope(labels=labels)
         elif node["type"] == "splitter2":
