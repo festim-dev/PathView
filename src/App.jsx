@@ -190,32 +190,18 @@ export default function App() {
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
-  //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function, default weight 1/n
+  //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
-      const outgoingEdgesFromSource = edges.filter(e => e.source === params.source);
-      const newOutgoingCount = outgoingEdgesFromSource.length + 1;
-      const defaultWeight = 1 / newOutgoingCount;
-
-      // Update existing outgoing edges to divide up the new weight
-      const updatedEdges = edges.map((e) =>
-        e.source === params.source
-          ? {
-            ...e,
-            data: { ...e.data, weight: defaultWeight },
-          }
-          : e
-      );
       const newEdge = makeEdge({
         id: `e${params.source}-${params.target}`,
         source: params.source,
         target: params.target,
         sourceHandle: params.sourceHandle,
         targetHandle: params.targetHandle,
-        weight: defaultWeight,
       });
 
-      setEdges([...updatedEdges, newEdge]);
+      setEdges([...edges, newEdge]);
     },
     [edges, setEdges]
   );
@@ -345,55 +331,6 @@ export default function App() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedEdge, selectedNode]);
-
-  const computeOutput = async (node) => {
-    const params = { ...node.data };
-    delete params.label;
-    delete params.output;
-
-    // Finds incoming nodes
-    const incomingNodeIds = edges
-      .filter((edge) => edge.target === node.id)
-      .map((edge) => edge.source);
-
-    // Collects outputs of incoming nodes by iterating through edges
-    const incomingOutputs = incomingEdges.map((edge) => {
-      const sourceNode = nodes.find((n) => n.id === edge.source);
-      const output = sourceNode?.data?.output;
-      // If output is null or undefined, returns 0
-      if (output === null || output === undefined) return 0;
-
-      // Collects weight from the edge data and multiples output by that
-      const weight = edge.data?.weight;
-      if (weight != null) {
-        return output * weight;
-      }
-    });
-
-    try {
-      const response = await fetch('http://localhost:8000/compute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: node.id,
-          params,
-          incomingOutputs,
-        }),
-      });
-
-      const result = await response.json();
-
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === node.id
-            ? { ...n, data: { ...n.data, output: result.output } }
-            : n
-        )
-      );
-    } catch (error) {
-      console.error('Error computing output:', error);
-    }
-  };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -640,55 +577,7 @@ export default function App() {
                     />
                   </div>
                 ))}
-              {selectedNode.type === 'process' && edges
-                .filter((edge) => edge.source === selectedNode.id)
-                .map((edge) => {
-                  const targetNode = nodes.find((n) => n.id === edge.target);
-                  const targetLabel = targetNode?.data?.label || `Node ${edge.target}`;
 
-                  return (
-                    <div key={edge.id} style={{ marginBottom: 10 }}>
-                      <label>Fraction to {targetLabel}:</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="1"
-                        value={edge.data?.weight ?? ''}
-                        onChange={(e) => {
-                          const newWeight = parseFloat(e.target.value);
-
-                          if (newWeight > 1) {
-                            alert('Please enter a value between 0 and 1.');
-                          } else {
-                            setEdges((eds) =>
-                              eds.map((ed) =>
-                                ed.id === edge.id
-                                  ? { ...ed, data: { ...ed.data, weight: isNaN(newWeight) ? null : newWeight } }
-                                  : ed
-                              )
-                            );
-                          }
-                        }}
-                        style={{ width: '100%' }}
-                      />
-                    </div>
-                  );
-                })}
-              {selectedNode.type === 'process' && (() => {
-                const outgoingEdges = edges.filter(e => e.source === selectedNode.id);
-                const totalWeight = outgoingEdges.reduce((sum, e) => sum + (e.data?.weight ?? 0), 0);
-
-                if (outgoingEdges.length > 0 && totalWeight !== 1) {
-                  return (
-                    <div style={{ color: 'red', fontSize: '0.85em', marginTop: 10 }}>
-                      Warning: f values should add up to 1 (currently {totalWeight.toFixed(2)})
-                    </div>
-                  );
-                }
-                
-                return null;
-              })()}
               <br />
               <button
                 style={{ marginTop: 10 }}

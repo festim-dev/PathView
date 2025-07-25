@@ -46,29 +46,6 @@ CORS(
 
 class Process(ODE):
     def __init__(self, residence_time=0, ic=0, gen=0):
-        """Chemical process with residence time model
-
-        The internal ODE with inputs 'u_i':
-
-        .. math::
-
-            \\dot{x} = \\alpha x + \\sum_i u_i
-
-        And the output equation for every output 'i':
-
-        .. math::
-
-            y_i = \\gamma_i x
-
-        Parameters
-        ----------
-        alpha : float
-            natural frequency (eigenvalue), inverse of residence time
-        gammas : liat[float]
-            weights of states (fractions) for output
-        ic : float
-            initial value of state
-        """
         alpha = -1 / residence_time if residence_time != 0 else 0
         super().__init__(
             func=lambda x, u, t: x * alpha + sum(u) + gen, initial_value=ic
