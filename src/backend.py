@@ -20,6 +20,7 @@ from pathsim.blocks import (
     Amplifier,
     Adder,
     Integrator,
+    Function,
 )
 
 
@@ -142,6 +143,7 @@ def run_pathsim():
     blocks = []
 
     for node in nodes:
+        # TODO this needs serious refactoring
         if node["type"] == "source":
             block = Constant(value=float(node["data"]["value"]))
             block.id = node["id"]
@@ -196,7 +198,54 @@ def run_pathsim():
             block.label = node["data"]["label"]
             blocks.append(block)
             continue
+        elif node["type"] == "function":
+            # Convert the expression string to a lambda function
+            expression = node["data"].get("expression", "x")
 
+            # Create a safe lambda function from the expression
+            # The expression should use 'x' as the variable
+            try:
+                # Create a lambda function from the expression string
+                # We'll allow common mathematical operations and numpy functions
+                import numpy as np
+                import math
+
+                # Safe namespace for eval
+                safe_namespace = {
+                    "x": 0,  # placeholder
+                    "np": np,
+                    "math": math,
+                    "sin": np.sin,
+                    "cos": np.cos,
+                    "tan": np.tan,
+                    "exp": np.exp,
+                    "log": np.log,
+                    "sqrt": np.sqrt,
+                    "abs": abs,
+                    "pow": pow,
+                    "pi": np.pi,
+                    "e": np.e,
+                }
+
+                # Test the expression first to ensure it's valid
+                eval(expression.replace("x", "1"), safe_namespace)
+
+                # Create the actual function
+                def func(x):
+                    return eval(expression, {**safe_namespace, "x": x})
+
+            except Exception as e:
+                print(f"Error parsing expression '{expression}': {e}")
+
+                raise ValueError(
+                    f"Invalid function expression: {expression}. Error: {str(e)}"
+                )
+
+            block = Function(func=func)
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
         betas = []
 
         # Find all incoming edges to this node and sort by source id for consistent ordering
@@ -217,7 +266,14 @@ def run_pathsim():
                 if source_node and source_node["data"].get("residence_time"):
                     betas.append(f / float(source_node["data"]["residence_time"]))
 
-            elif source_node["type"] in ["source", "amplifier", "adder", "integrator"]:
+            elif source_node["type"] in [
+                "source",
+                "stepsource",
+                "amplifier",
+                "adder",
+                "integrator",
+                "function",
+            ]:
                 betas.append(1)
             else:
                 raise ValueError(f"Unsupported source type: {source_node['type']}")
@@ -254,6 +310,7 @@ def run_pathsim():
             labels=[node["data"]["label"] for node in nodes],
         )
         scope_default.id = "scope_default"
+        scope_default.label = "Default Scope"
         blocks.append(scope_default)
 
     # Create connections based on the sorted edges to match beta order

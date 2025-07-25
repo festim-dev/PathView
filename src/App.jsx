@@ -20,6 +20,7 @@ import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
 import StepSourceNode from './StepSourceNode';
+import FunctionNode from './FunctionNode';
 import { makeEdge } from './CustomEdge';
 
 // Add CustomNode as a node type for this script
@@ -31,6 +32,7 @@ const nodeTypes = {
   integrator: IntegratorNode,
   adder: AdderNode,
   scope: ScopeNode,
+  function: FunctionNode,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
