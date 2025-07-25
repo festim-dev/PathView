@@ -34,4 +34,4 @@ class Splitter(Block):
         # get the input from port '0'
         u = self.inputs[0]
         # mult by fractions and update outputs
-        self.outputs.from_array(self.fractions * u)
+        self.outputs.update_from_array(self.fractions * u)
