@@ -24,6 +24,7 @@ import FunctionNode from './FunctionNode';
 import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
+import { Splitter2Node, Splitter3Node } from './Splitters';
 
 // Add nodes as a node type for this script
 const nodeTypes = {
@@ -39,6 +40,8 @@ const nodeTypes = {
   function: FunctionNode,
   rng: DefaultNode,
   pid: DefaultNode,
+  splitter2: Splitter2Node,
+  splitter3: Splitter3Node,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -193,8 +196,18 @@ export default function App() {
   //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
+      let edgeId = `e${params.source}-${params.target}`;
+
+      // If sourceHandle or targetHandle is specified, append it to the edge ID
+      if (params.sourceHandle) {
+        edgeId += `-from_${params.sourceHandle}`;
+      }
+      
+      if (params.targetHandle) {
+        edgeId += `-to_${params.targetHandle}`;
+      }
       const newEdge = makeEdge({
-        id: `e${params.source}-${params.target}`,
+        id: edgeId,
         source: params.source,
         target: params.target,
         sourceHandle: params.sourceHandle,
@@ -332,6 +345,12 @@ export default function App() {
         break;
       case 'pid':
         nodeData = { ...nodeData, Kp: '', Ki: '', Kd: '', f_max: '' };
+        break;
+      case 'splitter2':
+        nodeData = { ...nodeData, f1: '0.5', f2: '0.5' };
+        break;
+      case 'splitter3':
+        nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
         break;
       default:
         // For any other types, just use basic data
