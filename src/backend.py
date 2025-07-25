@@ -14,7 +14,6 @@ import base64
 
 from pathsim import Simulation, Connection
 from pathsim.blocks import (
-    ODE,
     Scope,
     Block,
     Constant,
@@ -28,6 +27,7 @@ from pathsim.blocks import (
     RNG,
     PID,
 )
+from custom_pathsim_blocks import Process, Splitter
 
 
 # app = Flask(__name__)
@@ -39,29 +39,6 @@ CORS(
     resources={r"/*": {"origins": "http://localhost:5173"}},
     supports_credentials=True,
 )
-
-
-# CUSTOM BLOCK ==========================================================================
-
-
-class Process(ODE):
-    def __init__(self, residence_time=0, ic=0, gen=0):
-        alpha = -1 / residence_time if residence_time != 0 else 0
-        super().__init__(
-            func=lambda x, u, t: x * alpha + sum(u) + gen, initial_value=ic
-        )
-        self.residence_time = residence_time
-        self.ic = ic
-        self.gen = gen
-
-    def update(self, t):
-        x = self.engine.get()
-        if self.residence_time == 0:
-            mass_rate = 0
-        else:
-            mass_rate = x / self.residence_time
-        # first output is the state, second is the rate of change (mass rate)
-        self.outputs.update_from_array([x, mass_rate])
 
 
 # Creates directory for saved graphs
@@ -184,12 +161,43 @@ def run_pathsim():
             # Find all incoming edges to this node and sort by source id for consistent ordering
             incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
             incoming_edges.sort(key=lambda x: x["source"])
-            labels = [
-                find_node_by_id(edge["source"])["data"]["label"]
-                for edge in incoming_edges
-            ]
-            block = Scope(
-                labels=labels,
+
+            # create labels for the scope based on incoming edges
+            labels = []
+            duplicate_labels = []
+            for edge in incoming_edges:
+                label = find_node_by_id(edge["source"])["data"]["label"]
+
+                # If the label already exists, try to append the source handle to it (if it exists)
+                if label in labels or label in duplicate_labels:
+                    duplicate_labels.append(label)
+                    if edge["sourceHandle"]:
+                        new_label = label + f" ({edge['sourceHandle']})"
+                        label = new_label
+                labels.append(label)
+
+            for i, (edge, label) in enumerate(zip(incoming_edges, labels)):
+                if label in duplicate_labels:
+                    if edge["sourceHandle"]:
+                        labels[i] += f" ({edge['sourceHandle']})"
+
+            block = Scope(labels=labels)
+        elif node["type"] == "splitter2":
+            block = Splitter(
+                n=2,
+                fractions=[
+                    eval(node["data"]["f1"]),
+                    eval(node["data"]["f2"]),
+                ],
+            )
+        elif node["type"] == "splitter3":
+            block = Splitter(
+                n=3,
+                fractions=[
+                    eval(node["data"]["f1"]),
+                    eval(node["data"]["f2"]),
+                    eval(node["data"]["f3"]),
+                ],
             )
         elif node["type"] == "adder":
             # TODO handle custom operations
@@ -279,6 +287,8 @@ def run_pathsim():
                     else 0
                 ),
             )
+        else:
+            raise ValueError(f"Unknown node type: {node['type']}")
         block.id = node["id"]
         block.label = node["data"]["label"]
         blocks.append(block)
@@ -308,6 +318,14 @@ def run_pathsim():
                         "Residence time must be non-zero for mass flow rate output."
                     )
                 else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Splitter):
+                # Splitter outputs are always in order, so we can use the handle directly
+                assert edge["sourceHandle"], edge
+                output_index = int(edge["sourceHandle"].replace("source", "")) - 1
+                if output_index >= block.n:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
