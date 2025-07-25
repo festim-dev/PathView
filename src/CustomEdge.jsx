@@ -12,14 +12,16 @@ const defaultMarkerEnd = {
   color: '#ECDFCC',
 };
 
-export function makeEdge({ id, source, target, type = 'smoothstep', label, dashed = false, weight = null }) {
+export function makeEdge({ id, source, target, sourceHandle, targetHandle, type = 'smoothstep', label, dashed = false}) {
   return {
     id,
     source,
     target,
+    sourceHandle,
+    targetHandle,
     type,
     label,
-    data: { weight },
+    data: { },
     style: {
       ...defaultEdgeStyle,
       ...(dashed ? { strokeDasharray: '4 3' } : {}),

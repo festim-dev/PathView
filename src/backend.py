@@ -3,6 +3,8 @@ import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from convert_to_python import convert_graph_to_python
+import math
+import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")  # Use non-interactive backend
@@ -11,7 +13,21 @@ import io
 import base64
 
 from pathsim import Simulation, Connection
-from pathsim.blocks import ODE, Scope, Block, Constant, Amplifier
+from pathsim.blocks import (
+    ODE,
+    Scope,
+    Block,
+    Constant,
+    StepSource,
+    Amplifier,
+    Adder,
+    Multiplier,
+    Integrator,
+    Function,
+    Delay,
+    RNG,
+    PID,
+)
 
 
 # app = Flask(__name__)
@@ -29,14 +45,23 @@ CORS(
 
 
 class Process(ODE):
-    def __init__(self, alpha=0, betas=[], gen=0, ic=0):
+    def __init__(self, residence_time=0, ic=0, gen=0):
+        alpha = -1 / residence_time if residence_time != 0 else 0
         super().__init__(
-            func=lambda x, u, t: alpha * x
-            + sum(_u * _b for _u, _b in zip(u, betas))
-            + gen,
-            jac=lambda x, u, t: alpha,
-            initial_value=ic,
+            func=lambda x, u, t: x * alpha + sum(u) + gen, initial_value=ic
         )
+        self.residence_time = residence_time
+        self.ic = ic
+        self.gen = gen
+
+    def update(self, t):
+        x = self.engine.get()
+        if self.residence_time == 0:
+            mass_rate = 0
+        else:
+            mass_rate = x / self.residence_time
+        # first output is the state, second is the rate of change (mass rate)
+        self.outputs.update_from_array([x, mass_rate])
 
 
 # Creates directory for saved graphs
@@ -132,20 +157,30 @@ def run_pathsim():
     # Create blocks
     blocks = []
 
+    # Add a Scope block if none exists
+    # This ensures that there is always a scope to collect outputs
+    scope_default = None
+    if not any(node["type"] == "scope" for node in nodes):
+        scope_default = Scope(
+            labels=[node["data"]["label"] for node in nodes],
+        )
+        scope_default.id = "scope_default"
+        scope_default.label = "Default Scope"
+        blocks.append(scope_default)
+
     for node in nodes:
+        # TODO this needs serious refactoring
         if node["type"] == "source":
             block = Constant(value=float(node["data"]["value"]))
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
+        elif node["type"] == "stepsource":
+            block = StepSource(
+                amplitude=float(node["data"]["amplitude"]),
+                tau=float(node["data"]["delay"]),
+            )
         elif node["type"] == "amplifier":
             block = Amplifier(gain=float(node["data"]["gain"]))
-            blocks.append(block)
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            continue
         elif node["type"] == "scope":
+            assert scope_default is None
             # Find all incoming edges to this node and sort by source id for consistent ordering
             incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
             incoming_edges.sort(key=lambda x: x["source"])
@@ -156,98 +191,147 @@ def run_pathsim():
             block = Scope(
                 labels=labels,
             )
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
-
-        betas = []
-
-        # Find all incoming edges to this node and sort by source id for consistent ordering
-        incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
-        incoming_edges.sort(key=lambda x: x["source"])
-
-        # Process incoming edges in sorted order to build betas
-        for edge in incoming_edges:
-            source_node = find_node_by_id(edge["source"])
-            outgoing_edges = [
-                edge for edge in edges if edge["source"] == source_node["id"]
-            ]
-
-            if source_node["type"] == "custom":
-                # default transfer fraction split equally
-                f = edge["data"].get("weight", 1 / len(outgoing_edges))
-
-                if source_node and source_node["data"].get("residence_time"):
-                    betas.append(f / float(source_node["data"]["residence_time"]))
-
-            elif source_node["type"] in ["source", "amplifier"]:
-                betas.append(1)
-            else:
-                raise ValueError(f"Unsupported source type: {source_node['type']}")
-
-        block = Process(
-            alpha=(
-                -1 / float(node["data"]["residence_time"])
-                if node["data"].get("residence_time")
-                and node["data"]["residence_time"] != ""
-                else 0
-            ),
-            betas=betas,
-            ic=(
-                float(node["data"]["initial_value"])
+        elif node["type"] == "adder":
+            # TODO handle custom operations
+            block = Adder()
+        elif node["type"] == "multiplier":
+            block = Multiplier()
+        elif node["type"] == "integrator":
+            block = Integrator(
+                initial_value=float(node["data"]["initial_value"])
                 if node["data"].get("initial_value")
                 and node["data"]["initial_value"] != ""
-                else 0
-            ),
-            gen=(
-                float(node["data"]["source_term"])
-                if node["data"].get("source_term") and node["data"]["source_term"] != ""
-                else 0
-            ),
-        )
+                else 0.0,
+            )
+        elif node["type"] == "function":
+            # Convert the expression string to a lambda function
+            expression = node["data"].get("expression", "x")
+
+            # Create a safe lambda function from the expression
+            # The expression should use 'x' as the variable
+            try:
+                # Create a lambda function from the expression string
+                # We'll allow common mathematical operations and numpy functions
+
+                # Safe namespace for eval
+                safe_namespace = {
+                    "x": 0,  # placeholder
+                    "np": np,
+                    "math": math,
+                    "sin": np.sin,
+                    "cos": np.cos,
+                    "tan": np.tan,
+                    "exp": np.exp,
+                    "log": np.log,
+                    "sqrt": np.sqrt,
+                    "abs": abs,
+                    "pow": pow,
+                    "pi": np.pi,
+                    "e": np.e,
+                }
+
+                # Test the expression first to ensure it's valid
+                eval(expression.replace("x", "1"), safe_namespace)
+
+                # Create the actual function
+                def func(x):
+                    return eval(expression, {**safe_namespace, "x": x})
+
+            except Exception as e:
+                print(f"Error parsing expression '{expression}': {e}")
+
+                raise ValueError(
+                    f"Invalid function expression: {expression}. Error: {str(e)}"
+                )
+
+            block = Function(func=func)
+        elif node["type"] == "delay":
+            block = Delay(tau=float(node["data"]["tau"]))
+        elif node["type"] == "rng":
+            block = RNG(sampling_rate=float(node["data"]["sampling_rate"]))
+        elif node["type"] == "pid":
+            block = PID(
+                Kp=float(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
+                Ki=float(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
+                Kd=float(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
+                f_max=float(node["data"]["f_max"])
+                if node["data"].get("f_max")
+                else 100,
+            )
+        elif node["type"] == "process":
+            block = Process(
+                residence_time=(
+                    float(node["data"]["residence_time"])
+                    if node["data"].get("residence_time")
+                    and node["data"]["residence_time"] != ""
+                    else 0
+                ),
+                ic=(
+                    float(node["data"]["initial_value"])
+                    if node["data"].get("initial_value")
+                    and node["data"]["initial_value"] != ""
+                    else 0
+                ),
+                gen=(
+                    float(node["data"]["source_term"])
+                    if node["data"].get("source_term")
+                    and node["data"]["source_term"] != ""
+                    else 0
+                ),
+            )
         block.id = node["id"]
         block.label = node["data"]["label"]
         blocks.append(block)
-
-    # Add a Scope block if none exists
-    # This ensures that there is always a scope to collect outputs
-    scope_default = None
-    if not any(isinstance(block, Scope) for block in blocks):
-        scope_default = Scope(
-            labels=[node["data"]["label"] for node in nodes],
-        )
-        scope_default.id = "scope_default"
-        blocks.append(scope_default)
 
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
 
     # Process each node and its sorted incoming edges to create connections
+    block_to_input_index = {b: 0 for b in blocks}
     for node in nodes:
-        # Find all incoming edges to this node and sort by source id (same as for betas)
+        outgoing_edges = [edge for edge in edges if edge["source"] == node["id"]]
+        outgoing_edges.sort(key=lambda x: x["target"])
+
         incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
         incoming_edges.sort(key=lambda x: x["source"])
 
-        target_block = find_block_by_id(node["id"])
-        target_input_index = 0
+        block = find_block_by_id(node["id"])
 
-        # Create connections in the same order as betas were created
-        for edge in incoming_edges:
-            source_block = find_block_by_id(edge["source"])
-            if source_block and target_block:
-                connection = Connection(source_block, target_block[target_input_index])
-                connections_pathsim.append(connection)
-                target_input_index += 1
+        for edge in outgoing_edges:
+            target_block = find_block_by_id(edge["target"])
+            if isinstance(block, Process):
+                if edge["sourceHandle"] == "inv":
+                    output_index = 0
+                elif edge["sourceHandle"] == "mass_flow_rate":
+                    output_index = 1
+                    assert block.residence_time != 0, (
+                        "Residence time must be non-zero for mass flow rate output."
+                    )
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            else:
+                output_index = 0
+
+            connection = Connection(
+                block[output_index],
+                target_block[block_to_input_index[target_block]],
+            )
+            connections_pathsim.append(connection)
+            block_to_input_index[target_block] += 1
 
     # Add connections to scope
     if scope_default:
-        scope_input_index = 0
+        input_index = 0
         for block in blocks:
             if block.id != "scope_default":
-                connection = Connection(block, scope_default[scope_input_index])
+                connection = Connection(
+                    block[0],
+                    scope_default[input_index],
+                )
                 connections_pathsim.append(connection)
-                scope_input_index += 1
+                input_index += 1
 
     # Create the simulation
     my_simulation = Simulation(blocks, connections_pathsim, log=False)

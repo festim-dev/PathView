@@ -2,76 +2,111 @@
   "nodes": [
     {
       "data": {
-        "initial_value": "1.5",
-        "label": "Storage",
-        "residence_time": "",
-        "source_term": ""
+        "amplitude": "1",
+        "delay": "1",
+        "label": "Reference Input"
       },
       "dragging": false,
-      "id": "1",
+      "id": "reference",
+      "measured": {
+        "height": 54,
+        "width": 206
+      },
+      "position": {
+        "x": 50,
+        "y": 150
+      },
+      "selected": false,
+      "type": "stepsource"
+    },
+    {
+      "data": {
+        "label": "Error"
+      },
+      "dragging": false,
+      "id": "error_summer",
+      "measured": {
+        "height": 64,
+        "width": 64
+      },
+      "position": {
+        "x": 237,
+        "y": 238
+      },
+      "selected": false,
+      "type": "adder"
+    },
+    {
+      "data": {
+        "Kp": "1.5",
+        "Ki": "0.5",
+        "Kd": "0.1",
+        "f_max": "10",
+        "label": "PID Controller"
+      },
+      "dragging": false,
+      "id": "pid_controller",
       "measured": {
         "height": 48,
         "width": 200
       },
       "position": {
-        "x": 302,
-        "y": 651
+        "x": 384,
+        "y": 89
       },
       "selected": true,
-      "type": "process"
+      "type": "pid"
     },
     {
       "data": {
-        "label": "Source",
-        "value": "1"
+        "initial_value": "0",
+        "label": "Plant (Process)"
       },
       "dragging": false,
-      "id": "4",
-      "measured": {
-        "height": 53,
-        "width": 205
-      },
-      "position": {
-        "x": 454.40000000000003,
-        "y": 76.19999999999999
-      },
-      "selected": false,
-      "type": "source"
-    },
-    {
-      "data": {
-        "initial_value": "",
-        "label": "Breeding blanket",
-        "residence_time": "2",
-        "source_term": ""
-      },
-      "dragging": false,
-      "id": "3",
+      "id": "plant",
       "measured": {
         "height": 48,
         "width": 200
       },
       "position": {
-        "x": 876,
-        "y": 395
+        "x": 662,
+        "y": 90
       },
       "selected": false,
-      "type": "process"
+      "type": "integrator"
     },
     {
       "data": {
-        "gain": "1.05",
-        "label": "TBR"
+        "label": "Output Scope",
+        "timespan": "20"
       },
       "dragging": false,
-      "id": "5",
+      "id": "output_scope",
       "measured": {
-        "height": 85,
-        "width": 135
+        "height": 120,
+        "width": 200
       },
       "position": {
-        "x": 721,
-        "y": 178
+        "x": 1038,
+        "y": 131
+      },
+      "selected": false,
+      "type": "scope"
+    },
+    {
+      "data": {
+        "gain": "0.4",
+        "label": "Feedback Gain"
+      },
+      "dragging": false,
+      "id": "feedback_gain",
+      "measured": {
+        "height": 86,
+        "width": 136
+      },
+      "position": {
+        "x": 375,
+        "y": 432
       },
       "selected": false,
       "type": "amplifier"
@@ -79,66 +114,28 @@
     {
       "data": {
         "gain": "-1",
-        "label": "Injection rate"
+        "label": "x -1"
       },
       "dragging": false,
-      "id": "6",
+      "id": "minus_one",
       "measured": {
-        "height": 85,
-        "width": 135
+        "height": 86,
+        "width": 136
       },
       "position": {
-        "x": 363,
-        "y": 195
+        "x": 606,
+        "y": 390
       },
       "selected": false,
       "type": "amplifier"
-    },
-    {
-      "data": {
-        "gain": "0.9",
-        "label": "Pump rate"
-      },
-      "dragging": false,
-      "id": "7",
-      "measured": {
-        "height": 85,
-        "width": 135
-      },
-      "position": {
-        "x": 575,
-        "y": 284
-      },
-      "selected": false,
-      "type": "amplifier"
-    },
-    {
-      "data": {
-        "initial_value": "",
-        "label": "Pump",
-        "residence_time": "1",
-        "source_term": ""
-      },
-      "dragging": false,
-      "id": "2",
-      "measured": {
-        "height": 48,
-        "width": 200
-      },
-      "position": {
-        "x": 553,
-        "y": 449
-      },
-      "selected": false,
-      "type": "process"
     }
   ],
   "edges": [
     {
       "data": {
-        "weight": 0.3333333333333333
+        "weight": 0.5
       },
-      "id": "e4-5",
+      "id": "e-reference-error_summer",
       "markerEnd": {
         "color": "#ECDFCC",
         "height": 20,
@@ -146,116 +143,138 @@
         "width": 20
       },
       "selected": false,
-      "source": "4",
+      "source": "reference",
       "style": {
         "stroke": "#ECDFCC",
         "strokeWidth": 2
       },
-      "target": "5",
+      "target": "error_summer",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "e-error_summer-pid_controller",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "error_summer",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "pid_controller",
       "type": "smoothstep"
     },
     {
       "data": {
         "weight": 1
       },
-      "id": "e5-3",
+      "id": "e-plant-feedback_gain",
       "markerEnd": {
         "color": "#ECDFCC",
         "height": 20,
         "type": "arrowclosed",
         "width": 20
       },
-      "source": "5",
+      "selected": false,
+      "source": "plant",
       "style": {
         "stroke": "#ECDFCC",
         "strokeWidth": 2
       },
-      "target": "3",
+      "target": "feedback_gain",
       "type": "smoothstep"
     },
     {
       "data": {
-        "weight": 0.3333333333333333
+        "weight": 0.5
       },
-      "id": "e4-7",
+      "id": "ereference-output_scope",
       "markerEnd": {
         "color": "#ECDFCC",
         "height": 20,
         "type": "arrowclosed",
         "width": 20
       },
-      "source": "4",
+      "source": "reference",
       "style": {
         "stroke": "#ECDFCC",
         "strokeWidth": 2
       },
-      "target": "7",
-      "type": "smoothstep"
-    },
-    {
-      "data": {
-        "weight": 1
-      },
-      "id": "e7-2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "7",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "2",
-      "type": "smoothstep"
-    },
-    {
-      "data": {
-        "weight": 0.3333333333333333
-      },
-      "id": "e4-6",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "4",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "6",
-      "type": "smoothstep"
+      "target": "output_scope",
+      "type": "smoothstep",
+      "selected": false
     },
     {
       "data": {
         "weight": 1
       },
-      "id": "e6-1",
+      "id": "epid_controller-plant",
       "markerEnd": {
         "color": "#ECDFCC",
         "height": 20,
         "type": "arrowclosed",
         "width": 20
       },
-      "source": "6",
+      "source": "pid_controller",
       "style": {
         "stroke": "#ECDFCC",
         "strokeWidth": 2
       },
-      "target": "1",
+      "target": "plant",
       "type": "smoothstep"
     },
     {
-      "id": "e3-1",
-      "source": "3",
-      "target": "1",
+      "data": {
+        "weight": 0.5
+      },
+      "id": "efeedback_gain-minus_one",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "feedback_gain",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "minus_one",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "eminus_one-error_summer",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "minus_one",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "error_summer",
+      "type": "smoothstep"
+    },
+    {
+      "id": "eerror_summer-output_scope",
+      "source": "error_summer",
+      "target": "output_scope",
       "type": "smoothstep",
       "data": {
-        "weight": 1
+        "weight": 0.5
       },
       "style": {
         "strokeWidth": 2,
@@ -270,12 +289,12 @@
       "selected": false
     },
     {
-      "id": "e2-1",
-      "source": "2",
-      "target": "1",
+      "id": "efeedback_gain-output_scope",
+      "source": "feedback_gain",
+      "target": "output_scope",
       "type": "smoothstep",
       "data": {
-        "weight": 1
+        "weight": 0.5
       },
       "style": {
         "strokeWidth": 2,

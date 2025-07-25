@@ -16,7 +16,7 @@
         "x": 200,
         "y": 200
       },
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -36,7 +36,7 @@
         "y": 429
       },
       "selected": true,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {

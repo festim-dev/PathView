@@ -18,7 +18,7 @@
         "y": 250
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -39,7 +39,7 @@
         "y": 380
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -59,7 +59,7 @@
         "y": 400
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -79,7 +79,7 @@
         "y": 550
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -100,7 +100,7 @@
         "y": 243
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -120,7 +120,7 @@
         "y": 400
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     },
     {
       "data": {
@@ -141,7 +141,7 @@
         "y": 593
       },
       "selected": false,
-      "type": "custom"
+      "type": "process"
     }
   ],
   "edges": [
