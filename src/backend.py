@@ -11,7 +11,7 @@ import io
 import base64
 
 from pathsim import Simulation, Connection
-from pathsim.blocks import ODE, Scope, Block
+from pathsim.blocks import ODE, Scope, Block, Constant, Amplifier
 
 
 # app = Flask(__name__)
@@ -108,138 +108,184 @@ def convert_to_python():
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
 def run_pathsim():
-    try:
-        data = request.json
-        graph_data = data.get("graph")
+    # try:
+    data = request.json
+    graph_data = data.get("graph")
+    if not graph_data:
+        return jsonify({"error": "No graph data provided"}), 400
 
-        if not graph_data:
-            return jsonify({"error": "No graph data provided"}), 400
+    nodes = graph_data.get("nodes", [])
+    edges = graph_data.get("edges", [])
 
-        nodes = graph_data.get("nodes", [])
-        edges = graph_data.get("edges", [])
-
-        def find_node_by_id(node_id: str) -> dict:
-            for node in nodes:
-                if node["id"] == node_id:
-                    return node
-            return None
-
-        def find_block_by_id(block_id: str) -> Block:
-            for block in blocks:
-                if hasattr(block, "id") and block.id == block_id:
-                    return block
-            return None
-
-        # Create blocks
-        blocks = []
-
+    def find_node_by_id(node_id: str) -> dict:
         for node in nodes:
-            betas = []
+            if node["id"] == node_id:
+                return node
+        return None
 
+    def find_block_by_id(block_id: str) -> Block:
+        for block in blocks:
+            if hasattr(block, "id") and block.id == block_id:
+                return block
+        return None
+
+    # Create blocks
+    blocks = []
+
+    for node in nodes:
+        if node["type"] == "source":
+            block = Constant(value=float(node["data"]["value"]))
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
+        elif node["type"] == "amplifier":
+            block = Amplifier(gain=float(node["data"]["gain"]))
+            blocks.append(block)
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            continue
+        elif node["type"] == "scope":
             # Find all incoming edges to this node and sort by source id for consistent ordering
             incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
             incoming_edges.sort(key=lambda x: x["source"])
+            labels = [
+                find_node_by_id(edge["source"])["data"]["label"]
+                for edge in incoming_edges
+            ]
+            block = Scope(
+                labels=labels,
+            )
+            block.id = node["id"]
+            block.label = node["data"]["label"]
+            blocks.append(block)
+            continue
 
-            # Process incoming edges in sorted order to build betas
-            for edge in incoming_edges:
-                source_node = find_node_by_id(edge["source"])
-                outgoing_edges = [
-                    edge for edge in edges if edge["source"] == source_node["id"]
-                ]
+        betas = []
+
+        # Find all incoming edges to this node and sort by source id for consistent ordering
+        incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+        incoming_edges.sort(key=lambda x: x["source"])
+
+        # Process incoming edges in sorted order to build betas
+        for edge in incoming_edges:
+            source_node = find_node_by_id(edge["source"])
+            outgoing_edges = [
+                edge for edge in edges if edge["source"] == source_node["id"]
+            ]
+
+            if source_node["type"] == "custom":
                 # default transfer fraction split equally
                 f = edge["data"].get("weight", 1 / len(outgoing_edges))
 
                 if source_node and source_node["data"].get("residence_time"):
                     betas.append(f / float(source_node["data"]["residence_time"]))
 
-            block = Process(
-                alpha=(
-                    -1 / float(node["data"]["residence_time"])
-                    if node["data"].get("residence_time")
-                    and node["data"]["residence_time"] != ""
-                    else 0
-                ),
-                betas=betas,
-                ic=(
-                    float(node["data"]["initial_value"])
-                    if node["data"].get("initial_value")
-                    and node["data"]["initial_value"] != ""
-                    else 0
-                ),
-                gen=(
-                    float(node["data"]["source_term"])
-                    if node["data"].get("source_term")
-                    and node["data"]["source_term"] != ""
-                    else 0
-                ),
-            )
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
+            elif source_node["type"] in ["source", "amplifier"]:
+                betas.append(1)
+            else:
+                raise ValueError(f"Unsupported source type: {source_node['type']}")
 
-        # Add a Scope block
-        scope = Scope(
+        block = Process(
+            alpha=(
+                -1 / float(node["data"]["residence_time"])
+                if node["data"].get("residence_time")
+                and node["data"]["residence_time"] != ""
+                else 0
+            ),
+            betas=betas,
+            ic=(
+                float(node["data"]["initial_value"])
+                if node["data"].get("initial_value")
+                and node["data"]["initial_value"] != ""
+                else 0
+            ),
+            gen=(
+                float(node["data"]["source_term"])
+                if node["data"].get("source_term") and node["data"]["source_term"] != ""
+                else 0
+            ),
+        )
+        block.id = node["id"]
+        block.label = node["data"]["label"]
+        blocks.append(block)
+
+    # Add a Scope block if none exists
+    # This ensures that there is always a scope to collect outputs
+    scope_default = None
+    if not any(isinstance(block, Scope) for block in blocks):
+        scope_default = Scope(
             labels=[node["data"]["label"] for node in nodes],
         )
-        scope.id = "scope"
-        blocks.append(scope)
+        scope_default.id = "scope_default"
+        blocks.append(scope_default)
 
-        # Create connections based on the sorted edges to match beta order
-        connections_pathsim = []
+    # Create connections based on the sorted edges to match beta order
+    connections_pathsim = []
 
-        # Process each node and its sorted incoming edges to create connections
-        for node in nodes:
-            # Find all incoming edges to this node and sort by source id (same as for betas)
-            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
-            incoming_edges.sort(key=lambda x: x["source"])
+    # Process each node and its sorted incoming edges to create connections
+    for node in nodes:
+        # Find all incoming edges to this node and sort by source id (same as for betas)
+        incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+        incoming_edges.sort(key=lambda x: x["source"])
 
-            target_block = find_block_by_id(node["id"])
-            target_input_index = 0
+        target_block = find_block_by_id(node["id"])
+        target_input_index = 0
 
-            # Create connections in the same order as betas were created
-            for edge in incoming_edges:
-                source_block = find_block_by_id(edge["source"])
-                if source_block and target_block:
-                    connection = Connection(
-                        source_block, target_block[target_input_index]
-                    )
-                    connections_pathsim.append(connection)
-                    target_input_index += 1
+        # Create connections in the same order as betas were created
+        for edge in incoming_edges:
+            source_block = find_block_by_id(edge["source"])
+            if source_block and target_block:
+                connection = Connection(source_block, target_block[target_input_index])
+                connections_pathsim.append(connection)
+                target_input_index += 1
 
-        # Add connections to scope
+    # Add connections to scope
+    if scope_default:
         scope_input_index = 0
         for block in blocks:
-            if block.id != "scope":
-                connection = Connection(block, scope[scope_input_index])
+            if block.id != "scope_default":
+                connection = Connection(block, scope_default[scope_input_index])
                 connections_pathsim.append(connection)
                 scope_input_index += 1
 
-        # Create the simulation
-        my_simulation = Simulation(blocks, connections_pathsim, log=False)
+    # Create the simulation
+    my_simulation = Simulation(blocks, connections_pathsim, log=False)
 
-        # Run the simulation
-        my_simulation.run(50)
+    # Run the simulation
+    my_simulation.run(50)
 
-        # Generate the plot
-        fig, ax = scope.plot()
+    # Generate the plot
+    scopes = [block for block in blocks if isinstance(block, Scope)]
+    fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
+    for i, scope in enumerate(scopes):
+        plt.sca(axs[i] if len(scopes) > 1 else axs)
+        # scope.plot()
+        time, data = scope.read()
+        # plot the recorded data
+        for p, d in enumerate(data):
+            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+            plt.plot(time, d, label=lb)
+        plt.legend()
+        plt.title(scope.label)
 
-        # Convert plot to base64 string
-        buffer = io.BytesIO()
-        plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
-        buffer.seek(0)
-        plot_data = base64.b64encode(buffer.getvalue()).decode()
-        plt.close(fig)
+    # Convert plot to base64 string
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
+    buffer.seek(0)
+    plot_data = base64.b64encode(buffer.getvalue()).decode()
+    plt.close(fig)
 
-        return jsonify(
-            {
-                "success": True,
-                "plot": plot_data,
-                "message": "Pathsim simulation completed successfully",
-            }
-        )
+    return jsonify(
+        {
+            "success": True,
+            "plot": plot_data,
+            "message": "Pathsim simulation completed successfully",
+        }
+    )
 
-    except Exception as e:
-        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+    # except Exception as e:
+    #     return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
 if __name__ == "__main__":

@@ -14,11 +14,17 @@ import './App.css';
 
 // Importing CustomNode component
 import CustomNode from './CustomNode';
+import SourceNode from './SourceNode';
+import AmplifierNode from './AmplifierNode';
+import ScopeNode from './ScopeNode';
 import { makeEdge } from './CustomEdge';
 
 // Add CustomNode as a node type for this script
 const nodeTypes = {
   custom: CustomNode,
+  source: SourceNode,
+  amplifier: AmplifierNode,
+  scope: ScopeNode,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -618,7 +624,7 @@ export default function App() {
                     />
                   </div>
                 ))}
-              {edges
+              {selectedNode.type === 'custom' && edges
                 .filter((edge) => edge.source === selectedNode.id)
                 .map((edge) => {
                   const targetNode = nodes.find((n) => n.id === edge.target);
@@ -653,7 +659,7 @@ export default function App() {
                     </div>
                   );
                 })}
-              {(() => {
+              {selectedNode.type === 'custom' && (() => {
                 const outgoingEdges = edges.filter(e => e.source === selectedNode.id);
                 const totalWeight = outgoingEdges.reduce((sum, e) => sum + (e.data?.weight ?? 0), 0);
 
