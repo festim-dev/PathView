@@ -267,13 +267,80 @@ export default function App() {
   };
   // Function to add a new node to the graph
   const addNode = () => {
+    // Get available node types from nodeTypes object
+    const availableTypes = Object.keys(nodeTypes);
+    
+    // Create options string for the prompt
+    const typeOptions = availableTypes.map((type, index) => `${index + 1}. ${type}`).join('\n');
+    
+    const userInput = prompt(
+      `Select a node type by entering the number:\n\n${typeOptions}\n\nEnter your choice (1-${availableTypes.length}):`
+    );
+    
+    // If user cancels the prompt
+    if (!userInput) {
+      return;
+    }
+    
+    // Parse the user input
+    const choiceIndex = parseInt(userInput) - 1;
+    
+    // Validate the choice
+    if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= availableTypes.length) {
+      alert('Invalid choice. Please enter a number between 1 and ' + availableTypes.length);
+      return;
+    }
+    
+    const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
+    
+    // Create appropriate data based on node type
+    let nodeData = { label: `${selectedType} ${newNodeId}` };
+    
+    // Add type-specific default parameters
+    switch (selectedType) {
+      case 'process':
+        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
+        break;
+      case 'source':
+        nodeData = { ...nodeData, value: '' };
+        break;
+      case 'stepsource':
+        nodeData = { ...nodeData, amplitude: '', frequency: '' };
+        break;
+      case 'amplifier':
+      case 'multiplier':
+      case 'integrator':
+        nodeData = { ...nodeData, initial_value: '' };
+        break;
+      case 'adder':
+      case 'scope':
+        nodeData = { ...nodeData };
+        break;
+      case 'function':
+        nodeData = { ...nodeData, expression: '' };
+        break;
+      case 'delay':
+        nodeData = { ...nodeData, tau: '' };
+        break;
+      case 'rng':
+        nodeData = { ...nodeData, sampling_rate: ''};
+        break;
+      case 'pid':
+        nodeData = { ...nodeData, Kp: '', Ki: '', Kd: '', f_max: '' };
+        break;
+      default:
+        // For any other types, just use basic data
+        break;
+    }
+    
     const newNode = {
       id: newNodeId,
-      type: 'process',
+      type: selectedType,
       position: { x: 200 + nodes.length * 50, y: 200 },
-      data: { label: `Node ${newNodeId}`, residence_time: '', source_term: '', initial_value: '' },
+      data: nodeData,
     };
+    
     setNodes((nds) => [...nds, newNode]);
     setNodeCounter((count) => count + 1);
   };
