@@ -21,11 +21,13 @@ import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
 import StepSourceNode from './StepSourceNode';
 import FunctionNode from './FunctionNode';
+import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 
 // Add CustomNode as a node type for this script
 const nodeTypes = {
   custom: CustomNode,
+  delay: DefaultNode,
   source: SourceNode,
   stepsource: StepSourceNode,
   amplifier: AmplifierNode,
@@ -33,6 +35,8 @@ const nodeTypes = {
   adder: AdderNode,
   scope: ScopeNode,
   function: FunctionNode,
+  rng: DefaultNode,
+  pid: DefaultNode,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.

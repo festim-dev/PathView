@@ -1,0 +1,312 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "amplitude": "1",
+        "delay": "1",
+        "label": "Reference Input"
+      },
+      "dragging": false,
+      "id": "reference",
+      "measured": {
+        "height": 54,
+        "width": 206
+      },
+      "position": {
+        "x": 50,
+        "y": 150
+      },
+      "selected": false,
+      "type": "stepsource"
+    },
+    {
+      "data": {
+        "label": "Error"
+      },
+      "dragging": false,
+      "id": "error_summer",
+      "measured": {
+        "height": 64,
+        "width": 64
+      },
+      "position": {
+        "x": 237,
+        "y": 238
+      },
+      "selected": false,
+      "type": "adder"
+    },
+    {
+      "data": {
+        "Kp": "1.5",
+        "Ki": "0.5",
+        "Kd": "0.1",
+        "f_max": "10",
+        "label": "PID Controller"
+      },
+      "dragging": false,
+      "id": "pid_controller",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 384,
+        "y": 89
+      },
+      "selected": true,
+      "type": "pid"
+    },
+    {
+      "data": {
+        "initial_value": "0",
+        "label": "Plant (Process)"
+      },
+      "dragging": false,
+      "id": "plant",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 662,
+        "y": 90
+      },
+      "selected": false,
+      "type": "integrator"
+    },
+    {
+      "data": {
+        "label": "Output Scope",
+        "timespan": "20"
+      },
+      "dragging": false,
+      "id": "output_scope",
+      "measured": {
+        "height": 120,
+        "width": 200
+      },
+      "position": {
+        "x": 1038,
+        "y": 131
+      },
+      "selected": false,
+      "type": "scope"
+    },
+    {
+      "data": {
+        "gain": "0.4",
+        "label": "Feedback Gain"
+      },
+      "dragging": false,
+      "id": "feedback_gain",
+      "measured": {
+        "height": 86,
+        "width": 136
+      },
+      "position": {
+        "x": 375,
+        "y": 432
+      },
+      "selected": false,
+      "type": "amplifier"
+    },
+    {
+      "data": {
+        "gain": "-1",
+        "label": "x -1"
+      },
+      "dragging": false,
+      "id": "minus_one",
+      "measured": {
+        "height": 86,
+        "width": 136
+      },
+      "position": {
+        "x": 606,
+        "y": 390
+      },
+      "selected": false,
+      "type": "amplifier"
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "e-reference-error_summer",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "reference",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "error_summer",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "e-error_summer-pid_controller",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "error_summer",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "pid_controller",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 1
+      },
+      "id": "e-plant-feedback_gain",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "plant",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "feedback_gain",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "ereference-output_scope",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "reference",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "output_scope",
+      "type": "smoothstep",
+      "selected": false
+    },
+    {
+      "data": {
+        "weight": 1
+      },
+      "id": "epid_controller-plant",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "pid_controller",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "plant",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "efeedback_gain-minus_one",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "feedback_gain",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "minus_one",
+      "type": "smoothstep"
+    },
+    {
+      "data": {
+        "weight": 0.5
+      },
+      "id": "eminus_one-error_summer",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "minus_one",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "error_summer",
+      "type": "smoothstep"
+    },
+    {
+      "id": "eerror_summer-output_scope",
+      "source": "error_summer",
+      "target": "output_scope",
+      "type": "smoothstep",
+      "data": {
+        "weight": 0.5
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      },
+      "selected": false
+    },
+    {
+      "id": "efeedback_gain-output_scope",
+      "source": "feedback_gain",
+      "target": "output_scope",
+      "type": "smoothstep",
+      "data": {
+        "weight": 0.5
+      },
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 1
+}

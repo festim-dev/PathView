@@ -21,6 +21,9 @@ from pathsim.blocks import (
     Adder,
     Integrator,
     Function,
+    Delay,
+    RNG,
+    PID,
 )
 
 
@@ -146,25 +149,13 @@ def run_pathsim():
         # TODO this needs serious refactoring
         if node["type"] == "source":
             block = Constant(value=float(node["data"]["value"]))
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
         elif node["type"] == "stepsource":
             block = StepSource(
                 amplitude=float(node["data"]["amplitude"]),
                 tau=float(node["data"]["delay"]),
             )
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
         elif node["type"] == "amplifier":
             block = Amplifier(gain=float(node["data"]["gain"]))
-            blocks.append(block)
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            continue
         elif node["type"] == "scope":
             # Find all incoming edges to this node and sort by source id for consistent ordering
             incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
@@ -176,17 +167,9 @@ def run_pathsim():
             block = Scope(
                 labels=labels,
             )
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
         elif node["type"] == "adder":
             # TODO handle custom operations
             block = Adder()
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
         elif node["type"] == "integrator":
             block = Integrator(
                 initial_value=float(node["data"]["initial_value"])
@@ -194,10 +177,6 @@ def run_pathsim():
                 and node["data"]["initial_value"] != ""
                 else 0.0,
             )
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
         elif node["type"] == "function":
             # Convert the expression string to a lambda function
             expression = node["data"].get("expression", "x")
@@ -242,62 +221,73 @@ def run_pathsim():
                 )
 
             block = Function(func=func)
-            block.id = node["id"]
-            block.label = node["data"]["label"]
-            blocks.append(block)
-            continue
-        betas = []
+        elif node["type"] == "delay":
+            block = Delay(tau=float(node["data"]["tau"]))
+        elif node["type"] == "rng":
+            block = RNG(sampling_rate=float(node["data"]["sampling_rate"]))
+        elif node["type"] == "pid":
+            block = PID(
+                Kp=float(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
+                Ki=float(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
+                Kd=float(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
+                f_max=float(node["data"]["f_max"])
+                if node["data"].get("f_max")
+                else 100,
+            )
+        elif node["type"] == "custom":
+            betas = []
 
-        # Find all incoming edges to this node and sort by source id for consistent ordering
-        incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
-        incoming_edges.sort(key=lambda x: x["source"])
+            # Find all incoming edges to this node and sort by source id for consistent ordering
+            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+            incoming_edges.sort(key=lambda x: x["source"])
 
-        # Process incoming edges in sorted order to build betas
-        for edge in incoming_edges:
-            source_node = find_node_by_id(edge["source"])
-            outgoing_edges = [
-                edge for edge in edges if edge["source"] == source_node["id"]
-            ]
+            # Process incoming edges in sorted order to build betas
+            for edge in incoming_edges:
+                source_node = find_node_by_id(edge["source"])
+                outgoing_edges = [
+                    edge for edge in edges if edge["source"] == source_node["id"]
+                ]
 
-            if source_node["type"] == "custom":
-                # default transfer fraction split equally
-                f = edge["data"].get("weight", 1 / len(outgoing_edges))
+                if source_node["type"] == "custom":
+                    # default transfer fraction split equally
+                    f = edge["data"].get("weight", 1 / len(outgoing_edges))
 
-                if source_node and source_node["data"].get("residence_time"):
-                    betas.append(f / float(source_node["data"]["residence_time"]))
+                    if source_node and source_node["data"].get("residence_time"):
+                        betas.append(f / float(source_node["data"]["residence_time"]))
 
-            elif source_node["type"] in [
-                "source",
-                "stepsource",
-                "amplifier",
-                "adder",
-                "integrator",
-                "function",
-            ]:
-                betas.append(1)
-            else:
-                raise ValueError(f"Unsupported source type: {source_node['type']}")
+                elif source_node["type"] in [
+                    "source",
+                    "stepsource",
+                    "amplifier",
+                    "adder",
+                    "integrator",
+                    "function",
+                ]:
+                    betas.append(1)
+                else:
+                    raise ValueError(f"Unsupported source type: {source_node['type']}")
 
-        block = Process(
-            alpha=(
-                -1 / float(node["data"]["residence_time"])
-                if node["data"].get("residence_time")
-                and node["data"]["residence_time"] != ""
-                else 0
-            ),
-            betas=betas,
-            ic=(
-                float(node["data"]["initial_value"])
-                if node["data"].get("initial_value")
-                and node["data"]["initial_value"] != ""
-                else 0
-            ),
-            gen=(
-                float(node["data"]["source_term"])
-                if node["data"].get("source_term") and node["data"]["source_term"] != ""
-                else 0
-            ),
-        )
+            block = Process(
+                alpha=(
+                    -1 / float(node["data"]["residence_time"])
+                    if node["data"].get("residence_time")
+                    and node["data"]["residence_time"] != ""
+                    else 0
+                ),
+                betas=betas,
+                ic=(
+                    float(node["data"]["initial_value"])
+                    if node["data"].get("initial_value")
+                    and node["data"]["initial_value"] != ""
+                    else 0
+                ),
+                gen=(
+                    float(node["data"]["source_term"])
+                    if node["data"].get("source_term")
+                    and node["data"]["source_term"] != ""
+                    else 0
+                ),
+            )
         block.id = node["id"]
         block.label = node["data"]["label"]
         blocks.append(block)
