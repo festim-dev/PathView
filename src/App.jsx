@@ -309,11 +309,15 @@ export default function App() {
         nodeData = { ...nodeData, amplitude: '', frequency: '' };
         break;
       case 'amplifier':
+        nodeData = { ...nodeData, gain: ''};
+        break;
       case 'multiplier':
+        break;
       case 'integrator':
         nodeData = { ...nodeData, initial_value: '' };
         break;
       case 'adder':
+        break;
       case 'scope':
         nodeData = { ...nodeData };
         break;
