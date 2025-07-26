@@ -147,7 +147,7 @@ def run_pathsim():
 
     for node in nodes:
         # TODO this needs serious refactoring
-        if node["type"] == "source":
+        if node["type"] == "constant":
             block = Constant(value=float(node["data"]["value"]))
         elif node["type"] == "stepsource":
             block = StepSource(
@@ -165,8 +165,12 @@ def run_pathsim():
             # create labels for the scope based on incoming edges
             labels = []
             duplicate_labels = []
+            source_nodes_order = []  # will be used later to make connections
             for edge in incoming_edges:
-                label = find_node_by_id(edge["source"])["data"]["label"]
+                source_node = find_node_by_id(edge["source"])
+                label = source_node["data"]["label"]
+
+                source_nodes_order.append(source_node)
 
                 # If the label already exists, try to append the source handle to it (if it exists)
                 if label in labels or label in duplicate_labels:
@@ -180,8 +184,9 @@ def run_pathsim():
                 if label in duplicate_labels:
                     if edge["sourceHandle"]:
                         labels[i] += f" ({edge['sourceHandle']})"
-
+            # assert len(labels) == 1, labels
             block = Scope(labels=labels)
+            block._source_nodes_order = source_nodes_order
         elif node["type"] == "splitter2":
             block = Splitter(
                 n=2,
@@ -332,9 +337,15 @@ def run_pathsim():
             else:
                 output_index = 0
 
+            if isinstance(target_block, Scope):
+                source_node = find_node_by_id(edge["source"])
+                input_index = target_block._source_nodes_order.index(source_node)
+            else:
+                input_index = block_to_input_index[target_block]
+
             connection = Connection(
                 block[output_index],
-                target_block[block_to_input_index[target_block]],
+                target_block[input_index],
             )
             connections_pathsim.append(connection)
             block_to_input_index[target_block] += 1

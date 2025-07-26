@@ -1,0 +1,867 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "amplitude": "1",
+        "delay": "1",
+        "label": "stepsource 2"
+      },
+      "dragging": false,
+      "id": "2",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 339,
+        "y": 435
+      },
+      "selected": false,
+      "type": "stepsource"
+    },
+    {
+      "data": {
+        "amplitude": "1",
+        "delay": "4",
+        "label": "stepsource 3"
+      },
+      "dragging": false,
+      "id": "3",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 411,
+        "y": 216
+      },
+      "selected": false,
+      "type": "stepsource"
+    },
+    {
+      "data": {
+        "gain": "-1",
+        "label": "amplifier 4"
+      },
+      "dragging": false,
+      "id": "4",
+      "measured": {
+        "height": 86,
+        "width": 136
+      },
+      "position": {
+        "x": 508,
+        "y": 369
+      },
+      "selected": false,
+      "type": "amplifier"
+    },
+    {
+      "data": {
+        "label": "Neutron source"
+      },
+      "dragging": false,
+      "id": "5",
+      "measured": {
+        "height": 140,
+        "width": 120
+      },
+      "position": {
+        "x": 875,
+        "y": 126
+      },
+      "selected": false,
+      "type": "scope"
+    },
+    {
+      "data": {
+        "label": "Neutron rate"
+      },
+      "dragging": false,
+      "id": "6",
+      "measured": {
+        "height": 64,
+        "width": 64
+      },
+      "position": {
+        "x": 738,
+        "y": 385
+      },
+      "selected": false,
+      "type": "adder"
+    },
+    {
+      "data": {
+        "gain": "3e-3",
+        "label": "TBR"
+      },
+      "dragging": false,
+      "id": "7",
+      "measured": {
+        "height": 86,
+        "width": 136
+      },
+      "position": {
+        "x": 912,
+        "y": 486
+      },
+      "selected": false,
+      "type": "amplifier"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "process 8",
+        "residence_time": "10",
+        "source_term": ""
+      },
+      "dragging": false,
+      "id": "8",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 1102,
+        "y": 571
+      },
+      "selected": false,
+      "type": "process"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "IV vial 1"
+      },
+      "dragging": false,
+      "id": "9",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 1418,
+        "y": 554
+      },
+      "selected": false,
+      "type": "integrator"
+    },
+    {
+      "data": {
+        "f1": "0.9",
+        "f2": "0.1",
+        "label": "Collection eff."
+      },
+      "dragging": false,
+      "id": "11",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 1305,
+        "y": 698
+      },
+      "selected": false,
+      "type": "splitter2"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "IV vial 2"
+      },
+      "dragging": false,
+      "id": "12",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 1542,
+        "y": 691
+      },
+      "selected": false,
+      "type": "integrator"
+    },
+    {
+      "data": {
+        "f1": "0.9",
+        "f2": "0.1",
+        "label": "Collection eff."
+      },
+      "dragging": false,
+      "id": "13",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 1312,
+        "y": 871
+      },
+      "selected": false,
+      "type": "splitter2"
+    },
+    {
+      "data": {
+        "f1": "0.99",
+        "f2": "0.01",
+        "label": "HT -> HTO eff."
+      },
+      "dragging": false,
+      "id": "14",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 1353.9258928782547,
+        "y": 1099.0441878253396
+      },
+      "selected": false,
+      "type": "splitter2"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "IV vial 3"
+      },
+      "dragging": false,
+      "id": "15",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 1872,
+        "y": 593
+      },
+      "selected": false,
+      "type": "integrator"
+    },
+    {
+      "data": {
+        "f1": "0.9",
+        "f2": "0.1",
+        "label": "Collection eff."
+      },
+      "dragging": false,
+      "id": "16",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 1659,
+        "y": 771
+      },
+      "selected": false,
+      "type": "splitter2"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "IV vial 4"
+      },
+      "dragging": false,
+      "id": "17",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 1865,
+        "y": 669
+      },
+      "selected": false,
+      "type": "integrator"
+    },
+    {
+      "data": {
+        "f1": "0.9",
+        "f2": "0.1",
+        "label": "Collection eff."
+      },
+      "dragging": false,
+      "id": "18",
+      "measured": {
+        "height": 120,
+        "width": 120
+      },
+      "position": {
+        "x": 1667,
+        "y": 951
+      },
+      "selected": false,
+      "type": "splitter2"
+    },
+    {
+      "data": {
+        "initial_value": "",
+        "label": "ambient air"
+      },
+      "dragging": false,
+      "id": "19",
+      "measured": {
+        "height": 48,
+        "width": 200
+      },
+      "position": {
+        "x": 2040,
+        "y": 913
+      },
+      "selected": false,
+      "type": "integrator"
+    },
+    {
+      "data": {
+        "label": "adder 20"
+      },
+      "dragging": false,
+      "id": "20",
+      "measured": {
+        "height": 64,
+        "width": 64
+      },
+      "position": {
+        "x": 1769,
+        "y": 1185
+      },
+      "selected": false,
+      "type": "adder"
+    },
+    {
+      "data": {
+        "label": "Inventories"
+      },
+      "dragging": false,
+      "id": "21",
+      "measured": {
+        "height": 140,
+        "width": 120
+      },
+      "position": {
+        "x": 1822.4225842692827,
+        "y": 260.99001087345584
+      },
+      "selected": true,
+      "type": "scope"
+    },
+    {
+      "id": "0",
+      "type": "adder",
+      "position": {
+        "x": 1517.8462568023597,
+        "y": 978.8349758222805
+      },
+      "data": {
+        "label": "adder 0"
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "splitter2",
+      "position": {
+        "x": 865.0782538373575,
+        "y": 719.9802025169162
+      },
+      "data": {
+        "label": "soluble vs insoluble",
+        "f1": "0.01",
+        "f2": "0.99"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "data": {},
+      "id": "e3-4",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "3",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "4",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e4-6",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "4",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "6",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e2-6",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "2",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "6",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e6-5",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "6",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "5",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e6-7",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "6",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "7",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e7-8",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "7",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "8",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e11-9-from_source1",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "11",
+      "sourceHandle": "source1",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "9",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e11-13-from_source2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "11",
+      "sourceHandle": "source2",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "13",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e13-12-from_source1",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "13",
+      "sourceHandle": "source1",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "12",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e13-14-from_source2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "13",
+      "sourceHandle": "source2",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "14",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e16-15-from_source1",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "selected": false,
+      "source": "16",
+      "sourceHandle": "source1",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "15",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e16-18-from_source2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "16",
+      "sourceHandle": "source2",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "18",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e18-17-from_source1",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "18",
+      "sourceHandle": "source1",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "17",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e14-20-from_source2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "14",
+      "sourceHandle": "source2",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "20",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e18-20-from_source2",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "18",
+      "sourceHandle": "source2",
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "20",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e20-19",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "20",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "19",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e9-21",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "9",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "21",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "data": {},
+      "id": "e12-21",
+      "markerEnd": {
+        "color": "#ECDFCC",
+        "height": 20,
+        "type": "arrowclosed",
+        "width": 20
+      },
+      "source": "12",
+      "sourceHandle": null,
+      "style": {
+        "stroke": "#ECDFCC",
+        "strokeWidth": 2
+      },
+      "target": "21",
+      "targetHandle": null,
+      "type": "smoothstep"
+    },
+    {
+      "id": "e8-1-from_mass_flow_rate",
+      "source": "8",
+      "target": "1",
+      "sourceHandle": "mass_flow_rate",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-11-from_source1",
+      "source": "1",
+      "target": "11",
+      "sourceHandle": "source1",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-0-from_source2",
+      "source": "1",
+      "target": "0",
+      "sourceHandle": "source2",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e0-16",
+      "source": "0",
+      "target": "16",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e14-0-from_source1",
+      "source": "14",
+      "target": "0",
+      "sourceHandle": "source1",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e15-21",
+      "source": "15",
+      "target": "21",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e17-21",
+      "source": "17",
+      "target": "21",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 23
+}

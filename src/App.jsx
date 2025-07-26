@@ -14,7 +14,8 @@ import './App.css';
 
 // Importing node components
 import ProcessNode from './ProcessNode';
-import SourceNode from './SourceNode';
+import DelayNode from './DelayNode';
+import SourceNode from './ConstantNode';
 import AmplifierNode from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
@@ -29,8 +30,8 @@ import { Splitter2Node, Splitter3Node } from './Splitters';
 // Add nodes as a node type for this script
 const nodeTypes = {
   process: ProcessNode,
-  delay: DefaultNode,
-  source: SourceNode,
+  delay: DelayNode,
+  constant: SourceNode,
   stepsource: StepSourceNode,
   amplifier: AmplifierNode,
   integrator: IntegratorNode,
@@ -106,11 +107,11 @@ export default function App() {
         return;
       }
 
-      const { nodes: loadedNodes, edges: loadedEdges } = await response.json();
+      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter } = await response.json();
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       setSelectedNode(null);
-      setNodeCounter(nodeCounter ?? loadedNodes.length);
+      setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
     } catch (error) {
       console.error('Error loading graph:', error);
     }
@@ -315,11 +316,11 @@ export default function App() {
       case 'process':
         nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
         break;
-      case 'source':
+      case 'constant':
         nodeData = { ...nodeData, value: '' };
         break;
       case 'stepsource':
-        nodeData = { ...nodeData, amplitude: '', frequency: '' };
+        nodeData = { ...nodeData, amplitude: '1', delay: '1' };
         break;
       case 'amplifier':
         nodeData = { ...nodeData, gain: ''};

@@ -5,28 +5,30 @@ export default function AmplifierNode({ data }) {
   return (
     <div
       style={{
-        width: 120,
+        width: 90,
         height: 80,
-        background: '#DDE6ED',
         color: 'black',
         fontWeight: 'bold',
         position: 'relative',
         cursor: 'pointer',
-        clipPath: 'polygon(0% 0%, 0% 100%, 100% 50%)',
-        border: '3px solid #2563eb',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingLeft: '10px',
       }}
     >
+
+      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <polygon points="0,0 100,50 0,100" fill="#DDE6ED" />
+      </svg>
       <div style={{ 
         fontSize: '12px',
         textAlign: 'center',
-        transform: 'translateX(-10px)' // Adjust text position in triangle
+        background: 'transparent',
+        transform: 'translate(-80%, -50%)',
+        top: '50%',
+        left: '50%',
+        position: 'absolute',
       }}>
-        {data.label}
+          {data.label}
       </div>
+
 
       <Handle 
         type="target" 
