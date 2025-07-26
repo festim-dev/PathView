@@ -107,11 +107,11 @@ export default function App() {
         return;
       }
 
-      const { nodes: loadedNodes, edges: loadedEdges } = await response.json();
+      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter } = await response.json();
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       setSelectedNode(null);
-      setNodeCounter(nodeCounter ?? loadedNodes.length);
+      setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
     } catch (error) {
       console.error('Error loading graph:', error);
     }
