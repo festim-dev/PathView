@@ -14,7 +14,7 @@ import './App.css';
 
 // Importing node components
 import ProcessNode from './ProcessNode';
-import SourceNode from './SourceNode';
+import SourceNode from './ConstantNode';
 import AmplifierNode from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
@@ -30,7 +30,7 @@ import { Splitter2Node, Splitter3Node } from './Splitters';
 const nodeTypes = {
   process: ProcessNode,
   delay: DefaultNode,
-  source: SourceNode,
+  constant: SourceNode,
   stepsource: StepSourceNode,
   amplifier: AmplifierNode,
   integrator: IntegratorNode,
@@ -315,7 +315,7 @@ export default function App() {
       case 'process':
         nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
         break;
-      case 'source':
+      case 'constant':
         nodeData = { ...nodeData, value: '' };
         break;
       case 'stepsource':

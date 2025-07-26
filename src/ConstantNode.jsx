@@ -1,7 +1,7 @@
 import React from 'react';
 import { Handle } from '@xyflow/react';
 
-export default function SourceNode({ data }) {
+export default function ConstantNode({ data }) {
   return (
     <div
       style={{

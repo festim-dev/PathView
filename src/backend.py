@@ -147,7 +147,7 @@ def run_pathsim():
 
     for node in nodes:
         # TODO this needs serious refactoring
-        if node["type"] == "source":
+        if node["type"] == "constant":
             block = Constant(value=float(node["data"]["value"]))
         elif node["type"] == "stepsource":
             block = StepSource(
