@@ -14,6 +14,7 @@ import './App.css';
 
 // Importing node components
 import ProcessNode from './ProcessNode';
+import DelayNode from './DelayNode';
 import SourceNode from './ConstantNode';
 import AmplifierNode from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
@@ -29,7 +30,7 @@ import { Splitter2Node, Splitter3Node } from './Splitters';
 // Add nodes as a node type for this script
 const nodeTypes = {
   process: ProcessNode,
-  delay: DefaultNode,
+  delay: DelayNode,
   constant: SourceNode,
   stepsource: StepSourceNode,
   amplifier: AmplifierNode,
