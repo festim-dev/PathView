@@ -319,7 +319,7 @@ export default function App() {
         nodeData = { ...nodeData, value: '' };
         break;
       case 'stepsource':
-        nodeData = { ...nodeData, amplitude: '', frequency: '' };
+        nodeData = { ...nodeData, amplitude: '1', delay: '1' };
         break;
       case 'amplifier':
         nodeData = { ...nodeData, gain: ''};
