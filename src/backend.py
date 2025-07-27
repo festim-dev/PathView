@@ -18,6 +18,7 @@ from pathsim.blocks import (
     Block,
     Constant,
     StepSource,
+    PulseSource,
     Amplifier,
     Adder,
     Multiplier,
@@ -153,6 +154,15 @@ def run_pathsim():
             block = StepSource(
                 amplitude=float(node["data"]["amplitude"]),
                 tau=float(node["data"]["delay"]),
+            )
+        elif node["type"] == "pulsesource":
+            block = PulseSource(
+                amplitude=float(node["data"]["amplitude"]),
+                T=float(node["data"]["T"]),
+                t_rise=float(node["data"]["t_rise"]),
+                t_fall=float(node["data"]["t_fall"]),
+                tau=float(node["data"]["tau"]),
+                duty=float(node["data"]["duty"]),
             )
         elif node["type"] == "amplifier":
             block = Amplifier(gain=float(node["data"]["gain"]))

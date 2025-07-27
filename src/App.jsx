@@ -33,6 +33,7 @@ const nodeTypes = {
   delay: DelayNode,
   constant: SourceNode,
   stepsource: StepSourceNode,
+  pulsesource: SourceNode,
   amplifier: AmplifierNode,
   integrator: IntegratorNode,
   adder: AdderNode,
@@ -321,6 +322,9 @@ export default function App() {
         break;
       case 'stepsource':
         nodeData = { ...nodeData, amplitude: '1', delay: '1' };
+        break;
+      case 'pulsesource':
+        nodeData = { ...nodeData, amplitude: '1', T: '1', t_rise: '0.0', t_fall: '0.0', tau: '0.0', duty: '0.5' };
         break;
       case 'amplifier':
         nodeData = { ...nodeData, gain: ''};
