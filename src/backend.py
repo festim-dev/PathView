@@ -27,6 +27,7 @@ from pathsim.blocks import (
     Delay,
     RNG,
     PID,
+    Schedule,
 )
 from custom_pathsim_blocks import Process, Splitter
 
@@ -132,8 +133,10 @@ def run_pathsim():
                 return block
         return None
 
-    # Create blocks
     blocks = []
+    events = []
+
+    # Create blocks
 
     # Add a Scope block if none exists
     # This ensures that there is always a scope to collect outputs
@@ -226,6 +229,18 @@ def run_pathsim():
                 and node["data"]["initial_value"] != ""
                 else 0.0,
             )
+            # add events to reset integrator if needed
+            if node["data"]["reset_times"] != "":
+
+                def reset_itg(_):
+                    block.reset()
+
+                reset_times = eval(node["data"]["reset_times"])
+                if isinstance(reset_times, (int, float)):
+                    # If it's a single number, convert it to a list
+                    reset_times = [reset_times]
+                for t in reset_times:
+                    events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
         elif node["type"] == "function":
             # Convert the expression string to a lambda function
             expression = node["data"].get("expression", "x")
@@ -373,7 +388,7 @@ def run_pathsim():
                 input_index += 1
 
     # Create the simulation
-    my_simulation = Simulation(blocks, connections_pathsim, log=False)
+    my_simulation = Simulation(blocks, connections_pathsim, log=False, events=events)
 
     # Run the simulation
     my_simulation.run(50)
