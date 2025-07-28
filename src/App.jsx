@@ -1232,15 +1232,17 @@ export default function App() {
                 <div style={{ marginBottom: '20px' }}>
                   {globalVariables.map((variable) => (
                     <div key={variable.id} style={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr auto',
+                      gap: '15px',
+                      alignItems: 'start',
                       marginBottom: '15px',
                       padding: '15px',
                       backgroundColor: '#1e1e2f',
                       borderRadius: '8px',
                       border: '1px solid #555'
                     }}>
-                      <div style={{ flex: '1', marginRight: '15px' }}>
+                      <div>
                         <label style={{ 
                           color: '#ffffff', 
                           display: 'block', 
@@ -1256,7 +1258,7 @@ export default function App() {
                           onChange={(e) => updateGlobalVariable(variable.id, 'name', e.target.value)}
                           placeholder="variable_name"
                           style={{
-                            width: '100%',
+                            width: '95%',
                             padding: '8px',
                             borderRadius: '4px',
                             border: variable.nameError ? '2px solid #e74c3c' : '1px solid #666',
@@ -1276,7 +1278,7 @@ export default function App() {
                           </div>
                         )}
                       </div>
-                      <div style={{ flex: '1', marginRight: '15px' }}>
+                      <div>
                         <label style={{ 
                           color: '#ffffff', 
                           display: 'block', 
@@ -1292,7 +1294,7 @@ export default function App() {
                           onChange={(e) => updateGlobalVariable(variable.id, 'value', e.target.value)}
                           placeholder="0.5"
                           style={{
-                            width: '100%',
+                            width: '95%',
                             padding: '8px',
                             borderRadius: '4px',
                             border: '1px solid #666',
@@ -1310,23 +1312,30 @@ export default function App() {
                           {/* Empty space to match error message height */}
                         </div>
                       </div>
-                      <button
-                        onClick={() => removeGlobalVariable(variable.id)}
-                        style={{
-                          padding: '8px 12px',
-                          backgroundColor: '#e74c3c',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '16px',
-                          fontWeight: 'bold',
-                          minWidth: '40px'
-                        }}
-                        title="Remove variable"
-                      >
-                        −
-                      </button>
+                      <div style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: '100%',
+                        paddingTop: '10px' // Align with input field (label height + margin)
+                      }}>
+                        <button
+                          onClick={() => removeGlobalVariable(variable.id)}
+                          style={{
+                            padding: '8px 12px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            minWidth: '40px'
+                          }}
+                          title="Remove variable"
+                        >
+                          −
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
