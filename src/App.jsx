@@ -240,11 +240,35 @@ export default function App() {
   };
   
   // Functions for managing global variables
+  const isValidPythonIdentifier = (name) => {
+    // Check if name is empty
+    if (!name) return false;
+    
+    // Python identifier rules:
+    // - Must start with letter or underscore
+    // - Can contain letters, digits, underscores
+    // - Cannot be a Python keyword
+    const pythonKeywords = [
+      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue', 
+      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 
+      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 
+      'raise', 'return', 'try', 'while', 'with', 'yield'
+    ];
+    
+    // Check if it's a keyword
+    if (pythonKeywords.includes(name)) return false;
+    
+    // Check pattern: must start with letter or underscore, followed by letters, digits, or underscores
+    const pattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+    return pattern.test(name);
+  };
+
   const addGlobalVariable = () => {
     const newVariable = {
       id: Date.now().toString(),
       name: '',
-      value: ''
+      value: '',
+      nameError: false
     };
     setGlobalVariables([...globalVariables, newVariable]);
   };
@@ -254,9 +278,19 @@ export default function App() {
   };
 
   const updateGlobalVariable = (id, field, value) => {
-    setGlobalVariables(globalVariables.map(variable => 
-      variable.id === id ? { ...variable, [field]: value } : variable
-    ));
+    setGlobalVariables(globalVariables.map(variable => {
+      if (variable.id === id) {
+        const updatedVariable = { ...variable, [field]: value };
+        
+        // Validate name field
+        if (field === 'name') {
+          updatedVariable.nameError = value !== '' && !isValidPythonIdentifier(value);
+        }
+        
+        return updatedVariable;
+      }
+      return variable;
+    }));
   };
 
   //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
@@ -1225,12 +1259,22 @@ export default function App() {
                             width: '100%',
                             padding: '8px',
                             borderRadius: '4px',
-                            border: '1px solid #666',
+                            border: variable.nameError ? '2px solid #e74c3c' : '1px solid #666',
                             backgroundColor: '#2c2c54',
                             color: '#ffffff',
                             fontSize: '14px'
                           }}
                         />
+                        {variable.nameError && (
+                          <div style={{
+                            color: '#e74c3c',
+                            fontSize: '11px',
+                            marginTop: '3px',
+                            fontStyle: 'italic'
+                          }}>
+                            Invalid Python variable name
+                          </div>
+                        )}
                       </div>
                       <div style={{ flex: '1', marginRight: '15px' }}>
                         <label style={{ 
@@ -1257,6 +1301,14 @@ export default function App() {
                             fontSize: '14px'
                           }}
                         />
+                        {/* Placeholder div to maintain alignment */}
+                        <div style={{
+                          height: variable.nameError ? '20px' : '0px',
+                          fontSize: '11px',
+                          marginTop: '3px'
+                        }}>
+                          {/* Empty space to match error message height */}
+                        </div>
                       </div>
                       <button
                         onClick={() => removeGlobalVariable(variable.id)}
@@ -1331,7 +1383,9 @@ export default function App() {
             }}>
               <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Usage Instructions:</h3>
               <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
-                <li>Define variables with meaningful names (e.g., "flow_rate", "temperature")</li>
+                <li><strong>Variable names</strong> must be valid Python identifiers (start with letter/underscore, contain only letters/digits/underscores)</li>
+                <li><strong>Cannot use Python keywords</strong> like "if", "for", "class", "def", etc.</li>
+                <li>Use meaningful names (e.g., "flow_rate", "temperature", "my_constant")</li>
                 <li>Use numeric values, expressions, or references to other variables</li>
                 <li>Variables can be referenced in node parameters using their exact names</li>
                 <li>Variables are saved and loaded with your graph files</li>

@@ -114,6 +114,7 @@ def convert_to_python():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+# TODO refactor this function...
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
 def run_pathsim():
@@ -128,13 +129,38 @@ def run_pathsim():
     solver_prms = graph_data.get("solverParams", {})
     global_vars = graph_data.get("globalVariables", {})
 
-    # exec global variables so that they are usable later in this script.
+    # Validate and exec global variables so that they are usable later in this script.
     for var in global_vars:
-        exec(f"{var['name']} = {var['value']}", globals())
+        var_name = var.get("name", "").strip()
+        var_value = var.get("value", "")
+
+        # Validate variable name
+        if not var_name:
+            continue  # Skip empty names
+
+        if not var_name.isidentifier():
+            raise ValueError(
+                f"Invalid Python variable name: '{var_name}'. "
+                "Variable names must start with a letter or underscore, "
+                "and contain only letters, digits, and underscores."
+            )
+
+        # Check if it's a Python keyword
+        import keyword
+
+        if keyword.iskeyword(var_name):
+            raise ValueError(
+                f"'{var_name}' is a Python keyword and cannot be used as a variable name."
+            )
+
+        try:
+            exec(f"{var_name} = {var_value}", globals())
+        except Exception as e:
+            raise ValueError(f"Error setting global variable '{var_name}': {str(e)}")
 
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
-            solver_prms[k] = float(v)
+            solver_prms[k] = eval(v)
         if k == "log":
             if v == "true":
                 solver_prms[k] = True
