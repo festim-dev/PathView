@@ -16,7 +16,7 @@ import './App.css';
 import ProcessNode from './ProcessNode';
 import DelayNode from './DelayNode';
 import SourceNode from './ConstantNode';
-import AmplifierNode from './AmplifierNode';
+import {AmplifierNode, AmplifierNodeReverse} from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
@@ -35,6 +35,7 @@ const nodeTypes = {
   stepsource: StepSourceNode,
   pulsesource: SourceNode,
   amplifier: AmplifierNode,
+  amplifier_reverse: AmplifierNodeReverse,
   integrator: IntegratorNode,
   adder: AdderNode,
   multiplier: MultiplierNode,
@@ -327,6 +328,9 @@ export default function App() {
         nodeData = { ...nodeData, amplitude: '1', T: '1', t_rise: '0.0', t_fall: '0.0', tau: '0.0', duty: '0.5' };
         break;
       case 'amplifier':
+        nodeData = { ...nodeData, gain: ''};
+        break;
+      case 'amplifier_reverse':
         nodeData = { ...nodeData, gain: ''};
         break;
       case 'multiplier':

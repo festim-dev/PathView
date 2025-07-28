@@ -164,7 +164,7 @@ def run_pathsim():
                 tau=float(node["data"]["tau"]),
                 duty=float(node["data"]["duty"]),
             )
-        elif node["type"] == "amplifier":
+        elif node["type"] in ["amplifier", "amplifier_reverse"]:
             block = Amplifier(gain=float(node["data"]["gain"]))
         elif node["type"] == "scope":
             assert scope_default is None
