@@ -13,7 +13,7 @@ import './App.css';
 
 
 // Importing node components
-import ProcessNode from './ProcessNode';
+import {ProcessNode, ProcessNodeHorizontal} from './ProcessNode';
 import DelayNode from './DelayNode';
 import SourceNode from './ConstantNode';
 import {AmplifierNode, AmplifierNodeReverse} from './AmplifierNode';
@@ -30,6 +30,7 @@ import { Splitter2Node, Splitter3Node } from './Splitters';
 // Add nodes as a node type for this script
 const nodeTypes = {
   process: ProcessNode,
+  process_horizontal: ProcessNodeHorizontal,
   delay: DelayNode,
   constant: SourceNode,
   stepsource: StepSourceNode,
@@ -316,6 +317,9 @@ export default function App() {
     // Add type-specific default parameters
     switch (selectedType) {
       case 'process':
+        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
+        break;
+      case 'process_horizontal':
         nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
         break;
       case 'constant':

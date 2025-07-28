@@ -281,7 +281,7 @@ def run_pathsim():
                 if node["data"].get("f_max")
                 else 100,
             )
-        elif node["type"] == "process":
+        elif node["type"] in ["process", "process_horizontal"]:
             block = Process(
                 residence_time=(
                     float(node["data"]["residence_time"])
