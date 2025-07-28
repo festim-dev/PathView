@@ -1092,28 +1092,24 @@ export default function App() {
                 <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ 
                     color: '#ffffff', 
-                    display: 'block', 
+                    display: 'flex',
+                    alignItems: 'center',
                     marginBottom: '8px',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
                   }}>
-                    Enable Logging:
+                    <input
+                      type="checkbox"
+                      checked={solverParams.log === 'true'}
+                      onChange={(e) => setSolverParams({...solverParams, log: e.target.checked ? 'true' : 'false'})}
+                      style={{
+                        marginRight: '10px',
+                        transform: 'scale(1.2)',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    Enable Logging
                   </label>
-                  <select
-                    value={solverParams.log}
-                    onChange={(e) => setSolverParams({...solverParams, log: e.target.value})}
-                    style={{
-                      width: '10%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  >
-                    <option value="true">True</option>
-                    <option value="false">False</option>
-                  </select>
                 </div>
                 
                 <div style={{ gridColumn: 'span 2' }}>
