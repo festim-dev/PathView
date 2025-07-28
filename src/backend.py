@@ -13,6 +13,7 @@ import io
 import base64
 
 from pathsim import Simulation, Connection
+import pathsim.solvers
 from pathsim.blocks import (
     Scope,
     Block,
@@ -30,6 +31,11 @@ from pathsim.blocks import (
 )
 from custom_pathsim_blocks import Process, Splitter
 
+NAME_TO_SOLVER = {
+    "SSPRK22": pathsim.solvers.SSPRK22,
+    "SSPRK33": pathsim.solvers.SSPRK33,
+    "RKF21": pathsim.solvers.RKF21,
+}
 
 # app = Flask(__name__)
 # CORS(app, supports_credentials=True)
@@ -119,6 +125,31 @@ def run_pathsim():
 
     nodes = graph_data.get("nodes", [])
     edges = graph_data.get("edges", [])
+    solver_prms = graph_data.get("solverParams", {})
+    for k, v in solver_prms.items():
+        if k not in ["Solver", "log"]:
+            solver_prms[k] = float(v)
+        if k == "log":
+            if v == "true":
+                solver_prms[k] = True
+            elif v == "false":
+                solver_prms[k] = False
+            else:
+                return jsonify(
+                    {"error": f"Invalid value for {k}: {v}. Must be 'true' or 'false'."}
+                ), 400
+        if k == "Solver":
+            if v not in NAME_TO_SOLVER:
+                return jsonify(
+                    {
+                        "error": f"Invalid solver: {v}. Must be one of {list(NAME_TO_SOLVER.keys())}."
+                    }
+                ), 400
+            solver_prms[k] = NAME_TO_SOLVER[v]
+    # remove solver duration from solver parameters
+    duration = float(solver_prms.pop("simulation_duration"))
+
+    assert not isinstance(solver_prms["Solver"], str), solver_prms["Solver"]
 
     def find_node_by_id(node_id: str) -> dict:
         for node in nodes:
@@ -373,10 +404,14 @@ def run_pathsim():
                 input_index += 1
 
     # Create the simulation
-    my_simulation = Simulation(blocks, connections_pathsim, log=False)
+    my_simulation = Simulation(
+        blocks,
+        connections_pathsim,
+        **solver_prms,  # Unpack solver parameters
+    )
 
     # Run the simulation
-    my_simulation.run(50)
+    my_simulation.run(duration)
 
     # Generate the plot
     scopes = [block for block in blocks if isinstance(block, Scope)]

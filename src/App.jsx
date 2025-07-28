@@ -60,6 +60,18 @@ export default function App() {
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [nodeCounter, setNodeCounter] = useState(1);
+  
+  // Solver parameters state
+  const [solverParams, setSolverParams] = useState({
+    dt: '0.01',
+    dt_min: '1e-6',
+    dt_max: '1.0',
+    Solver: 'SSPRK22',
+    tolerance_fpi: '1e-6',
+    iterations_max: '100',
+    log: 'true',
+    simulation_duration: '50.0'
+  });
 
   // Function to save a graph
   const saveGraph = async () => {
@@ -72,7 +84,8 @@ export default function App() {
     const graphData = {
       nodes,
       edges,
-      nodeCounter
+      nodeCounter,
+      solverParams
     };
 
     try {
@@ -108,11 +121,21 @@ export default function App() {
         return;
       }
 
-      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter } = await response.json();
+      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams } = await response.json();
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       setSelectedNode(null);
       setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
+      setSolverParams(loadedSolverParams ?? {
+        dt: '0.01',
+        dt_min: '1e-6',
+        dt_max: '1.0',
+        Solver: 'SSPRK22',
+        tolerance_fpi: '1e-6',
+        iterations_max: '100',
+        log: 'true',
+        simulation_duration: '50.0'
+      });
     } catch (error) {
       console.error('Error loading graph:', error);
     }
@@ -123,6 +146,16 @@ export default function App() {
     setEdges(initialEdges);
     setSelectedNode(null);
     setNodeCounter(0);
+    setSolverParams({
+      dt: '0.01',
+      dt_min: '1e-6',
+      dt_max: '1.0',
+      Solver: 'SSPRK22',
+      tolerance_fpi: '1e-6',
+      iterations_max: '100',
+      log: 'true',
+      simulation_duration: '50.0'
+    });
   };
   // Allows user to save to python script
   const saveToPython = async () => {
@@ -130,7 +163,8 @@ export default function App() {
       const graphData = {
         nodes,
         edges,
-        nodeCounter
+        nodeCounter,
+        solverParams
       };
 
       const response = await fetch('http://localhost:8000/convert-to-python', {
@@ -169,7 +203,8 @@ export default function App() {
     try {
       const graphData = {
         nodes,
-        edges
+        edges,
+        solverParams
       };
 
       const response = await fetch('http://localhost:8000/run-pathsim', {
@@ -460,6 +495,20 @@ export default function App() {
           style={{
             padding: '10px 20px',
             margin: '5px',
+            backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={() => setActiveTab('solver')}
+        >
+          Solver Parameters
+        </button>
+        <button
+          style={{
+            padding: '10px 20px',
+            margin: '5px',
             backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
@@ -744,6 +793,320 @@ export default function App() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Solver Parameters Tab */}
+      {activeTab === 'solver' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#1e1e2f',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            padding: '40px',
+            maxWidth: '800px',
+            margin: '0 auto',
+          }}>
+            <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
+              Solver Parameters
+            </h1>
+            <div style={{
+              backgroundColor: '#2c2c54',
+              padding: '30px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+            }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '20px',
+                marginBottom: '20px'
+              }}>
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Time Step (dt):
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.dt}
+                    onChange={(e) => setSolverParams({...solverParams, dt: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="0.01"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Minimum Time Step (dt_min):
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.dt_min}
+                    onChange={(e) => setSolverParams({...solverParams, dt_min: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="1e-6"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Maximum Time Step (dt_max):
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.dt_max}
+                    onChange={(e) => setSolverParams({...solverParams, dt_max: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="1.0"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Solver Type:
+                  </label>
+                  <select
+                    value={solverParams.Solver}
+                    onChange={(e) => setSolverParams({...solverParams, Solver: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="SSPRK22">SSPRK22</option>
+                    <option value="SSPRK33">SSPRK33</option>
+                    <option value="RKF21">RKF21</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    FPI Tolerance:
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.tolerance_fpi}
+                    onChange={(e) => setSolverParams({...solverParams, tolerance_fpi: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="1e-6"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Maximum Iterations:
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.iterations_max}
+                    onChange={(e) => setSolverParams({...solverParams, iterations_max: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Simulation Duration:
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.simulation_duration}
+                    onChange={(e) => setSolverParams({...solverParams, simulation_duration: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="50.0"
+                  />
+                </div>
+                
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Enable Logging:
+                  </label>
+                  <select
+                    value={solverParams.log}
+                    onChange={(e) => setSolverParams({...solverParams, log: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div style={{ 
+                textAlign: 'center',
+                marginTop: '30px' 
+              }}>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    marginRight: '15px'
+                  }}
+                  onClick={() => {
+                    // Reset to default values
+                    setSolverParams({
+                      dt: '0.01',
+                      dt_min: '1e-6',
+                      dt_max: '1.0',
+                      Solver: 'SSPRK22',
+                      tolerance_fpi: '1e-6',
+                      iterations_max: '100',
+                      log: 'true',
+                      simulation_duration: '50.0'
+                    });
+                  }}
+                >
+                  Reset to Defaults
+                </button>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#3498db',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                  onClick={() => setActiveTab('graph')}
+                >
+                  Back to Graph Editor
+                </button>
+              </div>
+            </div>
+            
+            <div style={{
+              marginTop: '30px',
+              padding: '20px',
+              backgroundColor: '#2c2c54',
+              borderRadius: '8px',
+              border: '1px solid #555'
+            }}>
+              <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Parameter Descriptions:</h3>
+              <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
+                <li><strong>dt:</strong> Base time step for simulation</li>
+                <li><strong>dt_min:</strong> Minimum allowed time step</li>
+                <li><strong>dt_max:</strong> Maximum allowed time step</li>
+                <li><strong>Solver:</strong> Numerical integration method</li>
+                <li><strong>tolerance_fpi:</strong> Tolerance for fixed point iterations</li>
+                <li><strong>iterations_max:</strong> Maximum number of iterations per time step</li>
+                <li><strong>simulation_duration:</strong> Total duration of the simulation (in time units)</li>
+                <li><strong>log:</strong> Enable/disable logging during simulation</li>
+              </ul>
+            </div>
+          </div>
         </div>
       )}
 
