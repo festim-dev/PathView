@@ -115,6 +115,28 @@ def convert_to_python():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
+    block = Integrator(
+        initial_value=eval(node["data"]["initial_value"])
+        if node["data"].get("initial_value") and node["data"]["initial_value"] != ""
+        else 0.0,
+    )
+    # add events to reset integrator if needed
+    events = []
+    if node["data"]["reset_times"] != "":
+
+        def reset_itg(_):
+            block.reset()
+
+        reset_times = eval(node["data"]["reset_times"])
+        if isinstance(reset_times, (int, float)):
+            # If it's a single number, convert it to a list
+            reset_times = [reset_times]
+        for t in reset_times:
+            events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+    return block, events
+
+
 # TODO refactor this function...
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
@@ -300,24 +322,8 @@ def run_pathsim():
         elif node["type"] == "multiplier":
             block = Multiplier()
         elif node["type"] == "integrator":
-            block = Integrator(
-                initial_value=eval(node["data"]["initial_value"])
-                if node["data"].get("initial_value")
-                and node["data"]["initial_value"] != ""
-                else 0.0,
-            )
-            # add events to reset integrator if needed
-            if node["data"]["reset_times"] != "":
-
-                def reset_itg(_):
-                    block.reset()
-
-                reset_times = eval(node["data"]["reset_times"])
-                if isinstance(reset_times, (int, float)):
-                    # If it's a single number, convert it to a list
-                    reset_times = [reset_times]
-                for t in reset_times:
-                    events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+            block, events_int = create_integrator(node)
+            events.extend(events_int)
         elif node["type"] == "function":
             # Convert the expression string to a lambda function
             expression = node["data"].get("expression", "x")
