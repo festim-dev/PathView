@@ -73,6 +73,9 @@ export default function App() {
     simulation_duration: '50.0'
   });
 
+  // Global variables state
+  const [globalVariables, setGlobalVariables] = useState([]);
+
   // Function to save a graph
   const saveGraph = async () => {
     const filename = prompt("Your file will be saved in the saved_graphs folder. Enter a name for your file:");
@@ -85,7 +88,8 @@ export default function App() {
       nodes,
       edges,
       nodeCounter,
-      solverParams
+      solverParams,
+      globalVariables
     };
 
     try {
@@ -121,7 +125,7 @@ export default function App() {
         return;
       }
 
-      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams } = await response.json();
+      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = await response.json();
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       setSelectedNode(null);
@@ -136,6 +140,7 @@ export default function App() {
         log: 'true',
         simulation_duration: '50.0'
       });
+      setGlobalVariables(loadedGlobalVariables ?? []);
     } catch (error) {
       console.error('Error loading graph:', error);
     }
@@ -156,6 +161,7 @@ export default function App() {
       log: 'true',
       simulation_duration: '50.0'
     });
+    setGlobalVariables([]);
   };
   // Allows user to save to python script
   const saveToPython = async () => {
@@ -164,7 +170,8 @@ export default function App() {
         nodes,
         edges,
         nodeCounter,
-        solverParams
+        solverParams,
+        globalVariables
       };
 
       const response = await fetch('http://localhost:8000/convert-to-python', {
@@ -204,7 +211,8 @@ export default function App() {
       const graphData = {
         nodes,
         edges,
-        solverParams
+        solverParams,
+        globalVariables
       };
 
       const response = await fetch('http://localhost:8000/run-pathsim', {
@@ -230,6 +238,27 @@ export default function App() {
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
+  
+  // Functions for managing global variables
+  const addGlobalVariable = () => {
+    const newVariable = {
+      id: Date.now().toString(),
+      name: '',
+      value: ''
+    };
+    setGlobalVariables([...globalVariables, newVariable]);
+  };
+
+  const removeGlobalVariable = (id) => {
+    setGlobalVariables(globalVariables.filter(variable => variable.id !== id));
+  };
+
+  const updateGlobalVariable = (id, field, value) => {
+    setGlobalVariables(globalVariables.map(variable => 
+      variable.id === id ? { ...variable, [field]: value } : variable
+    ));
+  };
+
   //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
@@ -504,6 +533,20 @@ export default function App() {
           onClick={() => setActiveTab('solver')}
         >
           Solver Parameters
+        </button>
+        <button
+          style={{
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={() => setActiveTab('globals')}
+        >
+          Global Variables
         </button>
         <button
           style={{
@@ -1104,6 +1147,194 @@ export default function App() {
                 <li><strong>iterations_max:</strong> Maximum number of iterations per time step</li>
                 <li><strong>simulation_duration:</strong> Total duration of the simulation (in time units)</li>
                 <li><strong>log:</strong> Enable/disable logging during simulation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Variables Tab */}
+      {activeTab === 'globals' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#1e1e2f',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            padding: '40px',
+            maxWidth: '800px',
+            margin: '0 auto',
+          }}>
+            <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
+              Global Variables
+            </h1>
+            <div style={{
+              backgroundColor: '#2c2c54',
+              padding: '30px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+            }}>
+              <p style={{ 
+                color: '#cccccc', 
+                marginBottom: '20px',
+                textAlign: 'center',
+                fontSize: '14px'
+              }}>
+                Define global variables that can be used in node definitions throughout your model.
+              </p>
+              
+              {globalVariables.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  color: '#888',
+                  padding: '40px 20px',
+                  fontStyle: 'italic'
+                }}>
+                  No global variables defined. Click "Add Variable" to create one.
+                </div>
+              ) : (
+                <div style={{ marginBottom: '20px' }}>
+                  {globalVariables.map((variable) => (
+                    <div key={variable.id} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '15px',
+                      padding: '15px',
+                      backgroundColor: '#1e1e2f',
+                      borderRadius: '8px',
+                      border: '1px solid #555'
+                    }}>
+                      <div style={{ flex: '1', marginRight: '15px' }}>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          Variable Name:
+                        </label>
+                        <input
+                          type="text"
+                          value={variable.name}
+                          onChange={(e) => updateGlobalVariable(variable.id, 'name', e.target.value)}
+                          placeholder="variable_name"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #666',
+                            backgroundColor: '#2c2c54',
+                            color: '#ffffff',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: '1', marginRight: '15px' }}>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          Value:
+                        </label>
+                        <input
+                          type="text"
+                          value={variable.value}
+                          onChange={(e) => updateGlobalVariable(variable.id, 'value', e.target.value)}
+                          placeholder="0.5"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #666',
+                            backgroundColor: '#2c2c54',
+                            color: '#ffffff',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                      <button
+                        onClick={() => removeGlobalVariable(variable.id)}
+                        style={{
+                          padding: '8px 12px',
+                          backgroundColor: '#e74c3c',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          minWidth: '40px'
+                        }}
+                        title="Remove variable"
+                      >
+                        −
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '15px',
+                marginTop: '20px'
+              }}>
+                <button
+                  onClick={addGlobalVariable}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  + Add Variable
+                </button>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#3498db',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                  onClick={() => setActiveTab('graph')}
+                >
+                  Back to Graph Editor
+                </button>
+              </div>
+            </div>
+            
+            <div style={{
+              marginTop: '30px',
+              padding: '20px',
+              backgroundColor: '#2c2c54',
+              borderRadius: '8px',
+              border: '1px solid #555'
+            }}>
+              <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Usage Instructions:</h3>
+              <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
+                <li>Define variables with meaningful names (e.g., "flow_rate", "temperature")</li>
+                <li>Use numeric values, expressions, or references to other variables</li>
+                <li>Variables can be referenced in node parameters using their exact names</li>
+                <li>Variables are saved and loaded with your graph files</li>
               </ul>
             </div>
           </div>

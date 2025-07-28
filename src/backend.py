@@ -126,6 +126,12 @@ def run_pathsim():
     nodes = graph_data.get("nodes", [])
     edges = graph_data.get("edges", [])
     solver_prms = graph_data.get("solverParams", {})
+    global_vars = graph_data.get("globalVariables", {})
+
+    # exec global variables so that they are usable later in this script.
+    for var in global_vars:
+        exec(f"{var['name']} = {var['value']}", globals())
+
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
             solver_prms[k] = float(v)
@@ -180,23 +186,23 @@ def run_pathsim():
     for node in nodes:
         # TODO this needs serious refactoring
         if node["type"] == "constant":
-            block = Constant(value=float(node["data"]["value"]))
+            block = Constant(value=eval(node["data"]["value"]))
         elif node["type"] == "stepsource":
             block = StepSource(
-                amplitude=float(node["data"]["amplitude"]),
-                tau=float(node["data"]["delay"]),
+                amplitude=eval(node["data"]["amplitude"]),
+                tau=eval(node["data"]["delay"]),
             )
         elif node["type"] == "pulsesource":
             block = PulseSource(
-                amplitude=float(node["data"]["amplitude"]),
-                T=float(node["data"]["T"]),
-                t_rise=float(node["data"]["t_rise"]),
-                t_fall=float(node["data"]["t_fall"]),
-                tau=float(node["data"]["tau"]),
-                duty=float(node["data"]["duty"]),
+                amplitude=eval(node["data"]["amplitude"]),
+                T=eval(node["data"]["T"]),
+                t_rise=eval(node["data"]["t_rise"]),
+                t_fall=eval(node["data"]["t_fall"]),
+                tau=eval(node["data"]["tau"]),
+                duty=eval(node["data"]["duty"]),
             )
         elif node["type"] == "amplifier":
-            block = Amplifier(gain=float(node["data"]["gain"]))
+            block = Amplifier(gain=eval(node["data"]["gain"]))
         elif node["type"] == "scope":
             assert scope_default is None
             # Find all incoming edges to this node and sort by source id for consistent ordering
@@ -252,7 +258,7 @@ def run_pathsim():
             block = Multiplier()
         elif node["type"] == "integrator":
             block = Integrator(
-                initial_value=float(node["data"]["initial_value"])
+                initial_value=eval(node["data"]["initial_value"])
                 if node["data"].get("initial_value")
                 and node["data"]["initial_value"] != ""
                 else 0.0,
@@ -300,34 +306,32 @@ def run_pathsim():
 
             block = Function(func=func)
         elif node["type"] == "delay":
-            block = Delay(tau=float(node["data"]["tau"]))
+            block = Delay(tau=eval(node["data"]["tau"]))
         elif node["type"] == "rng":
-            block = RNG(sampling_rate=float(node["data"]["sampling_rate"]))
+            block = RNG(sampling_rate=eval(node["data"]["sampling_rate"]))
         elif node["type"] == "pid":
             block = PID(
-                Kp=float(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
-                Ki=float(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
-                Kd=float(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
-                f_max=float(node["data"]["f_max"])
-                if node["data"].get("f_max")
-                else 100,
+                Kp=eval(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
+                Ki=eval(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
+                Kd=eval(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
+                f_max=eval(node["data"]["f_max"]) if node["data"].get("f_max") else 100,
             )
         elif node["type"] == "process":
             block = Process(
                 residence_time=(
-                    float(node["data"]["residence_time"])
+                    eval(node["data"]["residence_time"])
                     if node["data"].get("residence_time")
                     and node["data"]["residence_time"] != ""
                     else 0
                 ),
                 ic=(
-                    float(node["data"]["initial_value"])
+                    eval(node["data"]["initial_value"])
                     if node["data"].get("initial_value")
                     and node["data"]["initial_value"] != ""
                     else 0
                 ),
                 gen=(
-                    float(node["data"]["source_term"])
+                    eval(node["data"]["source_term"])
                     if node["data"].get("source_term")
                     and node["data"]["source_term"] != ""
                     else 0
