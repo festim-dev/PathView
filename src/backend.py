@@ -167,7 +167,7 @@ def run_pathsim():
                 tau=float(node["data"]["tau"]),
                 duty=float(node["data"]["duty"]),
             )
-        elif node["type"] == "amplifier":
+        elif node["type"] in ["amplifier", "amplifier_reverse"]:
             block = Amplifier(gain=float(node["data"]["gain"]))
         elif node["type"] == "scope":
             assert scope_default is None
@@ -296,7 +296,7 @@ def run_pathsim():
                 if node["data"].get("f_max")
                 else 100,
             )
-        elif node["type"] == "process":
+        elif node["type"] in ["process", "process_horizontal"]:
             block = Process(
                 residence_time=(
                     float(node["data"]["residence_time"])
