@@ -919,7 +919,7 @@ export default function App() {
                     value={solverParams.dt}
                     onChange={(e) => setSolverParams({...solverParams, dt: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -945,7 +945,7 @@ export default function App() {
                     value={solverParams.dt_min}
                     onChange={(e) => setSolverParams({...solverParams, dt_min: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -971,7 +971,7 @@ export default function App() {
                     value={solverParams.dt_max}
                     onChange={(e) => setSolverParams({...solverParams, dt_max: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -996,7 +996,7 @@ export default function App() {
                     value={solverParams.Solver}
                     onChange={(e) => setSolverParams({...solverParams, Solver: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -1025,7 +1025,7 @@ export default function App() {
                     value={solverParams.tolerance_fpi}
                     onChange={(e) => setSolverParams({...solverParams, tolerance_fpi: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -1051,7 +1051,7 @@ export default function App() {
                     value={solverParams.iterations_max}
                     onChange={(e) => setSolverParams({...solverParams, iterations_max: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -1077,7 +1077,7 @@ export default function App() {
                     value={solverParams.simulation_duration}
                     onChange={(e) => setSolverParams({...solverParams, simulation_duration: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -1102,7 +1102,7 @@ export default function App() {
                     value={solverParams.log}
                     onChange={(e) => setSolverParams({...solverParams, log: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '10%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
@@ -1129,7 +1129,7 @@ export default function App() {
                     value={solverParams.extra_params}
                     onChange={(e) => setSolverParams({...solverParams, extra_params: e.target.value})}
                     style={{
-                      width: '100%',
+                      width: '95%',
                       padding: '10px',
                       borderRadius: '5px',
                       border: '1px solid #555',
