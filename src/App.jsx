@@ -62,6 +62,22 @@ export default function App() {
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [nodeCounter, setNodeCounter] = useState(1);
+  
+  // Solver parameters state
+  const [solverParams, setSolverParams] = useState({
+    dt: '0.01',
+    dt_min: '1e-6',
+    dt_max: '1.0',
+    Solver: 'SSPRK22',
+    tolerance_fpi: '1e-6',
+    iterations_max: '100',
+    log: 'true',
+    simulation_duration: '50.0',
+    extra_params: '{}'
+  });
+
+  // Global variables state
+  const [globalVariables, setGlobalVariables] = useState([]);
 
   // Function to save a graph
   const saveGraph = async () => {
@@ -74,7 +90,9 @@ export default function App() {
     const graphData = {
       nodes,
       edges,
-      nodeCounter
+      nodeCounter,
+      solverParams,
+      globalVariables
     };
 
     try {
@@ -110,11 +128,23 @@ export default function App() {
         return;
       }
 
-      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter } = await response.json();
+      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = await response.json();
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       setSelectedNode(null);
       setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
+      setSolverParams(loadedSolverParams ?? {
+        dt: '0.01',
+        dt_min: '1e-6',
+        dt_max: '1.0',
+        Solver: 'SSPRK22',
+        tolerance_fpi: '1e-6',
+        iterations_max: '100',
+        log: 'true',
+        simulation_duration: '50.0',
+        extra_params: '{}'
+      });
+      setGlobalVariables(loadedGlobalVariables ?? []);
     } catch (error) {
       console.error('Error loading graph:', error);
     }
@@ -125,6 +155,18 @@ export default function App() {
     setEdges(initialEdges);
     setSelectedNode(null);
     setNodeCounter(0);
+    setSolverParams({
+      dt: '0.01',
+      dt_min: '1e-6',
+      dt_max: '1.0',
+      Solver: 'SSPRK22',
+      tolerance_fpi: '1e-6',
+      iterations_max: '100',
+      log: 'true',
+      simulation_duration: '50.0',
+      extra_params: '{}'
+    });
+    setGlobalVariables([]);
   };
   // Allows user to save to python script
   const saveToPython = async () => {
@@ -132,7 +174,9 @@ export default function App() {
       const graphData = {
         nodes,
         edges,
-        nodeCounter
+        nodeCounter,
+        solverParams,
+        globalVariables
       };
 
       const response = await fetch('http://localhost:8000/convert-to-python', {
@@ -171,7 +215,9 @@ export default function App() {
     try {
       const graphData = {
         nodes,
-        edges
+        edges,
+        solverParams,
+        globalVariables
       };
 
       const response = await fetch('http://localhost:8000/run-pathsim', {
@@ -197,6 +243,61 @@ export default function App() {
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
+  
+  // Functions for managing global variables
+  const isValidPythonIdentifier = (name) => {
+    // Check if name is empty
+    if (!name) return false;
+    
+    // Python identifier rules:
+    // - Must start with letter or underscore
+    // - Can contain letters, digits, underscores
+    // - Cannot be a Python keyword
+    const pythonKeywords = [
+      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue', 
+      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 
+      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 
+      'raise', 'return', 'try', 'while', 'with', 'yield'
+    ];
+    
+    // Check if it's a keyword
+    if (pythonKeywords.includes(name)) return false;
+    
+    // Check pattern: must start with letter or underscore, followed by letters, digits, or underscores
+    const pattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+    return pattern.test(name);
+  };
+
+  const addGlobalVariable = () => {
+    const newVariable = {
+      id: Date.now().toString(),
+      name: '',
+      value: '',
+      nameError: false
+    };
+    setGlobalVariables([...globalVariables, newVariable]);
+  };
+
+  const removeGlobalVariable = (id) => {
+    setGlobalVariables(globalVariables.filter(variable => variable.id !== id));
+  };
+
+  const updateGlobalVariable = (id, field, value) => {
+    setGlobalVariables(globalVariables.map(variable => {
+      if (variable.id === id) {
+        const updatedVariable = { ...variable, [field]: value };
+        
+        // Validate name field
+        if (field === 'name') {
+          updatedVariable.nameError = value !== '' && !isValidPythonIdentifier(value);
+        }
+        
+        return updatedVariable;
+      }
+      return variable;
+    }));
+  };
+
   //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
   const onConnect = useCallback(
     (params) => {
@@ -463,6 +564,34 @@ export default function App() {
           onClick={() => setActiveTab('graph')}
         >
           Graph Editor
+        </button>
+        <button
+          style={{
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={() => setActiveTab('solver')}
+        >
+          Solver Parameters
+        </button>
+        <button
+          style={{
+            padding: '10px 20px',
+            margin: '5px',
+            backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={() => setActiveTab('globals')}
+        >
+          Global Variables
         </button>
         <button
           style={{
@@ -752,6 +881,570 @@ export default function App() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Solver Parameters Tab */}
+      {activeTab === 'solver' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#1e1e2f',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            padding: '40px',
+            maxWidth: '800px',
+            margin: '0 auto',
+          }}>
+            <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
+              Solver Parameters
+            </h1>
+            <div style={{
+              backgroundColor: '#2c2c54',
+              padding: '30px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+            }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '20px',
+                marginBottom: '20px'
+              }}>
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Time Step (dt):
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.dt}
+                    onChange={(e) => setSolverParams({...solverParams, dt: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="0.01"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Minimum Time Step (dt_min):
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.dt_min}
+                    onChange={(e) => setSolverParams({...solverParams, dt_min: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="1e-6"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Maximum Time Step (dt_max):
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.dt_max}
+                    onChange={(e) => setSolverParams({...solverParams, dt_max: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="1.0"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Solver Type:
+                  </label>
+                  <select
+                    value={solverParams.Solver}
+                    onChange={(e) => setSolverParams({...solverParams, Solver: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="SSPRK22">SSPRK22</option>
+                    <option value="SSPRK33">SSPRK33</option>
+                    <option value="RKF21">RKF21</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    FPI Tolerance:
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.tolerance_fpi}
+                    onChange={(e) => setSolverParams({...solverParams, tolerance_fpi: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="1e-6"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Maximum Iterations:
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.iterations_max}
+                    onChange={(e) => setSolverParams({...solverParams, iterations_max: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Simulation Duration:
+                  </label>
+                  <input
+                    type="text"
+                    value={solverParams.simulation_duration}
+                    onChange={(e) => setSolverParams({...solverParams, simulation_duration: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px'
+                    }}
+                    placeholder="50.0"
+                  />
+                </div>
+                
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '8px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={solverParams.log === 'true'}
+                      onChange={(e) => setSolverParams({...solverParams, log: e.target.checked ? 'true' : 'false'})}
+                      style={{
+                        marginRight: '10px',
+                        transform: 'scale(1.2)',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    Enable Logging
+                  </label>
+                </div>
+                
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Extra Parameters (JSON):
+                  </label>
+                  <textarea
+                    value={solverParams.extra_params}
+                    onChange={(e) => setSolverParams({...solverParams, extra_params: e.target.value})}
+                    style={{
+                      width: '95%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      minHeight: '80px',
+                      fontFamily: 'monospace',
+                      resize: 'vertical'
+                    }}
+                    placeholder='{"tolerance_lte_abs": 1e-8, "tolerance_lte_rel": 1e-6}'
+                  />
+                  <div style={{
+                    color: '#cccccc',
+                    fontSize: '12px',
+                    marginTop: '5px',
+                    fontStyle: 'italic'
+                  }}>
+                    Additional solver parameters as JSON dictionary (e.g., tolerances, custom settings)
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ 
+                textAlign: 'center',
+                marginTop: '30px' 
+              }}>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    marginRight: '15px'
+                  }}
+                  onClick={() => {
+                    // Reset to default values
+                    setSolverParams({
+                      dt: '0.01',
+                      dt_min: '1e-6',
+                      dt_max: '1.0',
+                      Solver: 'SSPRK22',
+                      tolerance_fpi: '1e-6',
+                      iterations_max: '100',
+                      log: 'true',
+                      simulation_duration: '50.0'
+                    });
+                  }}
+                >
+                  Reset to Defaults
+                </button>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#3498db',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                  onClick={() => setActiveTab('graph')}
+                >
+                  Back to Graph Editor
+                </button>
+              </div>
+            </div>
+            
+            <div style={{
+              marginTop: '30px',
+              padding: '20px',
+              backgroundColor: '#2c2c54',
+              borderRadius: '8px',
+              border: '1px solid #555'
+            }}>
+              <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Parameter Descriptions:</h3>
+              <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
+                <li><strong>dt:</strong> Base time step for simulation</li>
+                <li><strong>dt_min:</strong> Minimum allowed time step</li>
+                <li><strong>dt_max:</strong> Maximum allowed time step</li>
+                <li><strong>Solver:</strong> Numerical integration method</li>
+                <li><strong>tolerance_fpi:</strong> Tolerance for fixed point iterations</li>
+                <li><strong>iterations_max:</strong> Maximum number of iterations per time step</li>
+                <li><strong>simulation_duration:</strong> Total duration of the simulation (in time units)</li>
+                <li><strong>log:</strong> Enable/disable logging during simulation</li>
+                <li><strong>extra_params:</strong> Additional solver parameters as JSON dictionary (e.g., tolerance_lte_abs, tolerance_lte_rel for numerical solvers)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Variables Tab */}
+      {activeTab === 'globals' && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          paddingTop: '50px',
+          backgroundColor: '#1e1e2f',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            padding: '40px',
+            maxWidth: '800px',
+            margin: '0 auto',
+          }}>
+            <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
+              Global Variables
+            </h1>
+            <div style={{
+              backgroundColor: '#2c2c54',
+              padding: '30px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+            }}>
+              <p style={{ 
+                color: '#cccccc', 
+                marginBottom: '20px',
+                textAlign: 'center',
+                fontSize: '14px'
+              }}>
+                Define global variables that can be used in node definitions throughout your model.
+              </p>
+              
+              {globalVariables.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  color: '#888',
+                  padding: '40px 20px',
+                  fontStyle: 'italic'
+                }}>
+                  No global variables defined. Click "Add Variable" to create one.
+                </div>
+              ) : (
+                <div style={{ marginBottom: '20px' }}>
+                  {globalVariables.map((variable) => (
+                    <div key={variable.id} style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr auto',
+                      gap: '15px',
+                      alignItems: 'start',
+                      marginBottom: '15px',
+                      padding: '15px',
+                      backgroundColor: '#1e1e2f',
+                      borderRadius: '8px',
+                      border: '1px solid #555'
+                    }}>
+                      <div>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          Variable Name:
+                        </label>
+                        <input
+                          type="text"
+                          value={variable.name}
+                          onChange={(e) => updateGlobalVariable(variable.id, 'name', e.target.value)}
+                          placeholder="variable_name"
+                          style={{
+                            width: '95%',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: variable.nameError ? '2px solid #e74c3c' : '1px solid #666',
+                            backgroundColor: '#2c2c54',
+                            color: '#ffffff',
+                            fontSize: '14px'
+                          }}
+                        />
+                        {variable.nameError && (
+                          <div style={{
+                            color: '#e74c3c',
+                            fontSize: '11px',
+                            marginTop: '3px',
+                            fontStyle: 'italic'
+                          }}>
+                            Invalid Python variable name
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          Value:
+                        </label>
+                        <input
+                          type="text"
+                          value={variable.value}
+                          onChange={(e) => updateGlobalVariable(variable.id, 'value', e.target.value)}
+                          placeholder="0.5"
+                          style={{
+                            width: '95%',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #666',
+                            backgroundColor: '#2c2c54',
+                            color: '#ffffff',
+                            fontSize: '14px'
+                          }}
+                        />
+                        {/* Placeholder div to maintain alignment */}
+                        <div style={{
+                          height: variable.nameError ? '20px' : '0px',
+                          fontSize: '11px',
+                          marginTop: '3px'
+                        }}>
+                          {/* Empty space to match error message height */}
+                        </div>
+                      </div>
+                      <div style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: '100%',
+                        paddingTop: '10px' // Align with input field (label height + margin)
+                      }}>
+                        <button
+                          onClick={() => removeGlobalVariable(variable.id)}
+                          style={{
+                            padding: '8px 12px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            minWidth: '40px'
+                          }}
+                          title="Remove variable"
+                        >
+                          −
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '15px',
+                marginTop: '20px'
+              }}>
+                <button
+                  onClick={addGlobalVariable}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  + Add Variable
+                </button>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#3498db',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                  onClick={() => setActiveTab('graph')}
+                >
+                  Back to Graph Editor
+                </button>
+              </div>
+            </div>
+            
+            <div style={{
+              marginTop: '30px',
+              padding: '20px',
+              backgroundColor: '#2c2c54',
+              borderRadius: '8px',
+              border: '1px solid #555'
+            }}>
+              <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Usage Instructions:</h3>
+              <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
+                <li><strong>Variable names</strong> must be valid Python identifiers (start with letter/underscore, contain only letters/digits/underscores)</li>
+                <li><strong>Cannot use Python keywords</strong> like "if", "for", "class", "def", etc.</li>
+                <li>Use meaningful names (e.g., "flow_rate", "temperature", "my_constant")</li>
+                <li>Use numeric values, expressions, or references to other variables</li>
+                <li>Variables can be referenced in node parameters using their exact names</li>
+                <li>Variables are saved and loaded with your graph files</li>
+              </ul>
+            </div>
+          </div>
         </div>
       )}
 

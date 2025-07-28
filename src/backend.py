@@ -13,6 +13,7 @@ import io
 import base64
 
 from pathsim import Simulation, Connection
+import pathsim.solvers
 from pathsim.blocks import (
     Scope,
     Block,
@@ -31,6 +32,11 @@ from pathsim.blocks import (
 )
 from custom_pathsim_blocks import Process, Splitter
 
+NAME_TO_SOLVER = {
+    "SSPRK22": pathsim.solvers.SSPRK22,
+    "SSPRK33": pathsim.solvers.SSPRK33,
+    "RKF21": pathsim.solvers.RKF21,
+}
 
 # app = Flask(__name__)
 # CORS(app, supports_credentials=True)
@@ -109,6 +115,7 @@ def convert_to_python():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+# TODO refactor this function...
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
 def run_pathsim():
@@ -120,6 +127,76 @@ def run_pathsim():
 
     nodes = graph_data.get("nodes", [])
     edges = graph_data.get("edges", [])
+    solver_prms = graph_data.get("solverParams", {})
+    global_vars = graph_data.get("globalVariables", {})
+
+    # Validate and exec global variables so that they are usable later in this script.
+    for var in global_vars:
+        var_name = var.get("name", "").strip()
+        var_value = var.get("value", "")
+
+        # Validate variable name
+        if not var_name:
+            continue  # Skip empty names
+
+        if not var_name.isidentifier():
+            raise ValueError(
+                f"Invalid Python variable name: '{var_name}'. "
+                "Variable names must start with a letter or underscore, "
+                "and contain only letters, digits, and underscores."
+            )
+
+        # Check if it's a Python keyword
+        import keyword
+
+        if keyword.iskeyword(var_name):
+            raise ValueError(
+                f"'{var_name}' is a Python keyword and cannot be used as a variable name."
+            )
+
+        try:
+            exec(f"{var_name} = {var_value}", globals())
+        except Exception as e:
+            raise ValueError(f"Error setting global variable '{var_name}': {str(e)}")
+
+    # solver parameters
+    extra_params = solver_prms.pop("extra_params", "")
+    if extra_params == "":
+        extra_params = {}
+    else:
+        extra_params = eval(extra_params)
+    assert isinstance(extra_params, dict), "extra_params must be a dictionary"
+
+    for k, v in solver_prms.items():
+        if k not in ["Solver", "log"]:
+            try:
+                solver_prms[k] = eval(v)
+            except Exception as e:
+                return jsonify(
+                    {"error": f"Invalid value for {k}: {v}. Error: {str(e)}"}
+                ), 400
+        elif k == "log":
+            if v == "true":
+                solver_prms[k] = True
+            elif v == "false":
+                solver_prms[k] = False
+            else:
+                return jsonify(
+                    {"error": f"Invalid value for {k}: {v}. Must be 'true' or 'false'."}
+                ), 400
+        elif k == "Solver":
+            if v not in NAME_TO_SOLVER:
+                return jsonify(
+                    {
+                        "error": f"Invalid solver: {v}. Must be one of {list(NAME_TO_SOLVER.keys())}."
+                    }
+                ), 400
+            solver_prms[k] = NAME_TO_SOLVER[v]
+
+    # remove solver duration from solver parameters
+    duration = float(solver_prms.pop("simulation_duration"))
+
+    assert not isinstance(solver_prms["Solver"], str), solver_prms["Solver"]
 
     def find_node_by_id(node_id: str) -> dict:
         for node in nodes:
@@ -152,23 +229,23 @@ def run_pathsim():
     for node in nodes:
         # TODO this needs serious refactoring
         if node["type"] == "constant":
-            block = Constant(value=float(node["data"]["value"]))
+            block = Constant(value=eval(node["data"]["value"]))
         elif node["type"] == "stepsource":
             block = StepSource(
-                amplitude=float(node["data"]["amplitude"]),
-                tau=float(node["data"]["delay"]),
+                amplitude=eval(node["data"]["amplitude"]),
+                tau=eval(node["data"]["delay"]),
             )
         elif node["type"] == "pulsesource":
             block = PulseSource(
-                amplitude=float(node["data"]["amplitude"]),
-                T=float(node["data"]["T"]),
-                t_rise=float(node["data"]["t_rise"]),
-                t_fall=float(node["data"]["t_fall"]),
-                tau=float(node["data"]["tau"]),
-                duty=float(node["data"]["duty"]),
+                amplitude=eval(node["data"]["amplitude"]),
+                T=eval(node["data"]["T"]),
+                t_rise=eval(node["data"]["t_rise"]),
+                t_fall=eval(node["data"]["t_fall"]),
+                tau=eval(node["data"]["tau"]),
+                duty=eval(node["data"]["duty"]),
             )
         elif node["type"] in ["amplifier", "amplifier_reverse"]:
-            block = Amplifier(gain=float(node["data"]["gain"]))
+            block = Amplifier(gain=eval(node["data"]["gain"]))
         elif node["type"] == "scope":
             assert scope_default is None
             # Find all incoming edges to this node and sort by source id for consistent ordering
@@ -224,7 +301,7 @@ def run_pathsim():
             block = Multiplier()
         elif node["type"] == "integrator":
             block = Integrator(
-                initial_value=float(node["data"]["initial_value"])
+                initial_value=eval(node["data"]["initial_value"])
                 if node["data"].get("initial_value")
                 and node["data"]["initial_value"] != ""
                 else 0.0,
@@ -284,34 +361,32 @@ def run_pathsim():
 
             block = Function(func=func)
         elif node["type"] == "delay":
-            block = Delay(tau=float(node["data"]["tau"]))
+            block = Delay(tau=eval(node["data"]["tau"]))
         elif node["type"] == "rng":
-            block = RNG(sampling_rate=float(node["data"]["sampling_rate"]))
+            block = RNG(sampling_rate=eval(node["data"]["sampling_rate"]))
         elif node["type"] == "pid":
             block = PID(
-                Kp=float(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
-                Ki=float(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
-                Kd=float(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
-                f_max=float(node["data"]["f_max"])
-                if node["data"].get("f_max")
-                else 100,
+                Kp=eval(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
+                Ki=eval(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
+                Kd=eval(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
+                f_max=eval(node["data"]["f_max"]) if node["data"].get("f_max") else 100,
             )
         elif node["type"] in ["process", "process_horizontal"]:
             block = Process(
                 residence_time=(
-                    float(node["data"]["residence_time"])
+                    eval(node["data"]["residence_time"])
                     if node["data"].get("residence_time")
                     and node["data"]["residence_time"] != ""
                     else 0
                 ),
                 ic=(
-                    float(node["data"]["initial_value"])
+                    eval(node["data"]["initial_value"])
                     if node["data"].get("initial_value")
                     and node["data"]["initial_value"] != ""
                     else 0
                 ),
                 gen=(
-                    float(node["data"]["source_term"])
+                    eval(node["data"]["source_term"])
                     if node["data"].get("source_term")
                     and node["data"]["source_term"] != ""
                     else 0
@@ -388,10 +463,16 @@ def run_pathsim():
                 input_index += 1
 
     # Create the simulation
-    my_simulation = Simulation(blocks, connections_pathsim, log=False, events=events)
+    my_simulation = Simulation(
+        blocks,
+        connections_pathsim,
+        events=events,
+        **solver_prms,  # Unpack solver parameters
+        **extra_params,  # Unpack extra parameters
+    )
 
     # Run the simulation
-    my_simulation.run(50)
+    my_simulation.run(duration)
 
     # Generate the plot
     scopes = [block for block in blocks if isinstance(block, Scope)]
