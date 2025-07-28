@@ -28,6 +28,7 @@ from pathsim.blocks import (
     Delay,
     RNG,
     PID,
+    Schedule,
 )
 from custom_pathsim_blocks import Process, Splitter
 
@@ -209,8 +210,10 @@ def run_pathsim():
                 return block
         return None
 
-    # Create blocks
     blocks = []
+    events = []
+
+    # Create blocks
 
     # Add a Scope block if none exists
     # This ensures that there is always a scope to collect outputs
@@ -241,7 +244,7 @@ def run_pathsim():
                 tau=eval(node["data"]["tau"]),
                 duty=eval(node["data"]["duty"]),
             )
-        elif node["type"] == "amplifier":
+        elif node["type"] in ["amplifier", "amplifier_reverse"]:
             block = Amplifier(gain=eval(node["data"]["gain"]))
         elif node["type"] == "scope":
             assert scope_default is None
@@ -303,6 +306,18 @@ def run_pathsim():
                 and node["data"]["initial_value"] != ""
                 else 0.0,
             )
+            # add events to reset integrator if needed
+            if node["data"]["reset_times"] != "":
+
+                def reset_itg(_):
+                    block.reset()
+
+                reset_times = eval(node["data"]["reset_times"])
+                if isinstance(reset_times, (int, float)):
+                    # If it's a single number, convert it to a list
+                    reset_times = [reset_times]
+                for t in reset_times:
+                    events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
         elif node["type"] == "function":
             # Convert the expression string to a lambda function
             expression = node["data"].get("expression", "x")
@@ -356,7 +371,7 @@ def run_pathsim():
                 Kd=eval(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
                 f_max=eval(node["data"]["f_max"]) if node["data"].get("f_max") else 100,
             )
-        elif node["type"] == "process":
+        elif node["type"] in ["process", "process_horizontal"]:
             block = Process(
                 residence_time=(
                     eval(node["data"]["residence_time"])
@@ -451,6 +466,7 @@ def run_pathsim():
     my_simulation = Simulation(
         blocks,
         connections_pathsim,
+        events=events,
         **solver_prms,  # Unpack solver parameters
         **extra_params,  # Unpack extra parameters
     )

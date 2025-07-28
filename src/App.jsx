@@ -13,10 +13,10 @@ import './App.css';
 
 
 // Importing node components
-import ProcessNode from './ProcessNode';
+import {ProcessNode, ProcessNodeHorizontal} from './ProcessNode';
 import DelayNode from './DelayNode';
 import SourceNode from './ConstantNode';
-import AmplifierNode from './AmplifierNode';
+import {AmplifierNode, AmplifierNodeReverse} from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
@@ -30,11 +30,13 @@ import { Splitter2Node, Splitter3Node } from './Splitters';
 // Add nodes as a node type for this script
 const nodeTypes = {
   process: ProcessNode,
+  process_horizontal: ProcessNodeHorizontal,
   delay: DelayNode,
   constant: SourceNode,
   stepsource: StepSourceNode,
   pulsesource: SourceNode,
   amplifier: AmplifierNode,
+  amplifier_reverse: AmplifierNodeReverse,
   integrator: IntegratorNode,
   adder: AdderNode,
   multiplier: MultiplierNode,
@@ -418,6 +420,9 @@ export default function App() {
       case 'process':
         nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
         break;
+      case 'process_horizontal':
+        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
+        break;
       case 'constant':
         nodeData = { ...nodeData, value: '' };
         break;
@@ -430,10 +435,13 @@ export default function App() {
       case 'amplifier':
         nodeData = { ...nodeData, gain: ''};
         break;
+      case 'amplifier_reverse':
+        nodeData = { ...nodeData, gain: ''};
+        break;
       case 'multiplier':
         break;
       case 'integrator':
-        nodeData = { ...nodeData, initial_value: '' };
+        nodeData = { ...nodeData, initial_value: '', reset_times: '' };
         break;
       case 'adder':
         break;
