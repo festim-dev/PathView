@@ -1,4 +1,6 @@
 from pathsim.blocks import Block, ODE
+import pathsim.blocks
+from pathsim import Subsystem, Interface, Connection
 import numpy as np
 
 
@@ -35,3 +37,76 @@ class Splitter(Block):
         u = self.inputs[0]
         # mult by fractions and update outputs
         self.outputs.update_from_array(self.fractions * u)
+
+
+# BUBBLER SYSTEM
+
+
+class Bubbler(Subsystem):
+    vial_efficiency: float
+    conversion_efficiency: float
+    n_soluble_vials: float
+    n_insoluble_vials: float
+
+    def __init__(
+        self,
+        conversion_efficiency=0.9,
+        vial_efficiency=0.9,
+    ):
+        self.n_soluble_vials = 2
+        self.n_insoluble_vials = 2
+        self.vial_efficiency = vial_efficiency
+        col_eff1 = Splitter(n=2, fractions=[vial_efficiency, 1 - vial_efficiency])
+        vial_1 = pathsim.blocks.Integrator()
+        col_eff2 = Splitter(n=2, fractions=[vial_efficiency, 1 - vial_efficiency])
+        vial_2 = pathsim.blocks.Integrator()
+
+        conversion_eff = Splitter(
+            n=2, fractions=[conversion_efficiency, 1 - conversion_efficiency]
+        )
+
+        col_eff3 = Splitter(n=2, fractions=[vial_efficiency, 1 - vial_efficiency])
+        vial_3 = pathsim.blocks.Integrator()
+        col_eff4 = Splitter(n=2, fractions=[vial_efficiency, 1 - vial_efficiency])
+        vial_4 = pathsim.blocks.Integrator()
+
+        add1 = pathsim.blocks.Adder()
+        add2 = pathsim.blocks.Adder()
+
+        interface = Interface()
+
+        blocks = [
+            vial_1,
+            col_eff1,
+            vial_2,
+            col_eff2,
+            conversion_eff,
+            vial_3,
+            col_eff3,
+            vial_4,
+            col_eff4,
+            add1,
+            add2,
+            interface,
+        ]
+        connections = [
+            Connection(interface[0], col_eff1),
+            Connection(col_eff1[0], vial_1),
+            Connection(col_eff1[1], col_eff2),
+            Connection(col_eff2[0], vial_2),
+            Connection(col_eff2[1], conversion_eff),
+            Connection(conversion_eff[0], add1[0]),
+            Connection(conversion_eff[1], add2[0]),
+            Connection(interface[1], add1[1]),
+            Connection(add1, col_eff3),
+            Connection(col_eff3[0], vial_3),
+            Connection(col_eff3[1], col_eff4),
+            Connection(col_eff4[0], vial_4),
+            Connection(col_eff4[1], add2[1]),
+            Connection(vial_1, interface[0]),
+            Connection(vial_2, interface[1]),
+            Connection(vial_3, interface[2]),
+            Connection(vial_4, interface[3]),
+            Connection(add2, interface[4]),
+        ]
+        super().__init__(blocks, connections)
