@@ -52,7 +52,9 @@ class Bubbler(Subsystem):
         self,
         conversion_efficiency=0.9,
         vial_efficiency=0.9,
+        replacement_times=None,
     ):
+        self.reset_times = replacement_times or []
         self.n_soluble_vials = 2
         self.n_insoluble_vials = 2
         self.vial_efficiency = vial_efficiency
@@ -74,6 +76,8 @@ class Bubbler(Subsystem):
         add2 = pathsim.blocks.Adder()
 
         interface = Interface()
+
+        self.vials = [vial_1, vial_2, vial_3, vial_4]
 
         blocks = [
             vial_1,
@@ -110,3 +114,36 @@ class Bubbler(Subsystem):
             Connection(add2, interface[4]),
         ]
         super().__init__(blocks, connections)
+
+    def create_reset_events_one_vial(
+        self, block, reset_times
+    ) -> list[pathsim.blocks.Schedule]:
+        events = []
+
+        def reset_itg(_):
+            block.reset()
+
+        for t in reset_times:
+            events.append(
+                pathsim.blocks.Schedule(t_start=t, t_end=t, func_act=reset_itg)
+            )
+        return events
+
+    def create_reset_events(self) -> list[pathsim.blocks.Schedule]:
+        reset_times = self.reset_times
+        events = []
+        # if reset_times is a single list use it for all vials
+        if isinstance(reset_times, (int, float)):
+            reset_times = [reset_times]
+        # if it's a flat list use it for all vials
+        elif isinstance(reset_times, list) and all(
+            isinstance(t, (int, float)) for t in reset_times
+        ):
+            reset_times = [reset_times] * len(self.vials)
+        elif isinstance(reset_times, list) and len(reset_times) != len(self.vials):
+            raise ValueError(
+                "reset_times must be a single value or a list with the same length as the number of vials"
+            )
+        for i, vial in enumerate(self.vials):
+            events.extend(self.create_reset_events_one_vial(vial, reset_times[i]))
+        return events
