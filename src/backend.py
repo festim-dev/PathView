@@ -161,7 +161,7 @@ def run_pathsim():
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
             solver_prms[k] = eval(v)
-        if k == "log":
+        elif k == "log":
             if v == "true":
                 solver_prms[k] = True
             elif v == "false":
@@ -170,7 +170,7 @@ def run_pathsim():
                 return jsonify(
                     {"error": f"Invalid value for {k}: {v}. Must be 'true' or 'false'."}
                 ), 400
-        if k == "Solver":
+        elif k == "Solver":
             if v not in NAME_TO_SOLVER:
                 return jsonify(
                     {

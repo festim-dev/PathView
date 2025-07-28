@@ -70,7 +70,8 @@ export default function App() {
     tolerance_fpi: '1e-6',
     iterations_max: '100',
     log: 'true',
-    simulation_duration: '50.0'
+    simulation_duration: '50.0',
+    extra_params: '{}'
   });
 
   // Global variables state
@@ -138,7 +139,8 @@ export default function App() {
         tolerance_fpi: '1e-6',
         iterations_max: '100',
         log: 'true',
-        simulation_duration: '50.0'
+        simulation_duration: '50.0',
+        extra_params: '{}'
       });
       setGlobalVariables(loadedGlobalVariables ?? []);
     } catch (error) {
@@ -159,7 +161,8 @@ export default function App() {
       tolerance_fpi: '1e-6',
       iterations_max: '100',
       log: 'true',
-      simulation_duration: '50.0'
+      simulation_duration: '50.0',
+      extra_params: '{}'
     });
     setGlobalVariables([]);
   };
@@ -1112,6 +1115,42 @@ export default function App() {
                     <option value="false">False</option>
                   </select>
                 </div>
+                
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontWeight: 'bold'
+                  }}>
+                    Extra Parameters (JSON):
+                  </label>
+                  <textarea
+                    value={solverParams.extra_params}
+                    onChange={(e) => setSolverParams({...solverParams, extra_params: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      border: '1px solid #555',
+                      backgroundColor: '#1e1e2f',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      minHeight: '80px',
+                      fontFamily: 'monospace',
+                      resize: 'vertical'
+                    }}
+                    placeholder='{"tolerance_lte_abs": 1e-8, "tolerance_lte_rel": 1e-6}'
+                  />
+                  <div style={{
+                    color: '#cccccc',
+                    fontSize: '12px',
+                    marginTop: '5px',
+                    fontStyle: 'italic'
+                  }}>
+                    Additional solver parameters as JSON dictionary (e.g., tolerances, custom settings)
+                  </div>
+                </div>
               </div>
               
               <div style={{ 
@@ -1181,6 +1220,7 @@ export default function App() {
                 <li><strong>iterations_max:</strong> Maximum number of iterations per time step</li>
                 <li><strong>simulation_duration:</strong> Total duration of the simulation (in time units)</li>
                 <li><strong>log:</strong> Enable/disable logging during simulation</li>
+                <li><strong>extra_params:</strong> Additional solver parameters as JSON dictionary (e.g., tolerance_lte_abs, tolerance_lte_rel for numerical solvers)</li>
               </ul>
             </div>
           </div>
