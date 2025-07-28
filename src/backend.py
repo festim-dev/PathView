@@ -158,9 +158,22 @@ def run_pathsim():
         except Exception as e:
             raise ValueError(f"Error setting global variable '{var_name}': {str(e)}")
 
+    # solver parameters
+    extra_params = solver_prms.pop("extra_params", "")
+    if extra_params == "":
+        extra_params = {}
+    else:
+        extra_params = eval(extra_params)
+    assert isinstance(extra_params, dict), "extra_params must be a dictionary"
+
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
-            solver_prms[k] = eval(v)
+            try:
+                solver_prms[k] = eval(v)
+            except Exception as e:
+                return jsonify(
+                    {"error": f"Invalid value for {k}: {v}. Error: {str(e)}"}
+                ), 400
         elif k == "log":
             if v == "true":
                 solver_prms[k] = True
@@ -178,6 +191,7 @@ def run_pathsim():
                     }
                 ), 400
             solver_prms[k] = NAME_TO_SOLVER[v]
+
     # remove solver duration from solver parameters
     duration = float(solver_prms.pop("simulation_duration"))
 
@@ -438,6 +452,7 @@ def run_pathsim():
         blocks,
         connections_pathsim,
         **solver_prms,  # Unpack solver parameters
+        **extra_params,  # Unpack extra parameters
     )
 
     # Run the simulation
