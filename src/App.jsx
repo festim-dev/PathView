@@ -332,7 +332,7 @@ export default function App() {
       case 'multiplier':
         break;
       case 'integrator':
-        nodeData = { ...nodeData, initial_value: '' };
+        nodeData = { ...nodeData, initial_value: '', reset_times: '' };
         break;
       case 'adder':
         break;
