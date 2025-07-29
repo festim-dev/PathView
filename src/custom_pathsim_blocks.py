@@ -43,6 +43,8 @@ class Splitter(Block):
 
 
 class Bubbler(Subsystem):
+    """Subsystem representing a tritium bubbling system with 4 vials."""
+
     vial_efficiency: float
     conversion_efficiency: float
     n_soluble_vials: float
@@ -54,7 +56,16 @@ class Bubbler(Subsystem):
         vial_efficiency=0.9,
         replacement_times=None,
     ):
-        self.reset_times = replacement_times or []
+        """
+        Args:
+            conversion_efficiency: Conversion efficiency from insoluble to soluble (between 0 and 1).
+            vial_efficiency: collection efficiency of each vial (between 0 and 1).
+            replacement_times: List of times at which each vial is replaced. If None, no replacement
+                events are created. If a single value is provided, it is used for all vials.
+                If a single list of floats is provided, it will be used for all vials.
+                If a list of lists is provided, each sublist corresponds to the replacement times for each vial.
+        """
+        self.reset_times = replacement_times
         self.n_soluble_vials = 2
         self.n_insoluble_vials = 2
         self.vial_efficiency = vial_efficiency
@@ -115,7 +126,7 @@ class Bubbler(Subsystem):
         ]
         super().__init__(blocks, connections)
 
-    def create_reset_events_one_vial(
+    def _create_reset_events_one_vial(
         self, block, reset_times
     ) -> list[pathsim.blocks.Schedule]:
         events = []
@@ -130,9 +141,19 @@ class Bubbler(Subsystem):
         return events
 
     def create_reset_events(self) -> list[pathsim.blocks.Schedule]:
+        """Create reset events for all vials based on the replacement times.
+
+        Raises:
+            ValueError: If reset_times is not valid.
+
+        Returns:
+            list of reset events.
+        """
         reset_times = self.reset_times
         events = []
         # if reset_times is a single list use it for all vials
+        if reset_times is None:
+            return events
         if isinstance(reset_times, (int, float)):
             reset_times = [reset_times]
         # if it's a flat list use it for all vials
@@ -140,10 +161,12 @@ class Bubbler(Subsystem):
             isinstance(t, (int, float)) for t in reset_times
         ):
             reset_times = [reset_times] * len(self.vials)
+        elif isinstance(reset_times, np.ndarray) and reset_times.ndim == 1:
+            reset_times = [reset_times.tolist()] * len(self.vials)
         elif isinstance(reset_times, list) and len(reset_times) != len(self.vials):
             raise ValueError(
                 "reset_times must be a single value or a list with the same length as the number of vials"
             )
         for i, vial in enumerate(self.vials):
-            events.extend(self.create_reset_events_one_vial(vial, reset_times[i]))
+            events.extend(self._create_reset_events_one_vial(vial, reset_times[i]))
         return events
