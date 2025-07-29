@@ -147,6 +147,45 @@ def run_pathsim():
     if not graph_data:
         return jsonify({"error": "No graph data provided"}), 400
 
+    my_simulation, duration = make_pathsim_model(graph_data)
+
+    # Run the simulation
+    my_simulation.run(duration)
+
+    # Generate the plot
+    scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
+    fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
+    for i, scope in enumerate(scopes):
+        plt.sca(axs[i] if len(scopes) > 1 else axs)
+        # scope.plot()
+        time, data = scope.read()
+        # plot the recorded data
+        for p, d in enumerate(data):
+            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+            plt.plot(time, d, label=lb)
+        plt.legend()
+        plt.title(scope.label)
+
+    # Convert plot to base64 string
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
+    buffer.seek(0)
+    plot_data = base64.b64encode(buffer.getvalue()).decode()
+    plt.close(fig)
+
+    return jsonify(
+        {
+            "success": True,
+            "plot": plot_data,
+            "message": "Pathsim simulation completed successfully",
+        }
+    )
+
+    # except Exception as e:
+    #     return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+
+
+def make_pathsim_model(graph_data):
     nodes = graph_data.get("nodes", [])
     edges = graph_data.get("edges", [])
     solver_prms = graph_data.get("solverParams", {})
@@ -469,48 +508,14 @@ def run_pathsim():
                 input_index += 1
 
     # Create the simulation
-    my_simulation = Simulation(
+    simulation = Simulation(
         blocks,
         connections_pathsim,
         events=events,
         **solver_prms,  # Unpack solver parameters
         **extra_params,  # Unpack extra parameters
     )
-
-    # Run the simulation
-    my_simulation.run(duration)
-
-    # Generate the plot
-    scopes = [block for block in blocks if isinstance(block, Scope)]
-    fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
-    for i, scope in enumerate(scopes):
-        plt.sca(axs[i] if len(scopes) > 1 else axs)
-        # scope.plot()
-        time, data = scope.read()
-        # plot the recorded data
-        for p, d in enumerate(data):
-            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-            plt.plot(time, d, label=lb)
-        plt.legend()
-        plt.title(scope.label)
-
-    # Convert plot to base64 string
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
-    buffer.seek(0)
-    plot_data = base64.b64encode(buffer.getvalue()).decode()
-    plt.close(fig)
-
-    return jsonify(
-        {
-            "success": True,
-            "plot": plot_data,
-            "message": "Pathsim simulation completed successfully",
-        }
-    )
-
-    # except Exception as e:
-    #     return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+    return simulation, duration
 
 
 if __name__ == "__main__":
