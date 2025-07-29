@@ -365,7 +365,87 @@ def make_solver_params(solver_prms, eval_namespace=None):
     return solver_prms, extra_params, duration
 
 
+map_str_to_object = {
+    "constant": Constant,
+    "stepsource": StepSource,
+    "pulsesource": PulseSource,
+    "amplifier": Amplifier,
+    "amplifier_reverse": Amplifier,
+    "scope": Scope,
+    "splitter2": Splitter,
+    "splitter3": Splitter,
+    "adder": Adder,
+    "adder_reverse": Adder,
+    "multiplier": Multiplier,
+    "process": Process,
+    "process_horizontal": Process,
+    "rng": RNG,
+    "pid": PID,
+    "integrator": Integrator,
+    "function": Function,
+    "delay": Delay,
+}
+
+
 def make_blocks(nodes, edges, eval_namespace=None):
+    blocks, events = [], []
+
+    for node in nodes:
+        block_type = node["type"]
+
+        # Manual construction for some block types
+        if block_type == "integrator":
+            block, event_int = create_integrator(node, eval_namespace)
+            events.extend(event_int)
+        elif block_type == "function":
+            block = create_function(node, eval_namespace)
+        elif block_type == "scope":
+            block = create_scope(node, edges, nodes)
+        elif block_type == "stepsource":
+            block = StepSource(
+                amplitude=eval(node["data"]["amplitude"], eval_namespace),
+                tau=eval(node["data"]["delay"], eval_namespace),
+            )
+        elif block_type == "delay":
+            block = Delay(tau=eval(node["data"]["delay"], eval_namespace))
+        elif block_type == "splitter2":
+            block = Splitter(
+                n=2,
+                fractions=[
+                    eval(node["data"]["f1"], eval_namespace),
+                    eval(node["data"]["f2"], eval_namespace),
+                ],
+            )
+        elif block_type == "splitter3":
+            block = Splitter(
+                n=3,
+                fractions=[
+                    eval(node["data"]["f1"], eval_namespace),
+                    eval(node["data"]["f2"], eval_namespace),
+                    eval(node["data"]["f3"], eval_namespace),
+                ],
+            )
+        else:  # try automated construction
+            block_class = map_str_to_object[block_type]
+
+            # skip 'self'
+            parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
+
+            parameters = {
+                k: eval(v, eval_namespace)
+                for k, v in node["data"].items()
+                if k in parameters_for_class
+            }
+            block = block_class(**parameters)
+
+        block.id = node["id"]
+        block.label = node["data"]["label"]
+        blocks.append(block)
+
+    return blocks, events
+
+
+def make_blocks_old(nodes, edges, eval_namespace=None):
     blocks, events = [], []
     for node in nodes:
         # TODO this needs serious refactoring
@@ -467,7 +547,7 @@ def make_blocks(nodes, edges, eval_namespace=None):
     return blocks, events
 
 
-def make_connections(nodes, edges, blocks):
+def make_connections(nodes, edges, blocks) -> list[Connection]:
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
 
@@ -522,7 +602,7 @@ def make_connections(nodes, edges, blocks):
     return connections_pathsim
 
 
-def make_default_scope(nodes, blocks):
+def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
     scope_default = Scope(
         labels=[node["data"]["label"] for node in nodes],
     )
@@ -533,7 +613,7 @@ def make_default_scope(nodes, blocks):
     connections_pathsim = []
     input_index = 0
     for block in blocks:
-        if block.id != "scope_default":
+        if block != scope_default:
             connection = Connection(
                 block[0],
                 scope_default[input_index],
