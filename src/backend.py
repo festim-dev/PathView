@@ -277,12 +277,12 @@ def run_pathsim():
             # create labels for the scope based on incoming edges
             labels = []
             duplicate_labels = []
-            source_nodes_order = []  # will be used later to make connections
+            connections_order = []  # will be used later to make connections
             for edge in incoming_edges:
                 source_node = find_node_by_id(edge["source"])
                 label = source_node["data"]["label"]
 
-                source_nodes_order.append(source_node)
+                connections_order.append(edge["id"])
 
                 # If the label already exists, try to append the source handle to it (if it exists)
                 if label in labels or label in duplicate_labels:
@@ -298,7 +298,7 @@ def run_pathsim():
                         labels[i] += f" ({edge['sourceHandle']})"
             # assert len(labels) == 1, labels
             block = Scope(labels=labels)
-            block._source_nodes_order = source_nodes_order
+            block._connections_order = connections_order
         elif node["type"] == "splitter2":
             block = Splitter(
                 n=2,
@@ -445,7 +445,7 @@ def run_pathsim():
 
             if isinstance(target_block, Scope):
                 source_node = find_node_by_id(edge["source"])
-                input_index = target_block._source_nodes_order.index(source_node)
+                input_index = target_block._connections_order.index(edge["id"])
             else:
                 input_index = block_to_input_index[target_block]
 
