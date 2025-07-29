@@ -115,6 +115,28 @@ def convert_to_python():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
+    block = Integrator(
+        initial_value=eval(node["data"]["initial_value"])
+        if node["data"].get("initial_value") and node["data"]["initial_value"] != ""
+        else 0.0,
+    )
+    # add events to reset integrator if needed
+    events = []
+    if node["data"]["reset_times"] != "":
+
+        def reset_itg(_):
+            block.reset()
+
+        reset_times = eval(node["data"]["reset_times"])
+        if isinstance(reset_times, (int, float)):
+            # If it's a single number, convert it to a list
+            reset_times = [reset_times]
+        for t in reset_times:
+            events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+    return block, events
+
+
 # TODO refactor this function...
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
@@ -255,12 +277,12 @@ def run_pathsim():
             # create labels for the scope based on incoming edges
             labels = []
             duplicate_labels = []
-            source_nodes_order = []  # will be used later to make connections
+            connections_order = []  # will be used later to make connections
             for edge in incoming_edges:
                 source_node = find_node_by_id(edge["source"])
                 label = source_node["data"]["label"]
 
-                source_nodes_order.append(source_node)
+                connections_order.append(edge["id"])
 
                 # If the label already exists, try to append the source handle to it (if it exists)
                 if label in labels or label in duplicate_labels:
@@ -276,7 +298,7 @@ def run_pathsim():
                         labels[i] += f" ({edge['sourceHandle']})"
             # assert len(labels) == 1, labels
             block = Scope(labels=labels)
-            block._source_nodes_order = source_nodes_order
+            block._connections_order = connections_order
         elif node["type"] == "splitter2":
             block = Splitter(
                 n=2,
@@ -300,24 +322,8 @@ def run_pathsim():
         elif node["type"] == "multiplier":
             block = Multiplier()
         elif node["type"] == "integrator":
-            block = Integrator(
-                initial_value=eval(node["data"]["initial_value"])
-                if node["data"].get("initial_value")
-                and node["data"]["initial_value"] != ""
-                else 0.0,
-            )
-            # add events to reset integrator if needed
-            if node["data"]["reset_times"] != "":
-
-                def reset_itg(_):
-                    block.reset()
-
-                reset_times = eval(node["data"]["reset_times"])
-                if isinstance(reset_times, (int, float)):
-                    # If it's a single number, convert it to a list
-                    reset_times = [reset_times]
-                for t in reset_times:
-                    events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+            block, events_int = create_integrator(node)
+            events.extend(events_int)
         elif node["type"] == "function":
             # Convert the expression string to a lambda function
             expression = node["data"].get("expression", "x")
@@ -439,7 +445,7 @@ def run_pathsim():
 
             if isinstance(target_block, Scope):
                 source_node = find_node_by_id(edge["source"])
-                input_index = target_block._source_nodes_order.index(source_node)
+                input_index = target_block._connections_order.index(edge["id"])
             else:
                 input_index = block_to_input_index[target_block]
 
