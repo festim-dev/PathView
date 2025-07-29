@@ -365,39 +365,8 @@ def make_solver_params(solver_prms, eval_namespace=None):
     return solver_prms, extra_params, duration
 
 
-# TODO refactor this function...
-def make_pathsim_model(graph_data):
-    nodes = graph_data.get("nodes", [])
-    edges = graph_data.get("edges", [])
-    solver_prms = graph_data.get("solverParams", {})
-    global_vars = graph_data.get("globalVariables", {})
-
-    # Get the global variables namespace to use in eval calls
-    global_namespace = make_global_variables(global_vars)
-
-    # Create a combined namespace that includes built-in functions and global variables
-    eval_namespace = {**globals(), **global_namespace}
-
-    solver_prms, extra_params, duration = make_solver_params(
-        solver_prms, eval_namespace
-    )
-
-    blocks = []
-    events = []
-
-    # Create blocks
-
-    # Add a Scope block if none exists
-    # This ensures that there is always a scope to collect outputs
-    scope_default = None
-    if not any(node["type"] == "scope" for node in nodes):
-        scope_default = Scope(
-            labels=[node["data"]["label"] for node in nodes],
-        )
-        scope_default.id = "scope_default"
-        scope_default.label = "Default Scope"
-        blocks.append(scope_default)
-
+def make_blocks(nodes, edges, eval_namespace=None):
+    blocks, events = [], []
     for node in nodes:
         # TODO this needs serious refactoring
         if node["type"] == "constant":
@@ -419,7 +388,6 @@ def make_pathsim_model(graph_data):
         elif node["type"] in ["amplifier", "amplifier_reverse"]:
             block = Amplifier(gain=eval(node["data"]["gain"], eval_namespace))
         elif node["type"] == "scope":
-            assert scope_default is None
             block = create_scope(node, edges, nodes)
         elif node["type"] == "splitter2":
             block = Splitter(
@@ -495,6 +463,40 @@ def make_pathsim_model(graph_data):
         block.id = node["id"]
         block.label = node["data"]["label"]
         blocks.append(block)
+
+    return blocks, events
+
+
+# TODO refactor this function...
+def make_pathsim_model(graph_data):
+    nodes = graph_data.get("nodes", [])
+    edges = graph_data.get("edges", [])
+    solver_prms = graph_data.get("solverParams", {})
+    global_vars = graph_data.get("globalVariables", {})
+
+    # Get the global variables namespace to use in eval calls
+    global_namespace = make_global_variables(global_vars)
+
+    # Create a combined namespace that includes built-in functions and global variables
+    eval_namespace = {**globals(), **global_namespace}
+
+    solver_prms, extra_params, duration = make_solver_params(
+        solver_prms, eval_namespace
+    )
+
+    # Create blocks
+    blocks, events = make_blocks(nodes, edges, eval_namespace)
+
+    # Add a Scope block if none exists
+    # This ensures that there is always a scope to collect outputs
+    scope_default = None
+    if not any(isinstance(block, Scope) for block in blocks):
+        scope_default = Scope(
+            labels=[node["data"]["label"] for node in nodes],
+        )
+        scope_default.id = "scope_default"
+        scope_default.label = "Default Scope"
+        blocks.append(scope_default)
 
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
