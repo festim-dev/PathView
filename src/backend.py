@@ -467,37 +467,7 @@ def make_blocks(nodes, edges, eval_namespace=None):
     return blocks, events
 
 
-# TODO refactor this function...
-def make_pathsim_model(graph_data):
-    nodes = graph_data.get("nodes", [])
-    edges = graph_data.get("edges", [])
-    solver_prms = graph_data.get("solverParams", {})
-    global_vars = graph_data.get("globalVariables", {})
-
-    # Get the global variables namespace to use in eval calls
-    global_namespace = make_global_variables(global_vars)
-
-    # Create a combined namespace that includes built-in functions and global variables
-    eval_namespace = {**globals(), **global_namespace}
-
-    solver_prms, extra_params, duration = make_solver_params(
-        solver_prms, eval_namespace
-    )
-
-    # Create blocks
-    blocks, events = make_blocks(nodes, edges, eval_namespace)
-
-    # Add a Scope block if none exists
-    # This ensures that there is always a scope to collect outputs
-    scope_default = None
-    if not any(isinstance(block, Scope) for block in blocks):
-        scope_default = Scope(
-            labels=[node["data"]["label"] for node in nodes],
-        )
-        scope_default.id = "scope_default"
-        scope_default.label = "Default Scope"
-        blocks.append(scope_default)
-
+def make_connections(nodes, edges, blocks):
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
 
@@ -549,17 +519,58 @@ def make_pathsim_model(graph_data):
             connections_pathsim.append(connection)
             block_to_input_index[target_block] += 1
 
+    return connections_pathsim
+
+
+def make_default_scope(nodes, blocks):
+    scope_default = Scope(
+        labels=[node["data"]["label"] for node in nodes],
+    )
+    scope_default.id = "scope_default"
+    scope_default.label = "Default Scope"
+
     # Add connections to scope
-    if scope_default:
-        input_index = 0
-        for block in blocks:
-            if block.id != "scope_default":
-                connection = Connection(
-                    block[0],
-                    scope_default[input_index],
-                )
-                connections_pathsim.append(connection)
-                input_index += 1
+    connections_pathsim = []
+    input_index = 0
+    for block in blocks:
+        if block.id != "scope_default":
+            connection = Connection(
+                block[0],
+                scope_default[input_index],
+            )
+            connections_pathsim.append(connection)
+            input_index += 1
+
+    return scope_default, connections_pathsim
+
+
+def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
+    nodes = graph_data.get("nodes", [])
+    edges = graph_data.get("edges", [])
+    solver_prms = graph_data.get("solverParams", {})
+    global_vars = graph_data.get("globalVariables", {})
+
+    # Get the global variables namespace to use in eval calls
+    global_namespace = make_global_variables(global_vars)
+
+    # Create a combined namespace that includes built-in functions and global variables
+    eval_namespace = {**globals(), **global_namespace}
+
+    solver_prms, extra_params, duration = make_solver_params(
+        solver_prms, eval_namespace
+    )
+
+    # Create blocks
+    blocks, events = make_blocks(nodes, edges, eval_namespace)
+
+    connections_pathsim = make_connections(nodes, edges, blocks)
+
+    # Add a Scope block if none exists
+    # This ensures that there is always a scope to collect outputs
+    if not any(isinstance(block, Scope) for block in blocks):
+        scope_default, connections_scope_def = make_default_scope(nodes, blocks)
+        blocks.append(scope_default)
+        connections_pathsim.extend(connections_scope_def)
 
     # Create the simulation
     simulation = Simulation(
