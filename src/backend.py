@@ -115,6 +115,20 @@ def convert_to_python():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+def find_node_by_id(node_id: str, nodes: list) -> dict:
+    for node in nodes:
+        if node["id"] == node_id:
+            return node
+    return None
+
+
+def find_block_by_id(block_id: str, blocks) -> Block:
+    for block in blocks:
+        if hasattr(block, "id") and block.id == block_id:
+            return block
+    return None
+
+
 def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
     block = Integrator(
         initial_value=eval(node["data"]["initial_value"])
@@ -135,6 +149,83 @@ def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
         for t in reset_times:
             events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
     return block, events
+
+
+def create_function(node: dict) -> Block:
+    # Convert the expression string to a lambda function
+    expression = node["data"].get("expression", "x")
+
+    # Create a safe lambda function from the expression
+    # The expression should use 'x' as the variable
+    try:
+        # Create a lambda function from the expression string
+        # We'll allow common mathematical operations and numpy functions
+
+        # Safe namespace for eval
+        safe_namespace = {
+            "x": 0,  # placeholder
+            "np": np,
+            "math": math,
+            "sin": np.sin,
+            "cos": np.cos,
+            "tan": np.tan,
+            "exp": np.exp,
+            "log": np.log,
+            "sqrt": np.sqrt,
+            "abs": abs,
+            "pow": pow,
+            "pi": np.pi,
+            "e": np.e,
+        }
+
+        # Test the expression first to ensure it's valid
+        eval(expression.replace("x", "1"), safe_namespace)
+
+        # Create the actual function
+        def func(x):
+            return eval(expression, {**safe_namespace, "x": x})
+
+    except Exception as e:
+        print(f"Error parsing expression '{expression}': {e}")
+
+        raise ValueError(f"Invalid function expression: {expression}. Error: {str(e)}")
+
+    block = Function(func=func)
+    return block
+
+
+def create_scope(node: dict, edges, nodes) -> Scope:
+    # Find all incoming edges to this node and sort by source id for consistent ordering
+    incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+    incoming_edges.sort(key=lambda x: x["source"])
+
+    # create labels for the scope based on incoming edges
+    labels = []
+    duplicate_labels = []
+    connections_order = []  # will be used later to make connections
+    for edge in incoming_edges:
+        source_node = find_node_by_id(edge["source"], nodes=nodes)
+        label = source_node["data"]["label"]
+
+        connections_order.append(edge["id"])
+
+        # If the label already exists, try to append the source handle to it (if it exists)
+        if label in labels or label in duplicate_labels:
+            duplicate_labels.append(label)
+            if edge["sourceHandle"]:
+                new_label = label + f" ({edge['sourceHandle']})"
+                label = new_label
+        labels.append(label)
+
+    for i, (edge, label) in enumerate(zip(incoming_edges, labels)):
+        if label in duplicate_labels:
+            if edge["sourceHandle"]:
+                labels[i] += f" ({edge['sourceHandle']})"
+    # assert len(labels) == 1, labels
+    block = Scope(labels=labels)
+    block._connections_order = connections_order
+
+    return block
 
 
 # Function to convert graph to pathsim and run simulation
@@ -259,18 +350,6 @@ def make_pathsim_model(graph_data):
 
     assert not isinstance(solver_prms["Solver"], str), solver_prms["Solver"]
 
-    def find_node_by_id(node_id: str) -> dict:
-        for node in nodes:
-            if node["id"] == node_id:
-                return node
-        return None
-
-    def find_block_by_id(block_id: str) -> Block:
-        for block in blocks:
-            if hasattr(block, "id") and block.id == block_id:
-                return block
-        return None
-
     blocks = []
     events = []
 
@@ -309,35 +388,7 @@ def make_pathsim_model(graph_data):
             block = Amplifier(gain=eval(node["data"]["gain"]))
         elif node["type"] == "scope":
             assert scope_default is None
-            # Find all incoming edges to this node and sort by source id for consistent ordering
-            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
-            incoming_edges.sort(key=lambda x: x["source"])
-
-            # create labels for the scope based on incoming edges
-            labels = []
-            duplicate_labels = []
-            connections_order = []  # will be used later to make connections
-            for edge in incoming_edges:
-                source_node = find_node_by_id(edge["source"])
-                label = source_node["data"]["label"]
-
-                connections_order.append(edge["id"])
-
-                # If the label already exists, try to append the source handle to it (if it exists)
-                if label in labels or label in duplicate_labels:
-                    duplicate_labels.append(label)
-                    if edge["sourceHandle"]:
-                        new_label = label + f" ({edge['sourceHandle']})"
-                        label = new_label
-                labels.append(label)
-
-            for i, (edge, label) in enumerate(zip(incoming_edges, labels)):
-                if label in duplicate_labels:
-                    if edge["sourceHandle"]:
-                        labels[i] += f" ({edge['sourceHandle']})"
-            # assert len(labels) == 1, labels
-            block = Scope(labels=labels)
-            block._connections_order = connections_order
+            block = create_scope(node, edges, nodes)
         elif node["type"] == "splitter2":
             block = Splitter(
                 n=2,
@@ -364,47 +415,7 @@ def make_pathsim_model(graph_data):
             block, events_int = create_integrator(node)
             events.extend(events_int)
         elif node["type"] == "function":
-            # Convert the expression string to a lambda function
-            expression = node["data"].get("expression", "x")
-
-            # Create a safe lambda function from the expression
-            # The expression should use 'x' as the variable
-            try:
-                # Create a lambda function from the expression string
-                # We'll allow common mathematical operations and numpy functions
-
-                # Safe namespace for eval
-                safe_namespace = {
-                    "x": 0,  # placeholder
-                    "np": np,
-                    "math": math,
-                    "sin": np.sin,
-                    "cos": np.cos,
-                    "tan": np.tan,
-                    "exp": np.exp,
-                    "log": np.log,
-                    "sqrt": np.sqrt,
-                    "abs": abs,
-                    "pow": pow,
-                    "pi": np.pi,
-                    "e": np.e,
-                }
-
-                # Test the expression first to ensure it's valid
-                eval(expression.replace("x", "1"), safe_namespace)
-
-                # Create the actual function
-                def func(x):
-                    return eval(expression, {**safe_namespace, "x": x})
-
-            except Exception as e:
-                print(f"Error parsing expression '{expression}': {e}")
-
-                raise ValueError(
-                    f"Invalid function expression: {expression}. Error: {str(e)}"
-                )
-
-            block = Function(func=func)
+            block = create_function(node)
         elif node["type"] == "delay":
             block = Delay(tau=eval(node["data"]["tau"]))
         elif node["type"] == "rng":
@@ -455,10 +466,10 @@ def make_pathsim_model(graph_data):
         incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
         incoming_edges.sort(key=lambda x: x["source"])
 
-        block = find_block_by_id(node["id"])
+        block = find_block_by_id(node["id"], blocks=blocks)
 
         for edge in outgoing_edges:
-            target_block = find_block_by_id(edge["target"])
+            target_block = find_block_by_id(edge["target"], blocks=blocks)
             if isinstance(block, Process):
                 if edge["sourceHandle"] == "inv":
                     output_index = 0
@@ -483,7 +494,6 @@ def make_pathsim_model(graph_data):
                 output_index = 0
 
             if isinstance(target_block, Scope):
-                source_node = find_node_by_id(edge["source"])
                 input_index = target_block._connections_order.index(edge["id"])
             else:
                 input_index = block_to_input_index[target_block]
