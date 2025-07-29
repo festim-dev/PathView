@@ -323,20 +323,7 @@ def make_global_variables(global_vars):
     return global_namespace
 
 
-# TODO refactor this function...
-def make_pathsim_model(graph_data):
-    nodes = graph_data.get("nodes", [])
-    edges = graph_data.get("edges", [])
-    solver_prms = graph_data.get("solverParams", {})
-    global_vars = graph_data.get("globalVariables", {})
-
-    # Get the global variables namespace to use in eval calls
-    global_namespace = make_global_variables(global_vars)
-
-    # Create a combined namespace that includes built-in functions and global variables
-    eval_namespace = {**globals(), **global_namespace}
-
-    # solver parameters
+def make_solver_params(solver_prms, eval_namespace=None):
     extra_params = solver_prms.pop("extra_params", "")
     if extra_params == "":
         extra_params = {}
@@ -374,6 +361,26 @@ def make_pathsim_model(graph_data):
     duration = float(solver_prms.pop("simulation_duration"))
 
     assert not isinstance(solver_prms["Solver"], str), solver_prms["Solver"]
+
+    return solver_prms, extra_params, duration
+
+
+# TODO refactor this function...
+def make_pathsim_model(graph_data):
+    nodes = graph_data.get("nodes", [])
+    edges = graph_data.get("edges", [])
+    solver_prms = graph_data.get("solverParams", {})
+    global_vars = graph_data.get("globalVariables", {})
+
+    # Get the global variables namespace to use in eval calls
+    global_namespace = make_global_variables(global_vars)
+
+    # Create a combined namespace that includes built-in functions and global variables
+    eval_namespace = {**globals(), **global_namespace}
+
+    solver_prms, extra_params, duration = make_solver_params(
+        solver_prms, eval_namespace
+    )
 
     blocks = []
     events = []
