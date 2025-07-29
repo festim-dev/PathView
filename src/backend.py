@@ -129,9 +129,14 @@ def find_block_by_id(block_id: str, blocks) -> Block:
     return None
 
 
-def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
+def create_integrator(
+    node: dict, eval_namespace: dict = None
+) -> tuple[Block, list[Schedule]]:
+    if eval_namespace is None:
+        eval_namespace = globals()
+
     block = Integrator(
-        initial_value=eval(node["data"]["initial_value"])
+        initial_value=eval(node["data"]["initial_value"], eval_namespace)
         if node["data"].get("initial_value") and node["data"]["initial_value"] != ""
         else 0.0,
     )
@@ -142,7 +147,7 @@ def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
         def reset_itg(_):
             block.reset()
 
-        reset_times = eval(node["data"]["reset_times"])
+        reset_times = eval(node["data"]["reset_times"], eval_namespace)
         if isinstance(reset_times, (int, float)):
             # If it's a single number, convert it to a list
             reset_times = [reset_times]
@@ -151,7 +156,10 @@ def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
     return block, events
 
 
-def create_function(node: dict) -> Block:
+def create_function(node: dict, eval_namespace: dict = None) -> Block:
+    if eval_namespace is None:
+        eval_namespace = globals()
+
     # Convert the expression string to a lambda function
     expression = node["data"].get("expression", "x")
 
@@ -161,7 +169,7 @@ def create_function(node: dict) -> Block:
         # Create a lambda function from the expression string
         # We'll allow common mathematical operations and numpy functions
 
-        # Safe namespace for eval
+        # Safe namespace for eval - merge with global variables
         safe_namespace = {
             "x": 0,  # placeholder
             "np": np,
@@ -176,6 +184,7 @@ def create_function(node: dict) -> Block:
             "pow": pow,
             "pi": np.pi,
             "e": np.e,
+            **eval_namespace,  # Include global variables
         }
 
         # Test the expression first to ensure it's valid
@@ -275,14 +284,11 @@ def run_pathsim():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
-# TODO refactor this function...
-def make_pathsim_model(graph_data):
-    nodes = graph_data.get("nodes", [])
-    edges = graph_data.get("edges", [])
-    solver_prms = graph_data.get("solverParams", {})
-    global_vars = graph_data.get("globalVariables", {})
-
+def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
+    # Return a namespace dictionary containing the global variables
+    global_namespace = {}
+
     for var in global_vars:
         var_name = var.get("name", "").strip()
         var_value = var.get("value", "")
@@ -307,22 +313,41 @@ def make_pathsim_model(graph_data):
             )
 
         try:
+            # Execute in global namespace for backwards compatibility
             exec(f"{var_name} = {var_value}", globals())
+            # Also store in local namespace for eval calls
+            global_namespace[var_name] = eval(var_value)
         except Exception as e:
             raise ValueError(f"Error setting global variable '{var_name}': {str(e)}")
+
+    return global_namespace
+
+
+# TODO refactor this function...
+def make_pathsim_model(graph_data):
+    nodes = graph_data.get("nodes", [])
+    edges = graph_data.get("edges", [])
+    solver_prms = graph_data.get("solverParams", {})
+    global_vars = graph_data.get("globalVariables", {})
+
+    # Get the global variables namespace to use in eval calls
+    global_namespace = make_global_variables(global_vars)
+
+    # Create a combined namespace that includes built-in functions and global variables
+    eval_namespace = {**globals(), **global_namespace}
 
     # solver parameters
     extra_params = solver_prms.pop("extra_params", "")
     if extra_params == "":
         extra_params = {}
     else:
-        extra_params = eval(extra_params)
+        extra_params = eval(extra_params, eval_namespace)
     assert isinstance(extra_params, dict), "extra_params must be a dictionary"
 
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
             try:
-                solver_prms[k] = eval(v)
+                solver_prms[k] = eval(v, eval_namespace)
             except Exception as e:
                 return jsonify(
                     {"error": f"Invalid value for {k}: {v}. Error: {str(e)}"}
@@ -369,23 +394,23 @@ def make_pathsim_model(graph_data):
     for node in nodes:
         # TODO this needs serious refactoring
         if node["type"] == "constant":
-            block = Constant(value=eval(node["data"]["value"]))
+            block = Constant(value=eval(node["data"]["value"], eval_namespace))
         elif node["type"] == "stepsource":
             block = StepSource(
-                amplitude=eval(node["data"]["amplitude"]),
-                tau=eval(node["data"]["delay"]),
+                amplitude=eval(node["data"]["amplitude"], eval_namespace),
+                tau=eval(node["data"]["delay"], eval_namespace),
             )
         elif node["type"] == "pulsesource":
             block = PulseSource(
-                amplitude=eval(node["data"]["amplitude"]),
-                T=eval(node["data"]["T"]),
-                t_rise=eval(node["data"]["t_rise"]),
-                t_fall=eval(node["data"]["t_fall"]),
-                tau=eval(node["data"]["tau"]),
-                duty=eval(node["data"]["duty"]),
+                amplitude=eval(node["data"]["amplitude"], eval_namespace),
+                T=eval(node["data"]["T"], eval_namespace),
+                t_rise=eval(node["data"]["t_rise"], eval_namespace),
+                t_fall=eval(node["data"]["t_fall"], eval_namespace),
+                tau=eval(node["data"]["tau"], eval_namespace),
+                duty=eval(node["data"]["duty"], eval_namespace),
             )
         elif node["type"] in ["amplifier", "amplifier_reverse"]:
-            block = Amplifier(gain=eval(node["data"]["gain"]))
+            block = Amplifier(gain=eval(node["data"]["gain"], eval_namespace))
         elif node["type"] == "scope":
             assert scope_default is None
             block = create_scope(node, edges, nodes)
@@ -393,17 +418,17 @@ def make_pathsim_model(graph_data):
             block = Splitter(
                 n=2,
                 fractions=[
-                    eval(node["data"]["f1"]),
-                    eval(node["data"]["f2"]),
+                    eval(node["data"]["f1"], eval_namespace),
+                    eval(node["data"]["f2"], eval_namespace),
                 ],
             )
         elif node["type"] == "splitter3":
             block = Splitter(
                 n=3,
                 fractions=[
-                    eval(node["data"]["f1"]),
-                    eval(node["data"]["f2"]),
-                    eval(node["data"]["f3"]),
+                    eval(node["data"]["f1"], eval_namespace),
+                    eval(node["data"]["f2"], eval_namespace),
+                    eval(node["data"]["f3"], eval_namespace),
                 ],
             )
         elif node["type"] == "adder":
@@ -412,37 +437,47 @@ def make_pathsim_model(graph_data):
         elif node["type"] == "multiplier":
             block = Multiplier()
         elif node["type"] == "integrator":
-            block, events_int = create_integrator(node)
+            block, events_int = create_integrator(node, eval_namespace)
             events.extend(events_int)
         elif node["type"] == "function":
-            block = create_function(node)
+            block = create_function(node, eval_namespace)
         elif node["type"] == "delay":
-            block = Delay(tau=eval(node["data"]["tau"]))
+            block = Delay(tau=eval(node["data"]["tau"], eval_namespace))
         elif node["type"] == "rng":
-            block = RNG(sampling_rate=eval(node["data"]["sampling_rate"]))
+            block = RNG(
+                sampling_rate=eval(node["data"]["sampling_rate"], eval_namespace)
+            )
         elif node["type"] == "pid":
             block = PID(
-                Kp=eval(node["data"]["Kp"]) if node["data"].get("Kp") else 0,
-                Ki=eval(node["data"]["Ki"]) if node["data"].get("Ki") else 0,
-                Kd=eval(node["data"]["Kd"]) if node["data"].get("Kd") else 0,
-                f_max=eval(node["data"]["f_max"]) if node["data"].get("f_max") else 100,
+                Kp=eval(node["data"]["Kp"], eval_namespace)
+                if node["data"].get("Kp")
+                else 0,
+                Ki=eval(node["data"]["Ki"], eval_namespace)
+                if node["data"].get("Ki")
+                else 0,
+                Kd=eval(node["data"]["Kd"], eval_namespace)
+                if node["data"].get("Kd")
+                else 0,
+                f_max=eval(node["data"]["f_max"], eval_namespace)
+                if node["data"].get("f_max")
+                else 100,
             )
         elif node["type"] in ["process", "process_horizontal"]:
             block = Process(
                 residence_time=(
-                    eval(node["data"]["residence_time"])
+                    eval(node["data"]["residence_time"], eval_namespace)
                     if node["data"].get("residence_time")
                     and node["data"]["residence_time"] != ""
                     else 0
                 ),
                 ic=(
-                    eval(node["data"]["initial_value"])
+                    eval(node["data"]["initial_value"], eval_namespace)
                     if node["data"].get("initial_value")
                     and node["data"]["initial_value"] != ""
                     else 0
                 ),
                 gen=(
-                    eval(node["data"]["source_term"])
+                    eval(node["data"]["source_term"], eval_namespace)
                     if node["data"].get("source_term")
                     and node["data"]["source_term"] != ""
                     else 0
