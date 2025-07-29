@@ -137,54 +137,54 @@ def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
     return block, events
 
 
-# TODO refactor this function...
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
 def run_pathsim():
-    # try:
-    data = request.json
-    graph_data = data.get("graph")
-    if not graph_data:
-        return jsonify({"error": "No graph data provided"}), 400
+    try:
+        data = request.json
+        graph_data = data.get("graph")
+        if not graph_data:
+            return jsonify({"error": "No graph data provided"}), 400
 
-    my_simulation, duration = make_pathsim_model(graph_data)
+        my_simulation, duration = make_pathsim_model(graph_data)
 
-    # Run the simulation
-    my_simulation.run(duration)
+        # Run the simulation
+        my_simulation.run(duration)
 
-    # Generate the plot
-    scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
-    fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
-    for i, scope in enumerate(scopes):
-        plt.sca(axs[i] if len(scopes) > 1 else axs)
-        # scope.plot()
-        time, data = scope.read()
-        # plot the recorded data
-        for p, d in enumerate(data):
-            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-            plt.plot(time, d, label=lb)
-        plt.legend()
-        plt.title(scope.label)
+        # Generate the plot
+        scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
+        fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
+        for i, scope in enumerate(scopes):
+            plt.sca(axs[i] if len(scopes) > 1 else axs)
+            # scope.plot()
+            time, data = scope.read()
+            # plot the recorded data
+            for p, d in enumerate(data):
+                lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+                plt.plot(time, d, label=lb)
+            plt.legend()
+            plt.title(scope.label)
 
-    # Convert plot to base64 string
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
-    buffer.seek(0)
-    plot_data = base64.b64encode(buffer.getvalue()).decode()
-    plt.close(fig)
+        # Convert plot to base64 string
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
+        buffer.seek(0)
+        plot_data = base64.b64encode(buffer.getvalue()).decode()
+        plt.close(fig)
 
-    return jsonify(
-        {
-            "success": True,
-            "plot": plot_data,
-            "message": "Pathsim simulation completed successfully",
-        }
-    )
+        return jsonify(
+            {
+                "success": True,
+                "plot": plot_data,
+                "message": "Pathsim simulation completed successfully",
+            }
+        )
 
-    # except Exception as e:
-    #     return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+# TODO refactor this function...
 def make_pathsim_model(graph_data):
     nodes = graph_data.get("nodes", [])
     edges = graph_data.get("edges", [])
