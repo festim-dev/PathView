@@ -30,7 +30,7 @@ from pathsim.blocks import (
     PID,
     Schedule,
 )
-from custom_pathsim_blocks import Process, Splitter
+from custom_pathsim_blocks import Process, Splitter, Bubbler
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
@@ -134,6 +134,24 @@ def create_integrator(node: dict) -> tuple[Block, list[Schedule]]:
             reset_times = [reset_times]
         for t in reset_times:
             events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+    return block, events
+
+
+def create_bubbler(node: dict) -> Bubbler:
+    """
+    Create a Bubbler block based on the node data.
+    """
+    # Extract parameters from node data
+    block = Bubbler(
+        conversion_efficiency=eval(node["data"]["conversion_efficiency"]),
+        vial_efficiency=eval(node["data"]["vial_efficiency"]),
+        replacement_times=eval(node["data"]["replacement_time"])
+        if node["data"].get("replacement_time") != ""
+        else None,
+    )
+
+    events = block.create_reset_events()
+
     return block, events
 
 
@@ -398,6 +416,9 @@ def run_pathsim():
                     else 0
                 ),
             )
+        elif node["type"] == "bubbler":
+            block, events_bubbler = create_bubbler(node)
+            events.extend(events_bubbler)
         else:
             raise ValueError(f"Unknown node type: {node['type']}")
         block.id = node["id"]
@@ -440,12 +461,37 @@ def run_pathsim():
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
+            elif isinstance(block, Bubbler):
+                if edge["sourceHandle"] == "vial1":
+                    output_index = 0
+                elif edge["sourceHandle"] == "vial2":
+                    output_index = 1
+                elif edge["sourceHandle"] == "vial3":
+                    output_index = 2
+                elif edge["sourceHandle"] == "vial4":
+                    output_index = 3
+                elif edge["sourceHandle"] == "sample_out":
+                    output_index = 4
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
             else:
                 output_index = 0
 
             if isinstance(target_block, Scope):
                 source_node = find_node_by_id(edge["source"])
                 input_index = target_block._source_nodes_order.index(source_node)
+
+            elif isinstance(target_block, Bubbler):
+                if edge["targetHandle"] == "sample_in_soluble":
+                    input_index = 0
+                elif edge["targetHandle"] == "sample_in_insoluble":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
             else:
                 input_index = block_to_input_index[target_block]
 

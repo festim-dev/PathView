@@ -26,6 +26,7 @@ import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './Splitters';
+import BubblerNode from './BubblerNode';
 
 // Add nodes as a node type for this script
 const nodeTypes = {
@@ -46,6 +47,7 @@ const nodeTypes = {
   pid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
+  bubbler: BubblerNode,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -466,6 +468,8 @@ export default function App() {
       case 'splitter3':
         nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
         break;
+      case 'bubbler':
+        nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_time: '' };
       default:
         // For any other types, just use basic data
         break;
