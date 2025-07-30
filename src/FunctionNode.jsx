@@ -19,7 +19,7 @@ export default function FunctionNode({ data }) {
       <div style={{ marginBottom: 4 }}>{data.label}</div>
 
       <CustomHandle type="target" position="left" style={{ background: '#555' }} connectionCount={1}/>
-      <CustomHandle type="source" position="right" style={{ background: '#555' }} connectionCount={1}/>
+      <Handle type="source" position="right" style={{ background: '#555' }} />
     </div>
   );
 }
