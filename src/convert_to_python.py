@@ -17,7 +17,7 @@ def main():
     templates_dir = os.path.join(current_dir, "templates")
 
     environment = Environment(loader=FileSystemLoader(templates_dir))
-    template = environment.get_template("template.py")
+    template = environment.get_template("template_with_macros.py")
 
     results_filename = os.path.join(current_dir, "..", "generated_script.py")
 
@@ -31,22 +31,31 @@ def main():
         print(f"... wrote {results_filename}")
 
 
+def convert_graph_to_python_str(graph_data: dict) -> str:
+    """Convert graph data to a Python script as a string."""
+    # Get the directory of this file to properly reference templates
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    templates_dir = os.path.join(current_dir, "templates")
+
+    environment = Environment(loader=FileSystemLoader(templates_dir))
+    template = environment.get_template("template_with_macros.py")
+
+    # Process the graph data
+    context = process_graph_data_from_dict(graph_data)
+
+    # Render the template
+    return template.render(context)
+
+
 def convert_graph_to_python(
     graph_data: dict, output_filename: str = "generated_script.py"
 ) -> str:
     """Convert graph data to Python script and return the generated code."""
     # Get the directory of this file to properly reference templates
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    templates_dir = os.path.join(current_dir, "templates")
-
-    environment = Environment(loader=FileSystemLoader(templates_dir))
-    template = environment.get_template("template.py")
-
-    # Process the graph data
-    context = process_graph_data_from_dict(graph_data)
 
     # Render the template
-    generated_code = template.render(context)
+    generated_code = convert_graph_to_python_str(graph_data)
 
     # Write to file
     output_path = os.path.join(current_dir, "..", output_filename)
