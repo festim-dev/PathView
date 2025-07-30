@@ -55,10 +55,13 @@ def test_nested_templates():
             "extra_params": "{}",
             "iterations_max": "100",
             "log": "true",
-            "simulation_duration": "50.0",
+            "simulation_duration": "duration",
             "tolerance_fpi": "1e-6",
         },
-        "globalVariables": [],
+        "globalVariables": [
+            {"id": "1", "name": "duration", "nameError": "false", "value": "50.0"},
+            {"id": "2", "name": "a", "nameError": "false", "value": "2"},
+        ],
     }
 
     # Process the data
