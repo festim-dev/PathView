@@ -1,4 +1,4 @@
-from src.convert_to_python import convert_graph_to_python_str
+from src.convert_to_python import convert_graph_to_python
 import json
 import pytest
 from pathlib import Path
@@ -77,7 +77,7 @@ def test_nested_templates(data):
         with open(file_path, "r") as f:
             data = json.load(f)
 
-    code = convert_graph_to_python_str(data)
+    code = convert_graph_to_python(data)
     print(code)
     exec(code)
 
@@ -110,7 +110,7 @@ def test_stepsource_delay_converted_to_tau():
         },
         "globalVariables": [],
     }
-    code = convert_graph_to_python_str(sample_data)
+    code = convert_graph_to_python(sample_data)
     assert "tau=3.0" in code
 
 

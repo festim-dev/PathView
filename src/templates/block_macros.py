@@ -50,7 +50,7 @@ def func(x):
 
 {% macro create_scope_block(node) -%}
 {{ node["var_name"] }} = pathsim.blocks.Scope(
-    labels={{ node["children"] }}
+    labels={{ node["labels"] }}
 )
 
 {%- endmacro -%}
