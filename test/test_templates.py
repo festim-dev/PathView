@@ -53,6 +53,7 @@ def test_nested_templates():
 
     code = convert_graph_to_python_str(sample_data)
     print(code)
+    exec(code)
 
 
 if __name__ == "__main__":
