@@ -156,6 +156,37 @@ def process_graph_data_from_dict(data: dict) -> dict:
     blocks, events = make_blocks(nodes, edges)
     connections = make_connections(nodes, edges, blocks)
 
+    # we can simply read the ports id from the actual pathsim connections
+    for node in nodes:
+        outgoing_edges = [edge for edge in edges if edge["source"] == node["id"]]
+        outgoing_edges.sort(key=lambda x: x["target"])
+
+        incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+        incoming_edges.sort(key=lambda x: x["source"])
+
+        for edge in outgoing_edges:
+            target_node = next((n for n in nodes if n["id"] == edge["target"]), None)
+
+            # find corresponding connection
+            connection = next(
+                (
+                    c
+                    for c in connections
+                    if c.source.block.id == node["id"]
+                    and c.targets[0].block.id == edge["target"]
+                ),
+                None,
+            )
+            source_block_port = connection.source.ports
+            assert len(connection.targets) == 1, (
+                "Connection must have exactly one target port."
+            )
+            target_block_port = connection.targets[0].ports
+            edge["source_var_name"] = node["var_name"]
+            edge["target_var_name"] = target_node["var_name"]
+            edge["source_port"] = str(source_block_port)
+            edge["target_port"] = str(target_block_port)
+
     return data_with_var_names
 
 

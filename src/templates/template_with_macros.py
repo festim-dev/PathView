@@ -8,7 +8,7 @@ from pathsim.solvers import RKBS32, RKF21
 from pathsim.events import ZeroCrossingDown, ZeroCrossingUp
 
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block %}
+{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_connection %}
 
 # Create blocks
 blocks, events = [], []
@@ -28,8 +28,11 @@ blocks.append({{ node["var_name"] }})
 {% endfor %}
 
 # Create connections
-connections = []
-
+connections = [
+{% for edge in edges -%}
+   {{ create_connection(edge) }},
+{% endfor -%}
+]
 # Create simulation
 my_simulation = Simulation(blocks, connections)
 

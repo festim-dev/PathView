@@ -44,3 +44,7 @@ def func(x):
 )
 
 {%- endmacro -%}
+
+{% macro create_connection(edge) -%}
+Connection({{ edge["source_var_name"] }}{{edge["source_port"]}}, {{ edge["target_var_name"] }}{{ edge["target_port"] }})
+{%- endmacro -%}
