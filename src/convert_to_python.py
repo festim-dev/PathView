@@ -2,6 +2,8 @@ from jinja2 import Environment, FileSystemLoader
 import json
 import os
 
+from .block_mapping import map_str_to_object
+
 
 def process_graph_data(json_file: str) -> dict:
     """Process the JSON graph data and prepare it for template rendering."""
@@ -57,94 +59,13 @@ def convert_graph_to_python(
 def process_graph_data_from_dict(data: dict) -> dict:
     """Process graph data from a dictionary (same as process_graph_data but takes dict instead of file path)."""
     # Clean up labels for variable names
-    for block in data["nodes"]:
-        block["data"]["label"] = block["data"]["label"].lower().replace(" ", "_")
-
-    def find_node_by_id(node_id: str) -> dict:
-        for node in data["nodes"]:
-            if node["id"] == node_id:
-                return node
-        return None
-
-    # Process each node to determine its incoming connections and betas
-    processed_blocks = []
-
-    for node in data["nodes"]:
-        # Find all incoming edges to this node
-        incoming_edges = [
-            edge for edge in data["edges"] if edge["target"] == node["id"]
-        ]
-
-        # Sort incoming edges by source id to ensure consistent ordering
-        incoming_edges.sort(key=lambda x: x["source"])
-
-        # Calculate transfer fractions and source blocks for this node
-        transfer_fractions = []
-        source_block_labels = []
-
-        for edge in incoming_edges:
-            source_node = find_node_by_id(edge["source"])
-            outgoing_edges = [
-                edge for edge in data["edges"] if edge["source"] == source_node["id"]
-            ]
-            # default transfer fraction split equally
-            f = edge["data"].get("weight", 1 / len(outgoing_edges))
-
-            # Create transfer fraction variable name
-            f_var_name = f"f_{source_node['data']['label']}_{node['data']['label']}"
-
-            transfer_fractions.append(
-                {
-                    "var_name": f_var_name,
-                    "value": f,
-                    "source_label": source_node["data"]["label"],
-                    "target_label": node["data"]["label"],
-                }
-            )
-            source_block_labels.append(source_node["data"]["label"])
-
-        # Create processed block info
-        processed_block = {
-            "id": node["id"],
-            "data": node["data"],
-            "transfer_fractions": transfer_fractions,
-            "source_block_labels": source_block_labels,
-            "incoming_edges": incoming_edges,
-        }
-        processed_blocks.append(processed_block)
-
-    # Collect all transfer fractions for global variable generation
-    all_transfer_fractions = []
-    for block in processed_blocks:
-        all_transfer_fractions.extend(block["transfer_fractions"])
-
-    # Create connection data with proper indexing
-    connection_data = []
-
-    # for nodes with several inputs, the order of the connection needs to
-    # be the same as the order of the transfer fractions (which are sorted by source id)
-    for block in processed_blocks:
-        target_input_index = 0
-        # Use the sorted incoming edges from each block to maintain order consistency
-        for edge in block["incoming_edges"]:
-            source_label = find_node_by_id(edge["source"])["data"]["label"]
-            target_label = block["data"]["label"]
-
-            connection_data.append(
-                {
-                    "source": source_label,
-                    "target": target_label,
-                    "target_input_index": target_input_index,
-                }
-            )
-
-            target_input_index += 1
-
-    return {
-        "blocks": processed_blocks,
-        "connection_data": connection_data,
-        "transfer_fractions": all_transfer_fractions,
-    }
+    data_with_var_names = data.copy()
+    for block in data_with_var_names["nodes"]:
+        block["var_name"] = block["data"]["label"].lower().replace(" ", "_")
+        # remove label from data
+        del block["data"]["label"]
+        block["class_name"] = map_str_to_object[block["type"]].__name__
+    return data_with_var_names
 
 
 if __name__ == "__main__":

@@ -30,34 +30,13 @@ from pathsim.blocks import (
 )
 from .custom_pathsim_blocks import Process, Splitter
 from .convert_to_python import convert_graph_to_python
+from .block_mapping import map_str_to_object
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
     "SSPRK33": pathsim.solvers.SSPRK33,
     "RKF21": pathsim.solvers.RKF21,
 }
-
-map_str_to_object = {
-    "constant": Constant,
-    "stepsource": StepSource,
-    "pulsesource": PulseSource,
-    "amplifier": Amplifier,
-    "amplifier_reverse": Amplifier,
-    "scope": Scope,
-    "splitter2": Splitter,
-    "splitter3": Splitter,
-    "adder": Adder,
-    "adder_reverse": Adder,
-    "multiplier": Multiplier,
-    "process": Process,
-    "process_horizontal": Process,
-    "rng": RNG,
-    "pid": PID,
-    "integrator": Integrator,
-    "function": Function,
-    "delay": Delay,
-}
-
 
 # app = Flask(__name__)
 # CORS(app, supports_credentials=True)
