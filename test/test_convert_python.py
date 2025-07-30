@@ -65,7 +65,14 @@ sample_data = {
 }
 
 
-@pytest.mark.parametrize("data", [sample_data, "test_files/constant_delay_scope.json"])
+@pytest.mark.parametrize(
+    "data",
+    [
+        sample_data,
+        "test_files/constant_delay_scope.json",
+        "test_files/custom_nodes.json",
+    ],
+)
 def test_nested_templates(data):
     """Test the nested template functionality."""
 
@@ -79,7 +86,12 @@ def test_nested_templates(data):
 
     code = convert_graph_to_python(data)
     print(code)
-    exec(code)
+    # execute the generated code and check for errors
+    try:
+        exec(code)
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        assert False
 
 
 def test_stepsource_delay_converted_to_tau():
