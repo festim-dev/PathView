@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -12,6 +12,7 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 import Plot from 'react-plotly.js';
 
+import ContextMenu from './ContextMenu.jsx';
 
 // Importing node components
 import {ProcessNode, ProcessNodeHorizontal} from './ProcessNode';
@@ -63,7 +64,9 @@ export default function App() {
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [nodeCounter, setNodeCounter] = useState(1);
-  
+  const [menu, setMenu] = useState(null);
+  const ref = useRef(null);
+
   // Solver parameters state
   const [solverParams, setSolverParams] = useState({
     dt: '0.01',
@@ -368,6 +371,7 @@ export default function App() {
   const onPaneClick = () => {
     setSelectedNode(null);
     setSelectedEdge(null);
+    setMenu(null); // Close context menu when clicking on pane
     // Reset all edge styles when deselecting
     setEdges((eds) =>
       eds.map((e) => ({
@@ -482,6 +486,28 @@ export default function App() {
     setNodes((nds) => [...nds, newNode]);
     setNodeCounter((count) => count + 1);
   };
+  
+  // Function to pop context menu when right-clicking on a node
+  const onNodeContextMenu = useCallback(
+    (event, node) => {
+      // Prevent native context menu from showing
+      event.preventDefault();
+ 
+      // Calculate position of the context menu. We want to make sure it
+      // doesn't get positioned off-screen.
+      const pane = ref.current.getBoundingClientRect();
+      setMenu({
+        id: node.id,
+        top: event.clientY < pane.height - 200 && event.clientY,
+        left: event.clientX < pane.width - 200 && event.clientX,
+        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
+        bottom:
+          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+      });
+    },
+    [setMenu],
+  );
+  
   // Function to delete the selected node
   const deleteSelectedNode = () => {
     if (selectedNode) {
@@ -614,6 +640,7 @@ export default function App() {
       {activeTab === 'graph' && (
         <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
           <ReactFlow
+            ref={ref}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -622,11 +649,13 @@ export default function App() {
             onNodeClick={onNodeClick}
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
+            onNodeContextMenu={onNodeContextMenu}
             nodeTypes={nodeTypes}
           >
             <Controls />
             <MiniMap />
             <Background variant="dots" gap={12} size={1} />
+            {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
             <button
               style={{
                 position: 'absolute',
