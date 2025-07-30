@@ -52,6 +52,15 @@ SAVE_DIR = "saved_graphs"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 
+# Health check endpoint for CI/CD
+@app.route("/", methods=["GET"])
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify(
+        {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
+    ), 200
+
+
 # Function to save graphs
 @app.route("/save", methods=["POST"])
 def save_graph():
