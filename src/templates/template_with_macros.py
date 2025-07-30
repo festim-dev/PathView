@@ -1,14 +1,10 @@
 import pathsim
+from pathsim import Simulation, Connection
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pathsim import Simulation, Connection
-from pathsim.blocks import ODE, Source, Scope, Block, Pulse
-from pathsim.solvers import RKBS32, RKF21
-from pathsim.events import ZeroCrossingDown, ZeroCrossingUp
-
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_connection %}
+{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_connections %}
 
 # Create blocks
 blocks, events = [], []
@@ -28,13 +24,23 @@ blocks.append({{ node["var_name"] }})
 {% endfor %}
 
 # Create connections
-connections = [
-{% for edge in edges -%}
-   {{ create_connection(edge) }},
-{% endfor -%}
-]
+
+{{ create_connections(edges) }}
+
 # Create simulation
-my_simulation = Simulation(blocks, connections)
+my_simulation = Simulation(
+    blocks,
+    connections,
+    events=events,
+    Solver=pathsim.solvers.{{ solverParams["Solver"] }},
+    dt={{ solverParams["dt"] }},
+    dt_max={{ solverParams["dt_max"] }},
+    dt_min={{ solverParams["dt_min"] }},
+    iterations_max={{ solverParams["iterations_max"] }},
+    log={{ solverParams["log"].capitalize() }},
+    tolerance_fpi={{ solverParams["tolerance_fpi"] }},
+    **{{ solverParams["extra_params"] }},
+)
 
 if __name__ == "__main__":
-    my_simulation.run(50)
+    my_simulation.run({{ solverParams["simulation_duration"] }})

@@ -47,6 +47,18 @@ def test_nested_templates():
             {"source": "3", "target": "5", "id": "e3-5"},
             {"source": "4", "target": "5", "id": "e4-5"},
         ],
+        "solverParams": {
+            "Solver": "SSPRK22",
+            "dt": "0.01",
+            "dt_max": "1.0",
+            "dt_min": "1e-6",
+            "extra_params": "{}",
+            "iterations_max": "100",
+            "log": "true",
+            "simulation_duration": "50.0",
+            "tolerance_fpi": "1e-6",
+        },
+        "globalVariables": [],
     }
 
     # Process the data
