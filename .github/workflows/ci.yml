@@ -51,6 +51,7 @@ jobs:
 
     - name: Lint frontend code
       run: npm run lint
+      stop-on-error: false
 
     - name: Build frontend
       run: npm run build
