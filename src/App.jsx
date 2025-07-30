@@ -10,6 +10,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './App.css';
+import Plot from 'react-plotly.js';
 
 
 // Importing node components
@@ -1461,20 +1462,19 @@ export default function App() {
             padding: '20px',
             textAlign: 'center',
           }}>
-            <h1 style={{ color: '#333', marginBottom: '20px' }}>
-              Pathsim Simulation Results
-            </h1>
             {simulationResults ? (
-              <img
-                src={`data:image/png;base64,${simulationResults}`}
-                alt="Simulation Plot"
-                style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                  border: '1px solid #ccc',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                  borderRadius: '5px',
+              <Plot
+                data={JSON.parse(simulationResults).data}
+                layout={{
+                  ...JSON.parse(simulationResults).layout,
+                  autosize: true,
                 }}
+                config={{
+                  responsive: true,
+                  displayModeBar: true,
+                  modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
+                }}
+                style={{ width: '100%', height: '600px' }}
               />
             ) : (
               <p style={{ color: '#666', fontSize: '18px' }}>

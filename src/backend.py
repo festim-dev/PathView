@@ -5,12 +5,10 @@ from flask_cors import CORS
 from convert_to_python import convert_graph_to_python
 import math
 import numpy as np
-import matplotlib
-
-matplotlib.use("Agg")  # Use non-interactive backend
-import matplotlib.pyplot as plt
-import io
-import base64
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly
+import json as plotly_json
 
 from pathsim import Simulation, Connection
 import pathsim.solvers
@@ -480,26 +478,49 @@ def run_pathsim():
     # Run the simulation
     my_simulation.run(duration)
 
-    # Generate the plot
+    # Generate the interactive Plotly plot
     scopes = [block for block in blocks if isinstance(block, Scope)]
-    fig, axs = plt.subplots(len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
-    for i, scope in enumerate(scopes):
-        plt.sca(axs[i] if len(scopes) > 1 else axs)
-        # scope.plot()
+
+    if len(scopes) == 1:
+        # Single subplot case
+        fig = go.Figure()
+        scope = scopes[0]
         time, data = scope.read()
-        # plot the recorded data
+
         for p, d in enumerate(data):
             lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-            plt.plot(time, d, label=lb)
-        plt.legend()
-        plt.title(scope.label)
+            fig.add_trace(go.Scatter(x=time, y=d, mode="lines", name=lb))
 
-    # Convert plot to base64 string
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
-    buffer.seek(0)
-    plot_data = base64.b64encode(buffer.getvalue()).decode()
-    plt.close(fig)
+        fig.update_layout(
+            title=scope.label,
+            xaxis_title="Time",
+            yaxis_title="Value",
+            hovermode="x unified",
+        )
+    else:
+        # Multiple subplots case
+        fig = make_subplots(
+            rows=len(scopes),
+            cols=1,
+            shared_xaxes=True,
+            subplot_titles=[scope.label for scope in scopes],
+            vertical_spacing=0.1,
+        )
+
+        for i, scope in enumerate(scopes):
+            time, data = scope.read()
+
+            for p, d in enumerate(data):
+                lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+                fig.add_trace(
+                    go.Scatter(x=time, y=d, mode="lines", name=lb), row=i + 1, col=1
+                )
+
+        fig.update_layout(height=400 * len(scopes), hovermode="x unified")
+        fig.update_xaxes(title_text="Time", row=len(scopes), col=1)
+
+    # Convert plot to JSON
+    plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     return jsonify(
         {
