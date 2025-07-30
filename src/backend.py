@@ -10,6 +10,7 @@ import plotly
 import json as plotly_json
 
 from pathsim import Simulation, Connection
+from pathsim.events import Event
 import pathsim.solvers
 from pathsim.blocks import (
     Scope,
@@ -35,6 +36,28 @@ NAME_TO_SOLVER = {
     "SSPRK33": pathsim.solvers.SSPRK33,
     "RKF21": pathsim.solvers.RKF21,
 }
+
+map_str_to_object = {
+    "constant": Constant,
+    "stepsource": StepSource,
+    "pulsesource": PulseSource,
+    "amplifier": Amplifier,
+    "amplifier_reverse": Amplifier,
+    "scope": Scope,
+    "splitter2": Splitter,
+    "splitter3": Splitter,
+    "adder": Adder,
+    "adder_reverse": Adder,
+    "multiplier": Multiplier,
+    "process": Process,
+    "process_horizontal": Process,
+    "rng": RNG,
+    "pid": PID,
+    "integrator": Integrator,
+    "function": Function,
+    "delay": Delay,
+}
+
 
 # app = Flask(__name__)
 # CORS(app, supports_credentials=True)
@@ -393,28 +416,6 @@ def make_solver_params(solver_prms, eval_namespace=None):
     return solver_prms, extra_params, duration
 
 
-map_str_to_object = {
-    "constant": Constant,
-    "stepsource": StepSource,
-    "pulsesource": PulseSource,
-    "amplifier": Amplifier,
-    "amplifier_reverse": Amplifier,
-    "scope": Scope,
-    "splitter2": Splitter,
-    "splitter3": Splitter,
-    "adder": Adder,
-    "adder_reverse": Adder,
-    "multiplier": Multiplier,
-    "process": Process,
-    "process_horizontal": Process,
-    "rng": RNG,
-    "pid": PID,
-    "integrator": Integrator,
-    "function": Function,
-    "delay": Delay,
-}
-
-
 def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     """
     Automatically constructs a block object from a node dictionary.
@@ -454,7 +455,9 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     return block_class(**parameters)
 
 
-def make_blocks(nodes, edges, eval_namespace=None):
+def make_blocks(
+    nodes: list[dict], edges: list[dict], eval_namespace: dict = None
+) -> tuple[list[Block], list[Event]]:
     blocks, events = [], []
 
     for node in nodes:
