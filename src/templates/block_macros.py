@@ -1,6 +1,6 @@
 {# Macro-based approach for block creation #}
 {% macro create_block(node) -%}
-{{ node["var_name"] }} = {{ node["class_name"] }}(
+{{ node["var_name"] }} = pathsim.blocks.{{ node["class_name"] }}(
     {%- for arg in node["expected_arguments"] %}
     {{ arg }}={{ node["data"].get(arg, "None") }}{% if not loop.last %}, {% endif %}
     {%- endfor %}
@@ -31,15 +31,15 @@ for t in {{ node["data"].get("reset_times", "[]") }}:
 {% macro create_function_block(node) -%}
 
 def func(x):
-    return node["data"]["expression"]
+    return {{ node["data"]["expression"] }}
 
-{{ node["var_name"] }} = Function(func=func)
+{{ node["var_name"] }} = pathsim.blocks.Function(func=func)
 
 {%- endmacro -%}
 
 
 {% macro create_scope_block(node) -%}
-{{ node["var_name"] }} = Scope(
+{{ node["var_name"] }} = pathsim.blocks.Scope(
     labels={{ node["children"] }}
 )
 
