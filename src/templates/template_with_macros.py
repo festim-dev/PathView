@@ -3,7 +3,7 @@ from pathsim import Simulation, Connection
 import numpy as np
 import matplotlib.pyplot as plt
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_connections -%}
+{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_delay, create_stepsource, create_connections -%}
 
 # Create global variables
 {% for var in globalVariables -%}
@@ -15,6 +15,10 @@ blocks, events = [], []
 {% for node in nodes -%}
 {%- if node["type"] == "integrator" -%}
 {{ create_integrator_block(node) }}
+{%- elif node["type"] == "stepsource" -%}
+{{ create_stepsource(node) }}
+{%- elif node["type"] == "delay" -%}
+{{ create_delay(node) }}
 {%- elif node["type"] == "function" -%}
 {{ create_function_block(node) }}
 {%- elif node["type"] == "scope" -%}
@@ -47,3 +51,17 @@ my_simulation = Simulation(
 
 if __name__ == "__main__":
     my_simulation.run({{ solverParams["simulation_duration"] }})
+
+    # Optional: Plotting results
+    scopes = [block for block in blocks if isinstance(block, pathsim.blocks.Scope)]
+    fig, axs = plt.subplots(nrows=len(scopes), sharex=True, figsize=(10, 5 * len(scopes)))
+    for i, scope in enumerate(scopes):
+        plt.sca(axs[i] if len(scopes) > 1 else axs)
+        time, data = scope.read()
+        # plot the recorded data
+        for p, d in enumerate(data):
+            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+            plt.plot(time, d, label=lb)
+        plt.legend()
+    plt.xlabel("Time")
+    plt.show()
