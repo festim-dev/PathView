@@ -8,7 +8,7 @@ from pathsim.solvers import RKBS32, RKF21
 from pathsim.events import ZeroCrossingDown, ZeroCrossingUp
 
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block %}
+{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block %}
 
 # Create blocks
 blocks, events = [], []
@@ -18,6 +18,8 @@ blocks, events = [], []
 {{ create_integrator_block(node) }}
 {%- elif node["type"] == "function" -%}
 {{ create_function_block(node) }}
+{%- elif node["type"] == "scope" -%}
+{{ create_scope_block(node) }}
 {%- else -%}
 {{ create_block(node) }}
 {%- endif %}

@@ -1,10 +1,12 @@
 from jinja2 import Environment, FileSystemLoader
 import json
 import os
+from inspect import signature
 
 from .block_mapping import map_str_to_object
 
 
+# TODO this is not needed...
 def process_graph_data(json_file: str) -> dict:
     """Process the JSON graph data and prepare it for template rendering."""
     data = json.load(open(json_file))
@@ -69,11 +71,26 @@ def process_graph_data_from_dict(data: dict) -> dict:
     """Process graph data from a dictionary (same as process_graph_data but takes dict instead of file path)."""
     # Clean up labels for variable names
     data_with_var_names = data.copy()
-    for block in data_with_var_names["nodes"]:
-        block["var_name"] = block["data"]["label"].lower().replace(" ", "_")
-        # remove label from data
-        del block["data"]["label"]
-        block["class_name"] = map_str_to_object[block["type"]].__name__
+
+    edges = data_with_var_names.get("edges", [])
+    nodes = data_with_var_names["nodes"]
+    for node in nodes:
+        node["var_name"] = node["data"]["label"].lower().replace(" ", "_")
+        node["class_name"] = map_str_to_object[node["type"]].__name__
+
+        node["expected_arguments"] = signature(
+            map_str_to_object[node["type"]]
+        ).parameters
+        if node["type"] == "scope":
+            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+            incoming_edges.sort(key=lambda x: x["source"])
+            node["children"] = []
+            for incoming_edge in incoming_edges:
+                source_node = next(
+                    (n for n in nodes if n["id"] == incoming_edge["source"])
+                )
+                print(source_node)
+                node["children"].append(source_node["data"]["label"])
     return data_with_var_names
 
 

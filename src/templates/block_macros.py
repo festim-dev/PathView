@@ -1,8 +1,8 @@
 {# Macro-based approach for block creation #}
 {% macro create_block(node) -%}
 {{ node["var_name"] }} = {{ node["class_name"] }}(
-    {%- for key, value in node["data"].items() %}
-    {{ key }}={{ value }}{% if not loop.last %}, {% endif %}
+    {%- for arg in node["expected_arguments"] %}
+    {{ arg }}={{ node["data"].get(arg, "None") }}{% if not loop.last %}, {% endif %}
     {%- endfor %}
 )
 {%- endmacro -%}
@@ -34,5 +34,13 @@ def func(x):
     return node["data"]["expression"]
 
 {{ node["var_name"] }} = Function(func=func)
+
+{%- endmacro -%}
+
+
+{% macro create_scope_block(node) -%}
+{{ node["var_name"] }} = Scope(
+    labels={{ node["children"] }}
+)
 
 {%- endmacro -%}
