@@ -2,7 +2,6 @@ import os
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from convert_to_python import convert_graph_to_python
 import math
 import numpy as np
 import plotly.graph_objects as go
@@ -11,6 +10,7 @@ import plotly
 import json as plotly_json
 
 from pathsim import Simulation, Connection
+from pathsim.events import Event
 import pathsim.solvers
 from pathsim.blocks import (
     Scope,
@@ -28,13 +28,36 @@ from pathsim.blocks import (
     PID,
     Schedule,
 )
-from custom_pathsim_blocks import Process, Splitter, Bubbler
+from .custom_pathsim_blocks import Process, Splitter, Bubbler
+from .convert_to_python import convert_graph_to_python
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
     "SSPRK33": pathsim.solvers.SSPRK33,
     "RKF21": pathsim.solvers.RKF21,
 }
+
+map_str_to_object = {
+    "constant": Constant,
+    "stepsource": StepSource,
+    "pulsesource": PulseSource,
+    "amplifier": Amplifier,
+    "amplifier_reverse": Amplifier,
+    "scope": Scope,
+    "splitter2": Splitter,
+    "splitter3": Splitter,
+    "adder": Adder,
+    "adder_reverse": Adder,
+    "multiplier": Multiplier,
+    "process": Process,
+    "process_horizontal": Process,
+    "rng": RNG,
+    "pid": PID,
+    "integrator": Integrator,
+    "function": Function,
+    "delay": Delay,
+}
+
 
 # app = Flask(__name__)
 # CORS(app, supports_credentials=True)
@@ -50,6 +73,15 @@ CORS(
 # Creates directory for saved graphs
 SAVE_DIR = "saved_graphs"
 os.makedirs(SAVE_DIR, exist_ok=True)
+
+
+# Health check endpoint for CI/CD
+@app.route("/", methods=["GET"])
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify(
+        {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
+    ), 200
 
 
 # Function to save graphs
@@ -402,29 +434,48 @@ def make_solver_params(solver_prms, eval_namespace=None):
     return solver_prms, extra_params, duration
 
 
-map_str_to_object = {
-    "constant": Constant,
-    "stepsource": StepSource,
-    "pulsesource": PulseSource,
-    "amplifier": Amplifier,
-    "amplifier_reverse": Amplifier,
-    "scope": Scope,
-    "splitter2": Splitter,
-    "splitter3": Splitter,
-    "adder": Adder,
-    "adder_reverse": Adder,
-    "multiplier": Multiplier,
-    "process": Process,
-    "process_horizontal": Process,
-    "rng": RNG,
-    "pid": PID,
-    "integrator": Integrator,
-    "function": Function,
-    "delay": Delay,
-}
+def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
+    """
+    Automatically constructs a block object from a node dictionary.
+
+    Args:
+        node: The node dictionary containing block information.
+        eval_namespace: A namespace for evaluating expressions. Defaults to None.
+
+    Raises:
+        ValueError: If the block type is unknown or if there are issues with evaluation.
+
+    Returns:
+        The constructed block object.
+    """
+    if eval_namespace is None:
+        eval_namespace = globals()
+
+    block_type = node["type"]
+
+    if eval_namespace is None:
+        eval_namespace = globals()
+
+    block_type = node["type"]
+    if block_type not in map_str_to_object:
+        raise ValueError(f"Unknown block type: {block_type}")
+
+    block_class = map_str_to_object[block_type]
+
+    # skip 'self'
+    parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
+
+    parameters = {
+        k: eval(v, eval_namespace)
+        for k, v in node["data"].items()
+        if k in parameters_for_class
+    }
+    return block_class(**parameters)
 
 
-def make_blocks(nodes, edges, eval_namespace=None):
+def make_blocks(
+    nodes: list[dict], edges: list[dict], eval_namespace: dict = None
+) -> tuple[list[Block], list[Event]]:
     blocks, events = [], []
 
     for node in nodes:
@@ -466,17 +517,7 @@ def make_blocks(nodes, edges, eval_namespace=None):
             block, events_bubbler = create_bubbler(node)
             events.extend(events_bubbler)
         else:  # try automated construction
-            block_class = map_str_to_object[block_type]
-
-            # skip 'self'
-            parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
-
-            parameters = {
-                k: eval(v, eval_namespace)
-                for k, v in node["data"].items()
-                if k in parameters_for_class
-            }
-            block = block_class(**parameters)
+            block = auto_block_construction(node, eval_namespace)
 
         block.id = node["id"]
         block.label = node["data"]["label"]

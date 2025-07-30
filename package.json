@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start:backend": "python ./src/backend.py",
+    "start:backend": "python -m src.backend",
     "start:both": "concurrently \"npm run dev\" \"npm run start:backend\""
   },
   "dependencies": {
