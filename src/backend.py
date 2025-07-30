@@ -195,9 +195,7 @@ def create_function(node: dict, eval_namespace: dict = None) -> Block:
             return eval(expression, {**safe_namespace, "x": x})
 
     except Exception as e:
-        print(f"Error parsing expression '{expression}': {e}")
-
-        raise ValueError(f"Invalid function expression: {expression}. Error: {str(e)}")
+        raise ValueError(f"Invalid function expression: {expression}. Error: {e}")
 
     block = Function(func=func)
     return block
@@ -230,7 +228,7 @@ def create_scope(node: dict, edges, nodes) -> Scope:
         if label in duplicate_labels:
             if edge["sourceHandle"]:
                 labels[i] += f" ({edge['sourceHandle']})"
-    # assert len(labels) == 1, labels
+
     block = Scope(labels=labels)
     block._connections_order = connections_order
 
