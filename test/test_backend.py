@@ -1,4 +1,4 @@
-from src.backend import create_integrator, auto_block_construction
+from src.backend import create_integrator, auto_block_construction, create_function
 from src.custom_pathsim_blocks import Process, Splitter
 
 import pathsim.blocks
@@ -24,7 +24,10 @@ NODE_TEMPLATES = {
         "type": "integrator",
         "data": {"initial_value": "0.0", "label": "Integrator", "reset_times": ""},
     },
-    "function": {"type": "function", "data": {"func": "x[0]", "label": "Function"}},
+    "function": {
+        "type": "function",
+        "data": {"expression": "3*x**2", "label": "Function"},
+    },
     "delay": {"type": "delay", "data": {"tau": "1.0", "label": "Delay"}},
     "rng": {"type": "rng", "data": {"seed": "42", "label": "RNG"}},
     "pid": {
@@ -143,3 +146,14 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
             break
     block = auto_block_construction(node, eval_namespace={"var1": 5.5})
     assert isinstance(block, expected_class)
+
+
+def test_create_function():
+    node = {
+        "data": {"expression": "3*x**2 + b", "label": "Function"},
+        "id": "10",
+        "type": "function",
+    }
+    block = create_function(node, eval_namespace={"b": 2.5})
+    assert isinstance(block, pathsim.blocks.Function)
+    assert block.func(2) == 3 * 2**2 + 2.5
