@@ -71,5 +71,37 @@ def test_nested_templates():
     exec(code)
 
 
+def test_stepsource_delay_converted_to_tau():
+    "Test that the delay parameter in a stepsource node is converted to tau in the generated code."
+    sample_data = {
+        "nodes": [
+            {
+                "id": "1",
+                "type": "stepsource",
+                "data": {
+                    "label": "input_signal",
+                    "delay": "3.0",
+                    "amplitude": "2.0",
+                },
+            },
+        ],
+        "edges": [],
+        "solverParams": {
+            "Solver": "SSPRK22",
+            "dt": "0.01",
+            "dt_max": "1.0",
+            "dt_min": "1e-6",
+            "extra_params": "{}",
+            "iterations_max": "100",
+            "log": "true",
+            "simulation_duration": "duration",
+            "tolerance_fpi": "1e-6",
+        },
+        "globalVariables": [],
+    }
+    code = convert_graph_to_python_str(sample_data)
+    assert "tau=3.0" in code
+
+
 if __name__ == "__main__":
     test_nested_templates()

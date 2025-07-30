@@ -3,7 +3,7 @@ from pathsim import Simulation, Connection
 import numpy as np
 import matplotlib.pyplot as plt
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_delay, create_stepsource, create_connections -%}
+{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_stepsource, create_connections -%}
 
 # Create global variables
 {% for var in globalVariables -%}
@@ -17,8 +17,6 @@ blocks, events = [], []
 {{ create_integrator_block(node) }}
 {%- elif node["type"] == "stepsource" -%}
 {{ create_stepsource(node) }}
-{%- elif node["type"] == "delay" -%}
-{{ create_delay(node) }}
 {%- elif node["type"] == "function" -%}
 {{ create_function_block(node) }}
 {%- elif node["type"] == "scope" -%}

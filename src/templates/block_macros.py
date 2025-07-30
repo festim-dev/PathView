@@ -46,11 +46,6 @@ def func(x):
 )
 {%- endmacro -%}
 
-{% macro create_delay(node) -%}
-{{ node["var_name"] }} = pathsim.blocks.Delay(
-    tau={{ node["data"]["delay"] }},
-)
-{%- endmacro -%}
 
 
 {% macro create_scope_block(node) -%}
