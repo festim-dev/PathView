@@ -118,6 +118,9 @@ def test_create_integrator():
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
+    """Test auto_block_construction for various block types.
+    Using the node_factory fixture to create nodes dynamically.
+    """
     node = node_factory(block_type)
     block = auto_block_construction(node)
     assert isinstance(block, expected_class)
@@ -138,6 +141,9 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):
+    """
+    Test auto_block_construction with a variable in the data.
+    This simulates a case where a data value is replaced with a variable expression."""
     node = node_factory(block_type)
     # replace one data value with "2*var1"
     for k, v in node["data"].items():
