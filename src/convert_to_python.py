@@ -3,7 +3,10 @@ import json
 import os
 from inspect import signature
 
-from .block_mapping import map_str_to_object
+from .pathsim_utils import map_str_to_object, make_blocks
+from pathsim import Connection
+from pathsim.blocks import Scope
+from .custom_pathsim_blocks import Process, Splitter
 
 
 # TODO this is not needed...
@@ -67,6 +70,62 @@ def convert_graph_to_python(
     return generated_code
 
 
+# TODO this is a dubplicate of the function in backend.py
+def make_connections(nodes, edges, blocks) -> list[Connection]:
+    # Create connections based on the sorted edges to match beta order
+    connections_pathsim = []
+
+    # Process each node and its sorted incoming edges to create connections
+    block_to_input_index = {b: 0 for b in blocks}
+    for node in nodes:
+        outgoing_edges = [edge for edge in edges if edge["source"] == node["id"]]
+        outgoing_edges.sort(key=lambda x: x["target"])
+
+        incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+        incoming_edges.sort(key=lambda x: x["source"])
+
+        block = next((b for b in blocks if b.id == node["id"]), None)
+
+        for edge in outgoing_edges:
+            target_block = next((b for b in blocks if b.id == edge["target"]), None)
+            if isinstance(block, Process):
+                if edge["sourceHandle"] == "inv":
+                    output_index = 0
+                elif edge["sourceHandle"] == "mass_flow_rate":
+                    output_index = 1
+                    assert block.residence_time != 0, (
+                        "Residence time must be non-zero for mass flow rate output."
+                    )
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Splitter):
+                # Splitter outputs are always in order, so we can use the handle directly
+                assert edge["sourceHandle"], edge
+                output_index = int(edge["sourceHandle"].replace("source", "")) - 1
+                if output_index >= block.n:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            else:
+                output_index = 0
+
+            if isinstance(target_block, Scope):
+                input_index = target_block._connections_order.index(edge["id"])
+            else:
+                input_index = block_to_input_index[target_block]
+
+            connection = Connection(
+                block[output_index],
+                target_block[input_index],
+            )
+            connections_pathsim.append(connection)
+            block_to_input_index[target_block] += 1
+
+    return connections_pathsim
+
+
 def process_graph_data_from_dict(data: dict) -> dict:
     """Process graph data from a dictionary (same as process_graph_data but takes dict instead of file path)."""
     # Clean up labels for variable names
@@ -89,8 +148,14 @@ def process_graph_data_from_dict(data: dict) -> dict:
                 source_node = next(
                     (n for n in nodes if n["id"] == incoming_edge["source"])
                 )
-                print(source_node)
+
+                # TODO take care of duplicated labels
                 node["children"].append(source_node["data"]["label"])
+
+    # edges
+    blocks, events = make_blocks(nodes, edges)
+    connections = make_connections(nodes, edges, blocks)
+
     return data_with_var_names
 
 
