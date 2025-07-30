@@ -415,6 +415,45 @@ map_str_to_object = {
 }
 
 
+def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
+    """
+    Automatically constructs a block object from a node dictionary.
+
+    Args:
+        node: The node dictionary containing block information.
+        eval_namespace: A namespace for evaluating expressions. Defaults to None.
+
+    Raises:
+        ValueError: If the block type is unknown or if there are issues with evaluation.
+
+    Returns:
+        The constructed block object.
+    """
+    if eval_namespace is None:
+        eval_namespace = globals()
+
+    block_type = node["type"]
+
+    if eval_namespace is None:
+        eval_namespace = globals()
+
+    block_type = node["type"]
+    if block_type not in map_str_to_object:
+        raise ValueError(f"Unknown block type: {block_type}")
+
+    block_class = map_str_to_object[block_type]
+
+    # skip 'self'
+    parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
+
+    parameters = {
+        k: eval(v, eval_namespace)
+        for k, v in node["data"].items()
+        if k in parameters_for_class
+    }
+    return block_class(**parameters)
+
+
 def make_blocks(nodes, edges, eval_namespace=None):
     blocks, events = [], []
 
@@ -454,17 +493,7 @@ def make_blocks(nodes, edges, eval_namespace=None):
                 ],
             )
         else:  # try automated construction
-            block_class = map_str_to_object[block_type]
-
-            # skip 'self'
-            parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
-
-            parameters = {
-                k: eval(v, eval_namespace)
-                for k, v in node["data"].items()
-                if k in parameters_for_class
-            }
-            block = block_class(**parameters)
+            block = auto_block_construction(node, eval_namespace)
 
         block.id = node["id"]
         block.label = node["data"]["label"]
