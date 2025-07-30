@@ -7,29 +7,21 @@ export default function ContextMenu({
   left,
   right,
   bottom,
+  onClick,
+  onDuplicate,
   ...props
 }) {
-  const { getNode, setNodes, addNodes, setEdges } = useReactFlow();
+  const { setNodes, setEdges } = useReactFlow();
+  
   const duplicateNode = useCallback(() => {
-    const node = getNode(id);
-    const position = {
-      x: node.position.x + 50,
-      y: node.position.y + 50,
-    };
- 
-    addNodes({
-      ...node,
-      selected: false,
-      dragging: false,
-      id: `${node.id}-copy`,
-      position,
-    });
-  }, [id, getNode, addNodes]);
+    onDuplicate(id);
+  }, [id, onDuplicate]);
  
   const deleteNode = useCallback(() => {
     setNodes((nodes) => nodes.filter((node) => node.id !== id));
-    setEdges((edges) => edges.filter((edge) => edge.source !== id));
-  }, [id, setNodes, setEdges]);
+    setEdges((edges) => edges.filter((edge) => edge.source !== id && edge.target !== id));
+    onClick && onClick(); // Close menu after action
+  }, [id, setNodes, setEdges, onClick]);
  
   return (
     <div

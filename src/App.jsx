@@ -563,6 +563,34 @@ export default function App() {
     };
   }, [selectedEdge, selectedNode]);
 
+  // Function to duplicate a node
+  const duplicateNode = useCallback((nodeId) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    const newNodeId = nodeCounter.toString();
+    const position = {
+      x: node.position.x + 50,
+      y: node.position.y + 50,
+    };
+ 
+    const newNode = {
+      ...node,
+      selected: false,
+      dragging: false,
+      id: newNodeId,
+      position,
+      data: {
+        ...node.data,
+        label: node.data.label ? node.data.label.replace(node.id, newNodeId) : `${node.type} ${newNodeId}`
+      }
+    };
+    
+    setNodes((nds) => [...nds, newNode]);
+    setNodeCounter((count) => count + 1);
+    setMenu(null); // Close the context menu
+  }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       {/* Tab Navigation */}
@@ -655,7 +683,7 @@ export default function App() {
             <Controls />
             <MiniMap />
             <Background variant="dots" gap={12} size={1} />
-            {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
+            {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
             <button
               style={{
                 position: 'absolute',
