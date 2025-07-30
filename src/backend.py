@@ -2,7 +2,6 @@ import os
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from convert_to_python import convert_graph_to_python
 import math
 import numpy as np
 import plotly.graph_objects as go
@@ -28,7 +27,8 @@ from pathsim.blocks import (
     PID,
     Schedule,
 )
-from custom_pathsim_blocks import Process, Splitter
+from .custom_pathsim_blocks import Process, Splitter
+from .convert_to_python import convert_graph_to_python
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
