@@ -1,72 +1,83 @@
 from src.convert_to_python import convert_graph_to_python_str
+import json
+import pytest
+from pathlib import Path
 
-
-def test_nested_templates():
-    """Test the nested template functionality."""
-    # Create sample graph data
-    sample_data = {
-        "nodes": [
-            {
-                "id": "1",
-                "type": "constant",
-                "data": {
-                    "label": "input_signal",
-                    "value": "1.0",
-                },
+# Create sample graph data
+sample_data = {
+    "nodes": [
+        {
+            "id": "1",
+            "type": "constant",
+            "data": {
+                "label": "input_signal",
+                "value": "1.0",
             },
-            {
-                "id": "2",
-                "type": "integrator",
-                "data": {
-                    "label": "integrator_1",
-                    "initial_value": "",
-                    "reset_times": "[10, 20]",
-                },
-            },
-            {"id": "3", "type": "amplifier", "data": {"label": "amp_1", "gain": "2.0"}},
-            {
-                "id": "4",
-                "type": "function",
-                "data": {
-                    "label": "func_block",
-                    "expression": "x * 2 + 1",
-                },
-            },
-            {
-                "id": "5",
-                "type": "scope",
-                "data": {
-                    "label": "scope_1",
-                },
-            },
-        ],
-        "edges": [
-            {"source": "1", "target": "2", "id": "e1-2"},
-            {"source": "2", "target": "3", "id": "e2-3"},
-            {"source": "3", "target": "4", "id": "e3-4"},
-            {"source": "3", "target": "5", "id": "e3-5"},
-            {"source": "4", "target": "5", "id": "e4-5"},
-        ],
-        "solverParams": {
-            "Solver": "SSPRK22",
-            "dt": "0.01",
-            "dt_max": "1.0",
-            "dt_min": "1e-6",
-            "extra_params": "{}",
-            "iterations_max": "100",
-            "log": "true",
-            "simulation_duration": "duration",
-            "tolerance_fpi": "1e-6",
         },
-        "globalVariables": [
-            {"id": "1", "name": "duration", "nameError": "false", "value": "50.0"},
-            {"id": "2", "name": "a", "nameError": "false", "value": "2"},
-        ],
-    }
+        {
+            "id": "2",
+            "type": "integrator",
+            "data": {
+                "label": "integrator_1",
+                "initial_value": "",
+                "reset_times": "[10, 20]",
+            },
+        },
+        {"id": "3", "type": "amplifier", "data": {"label": "amp_1", "gain": "2.0"}},
+        {
+            "id": "4",
+            "type": "function",
+            "data": {
+                "label": "func_block",
+                "expression": "x * 2 + 1",
+            },
+        },
+        {
+            "id": "5",
+            "type": "scope",
+            "data": {
+                "label": "scope_1",
+            },
+        },
+    ],
+    "edges": [
+        {"source": "1", "target": "2", "id": "e1-2"},
+        {"source": "2", "target": "3", "id": "e2-3"},
+        {"source": "3", "target": "4", "id": "e3-4"},
+        {"source": "3", "target": "5", "id": "e3-5"},
+        {"source": "4", "target": "5", "id": "e4-5"},
+    ],
+    "solverParams": {
+        "Solver": "SSPRK22",
+        "dt": "0.01",
+        "dt_max": "1.0",
+        "dt_min": "1e-6",
+        "extra_params": "{}",
+        "iterations_max": "100",
+        "log": "true",
+        "simulation_duration": "duration",
+        "tolerance_fpi": "1e-6",
+    },
+    "globalVariables": [
+        {"id": "1", "name": "duration", "nameError": "false", "value": "50.0"},
+        {"id": "2", "name": "a", "nameError": "false", "value": "2"},
+    ],
+}
+
+
+@pytest.mark.parametrize("data", [sample_data, "test_files/constant_delay_scope.json"])
+def test_nested_templates(data):
+    """Test the nested template functionality."""
 
     # Process the data
+    if not isinstance(data, dict):
+        # read from json file using path relative to current file
+        current_file_dir = Path(__file__).parent
+        file_path = current_file_dir / data
+        with open(file_path, "r") as f:
+            data = json.load(f)
 
-    code = convert_graph_to_python_str(sample_data)
+    code = convert_graph_to_python_str(data)
     print(code)
     exec(code)
 

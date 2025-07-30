@@ -309,8 +309,6 @@ def make_blocks(
                 amplitude=eval(node["data"]["amplitude"], eval_namespace),
                 tau=eval(node["data"]["delay"], eval_namespace),
             )
-        elif block_type == "delay":
-            block = Delay(tau=eval(node["data"]["delay"], eval_namespace))
         elif block_type == "splitter2":
             block = Splitter(
                 n=2,
