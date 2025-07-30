@@ -19,7 +19,7 @@ def test_nested_templates():
                 "type": "integrator",
                 "data": {
                     "label": "integrator_1",
-                    "initial_value": "0.0",
+                    "initial_value": "",
                     "reset_times": "[10, 20]",
                 },
             },
