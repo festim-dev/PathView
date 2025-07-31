@@ -170,3 +170,99 @@ class Bubbler(Subsystem):
         for i, vial in enumerate(self.vials):
             events.extend(self._create_reset_events_one_vial(vial, reset_times[i]))
         return events
+
+
+# FESTIM wall
+
+
+class FestimWall(Block):
+    def __init__(
+        self, thickness, temperature, D_0, E_D, n_vertices=100, final_time=100
+    ):
+        super().__init__()
+        try:
+            import festim as F
+        except ImportError:
+            raise ImportError("festim is needed for FestimWall node.")
+
+        self.thickness = thickness
+        self.temperature = temperature
+        self.D_0 = D_0
+        self.E_D = E_D
+        self.n_vertices = n_vertices
+        self.final_time = final_time
+        self.t = 0.0
+
+        self.initialise_festim_model()
+
+    def initialise_festim_model(self):
+        import festim as F
+
+        model = F.HydrogenTransportProblem()
+
+        model.mesh = F.Mesh1D(
+            vertices=np.linspace(0, self.thickness, num=self.n_vertices)
+        )
+        material = F.Material(D_0=self.D_0, E_D=self.E_D)
+
+        vol = F.VolumeSubdomain1D(id=1, material=material, borders=[0, self.thickness])
+        left_surf = F.SurfaceSubdomain1D(id=1, x=0)
+        right_surf = F.SurfaceSubdomain1D(id=2, x=self.thickness)
+
+        model.subdomains = [vol, left_surf, right_surf]
+
+        H = F.Species("H")
+        model.species = [H]
+
+        model.boundary_conditions = [
+            F.FixedConcentrationBC(left_surf, value=0.0, species=H),
+            F.FixedConcentrationBC(right_surf, value=0.0, species=H),
+        ]
+
+        model.temperature = self.temperature
+
+        model.settings = F.Settings(
+            atol=1e-10, rtol=1e-10, transient=True, final_time=self.final_time
+        )
+
+        model.settings.stepsize = F.Stepsize(initial_value=1)
+
+        self.surface_flux_0 = F.SurfaceFlux(field=H, surface=left_surf)
+        self.surface_flux_L = F.SurfaceFlux(field=H, surface=right_surf)
+        model.exports = [self.surface_flux_0, self.surface_flux_L]
+
+        model.show_progress_bar = False
+
+        model.initialise()
+
+        self.dt = model.dt
+        self.c_0 = model.boundary_conditions[0].value_fenics
+        self.c_L = model.boundary_conditions[1].value_fenics
+
+        self.model = model
+
+    def update_festim_model(self, c_0, c_L, stepsize):
+        self.c_0.value = c_0
+        self.c_L.value = c_L
+        self.dt.value = stepsize
+
+        self.model.iterate()
+
+        return self.surface_flux_0.data[-1], self.surface_flux_L.data[-1]
+
+    def update(self, t):
+        # no internal algebraic operator -> early exit
+        # if self.op_alg is None:
+        #     return 0.0
+
+        # block inputs
+        c_0, c_L = self.inputs.to_array()
+
+        if t == 0.0:
+            flux_0, flux_L = 0, 0
+        else:
+            flux_0, flux_L = self.update_festim_model(
+                c_0=c_0, c_L=c_L, stepsize=t - self.t
+            )
+        # error control
+        return self.outputs.update_from_array([flux_0, flux_L])
