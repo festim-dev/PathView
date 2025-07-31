@@ -14,7 +14,7 @@
 {{ create_block(node) }}
 
 {%- if node["data"].get("reset_times") %}
-def reset_itg(_):
+def reset_{{ node["var_name"] }}(_):
     {{ node["var_name"] }}.reset()
 
 for t in {{ node["data"].get("reset_times", "[]") }}:
@@ -22,12 +22,24 @@ for t in {{ node["data"].get("reset_times", "[]") }}:
         pathsim.events.Schedule(
             t_start=t,
             t_end=t,
-            func_act=reset_itg,
+            func_act=reset_{{ node["var_name"] }},
         )
     )
 {%- endif %}
 
 {%- endmacro -%}
+
+
+{% macro create_bubbler_block(node) -%}
+{{ create_block(node) }}
+
+{%- if node["data"].get("replacement_times") %}
+events_{{ node["var_name"] }} = {{ node["var_name"] }}.create_reset_events()
+events += events_{{ node["var_name"] }}
+{%- endif %}
+
+{%- endmacro -%}
+
 
 
 {% macro create_function_block(node) -%}
