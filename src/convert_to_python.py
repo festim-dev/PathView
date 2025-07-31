@@ -35,17 +35,30 @@ def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
         The processed node data with variable names, class names, and expected arguments.
     """
     nodes = nodes.copy()
+    used_var_names = set()
 
     for node in nodes:
         # Make a variable name from the label
         invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
-        node["var_name"] = node["data"]["label"].lower().replace(" ", "_")
+        base_var_name = node["data"]["label"].lower().replace(" ", "_")
         for char in invalid_chars:
-            node["var_name"] = node["var_name"].replace(char, "")
+            base_var_name = base_var_name.replace(char, "")
 
-        assert node["var_name"].isidentifier(), (
-            f"Variable name must be a valid identifier. {node['var_name']}"
-        )
+        # Ensure the base variable name is a valid identifier
+        if not base_var_name.isidentifier():
+            raise ValueError(
+                f"Variable name must be a valid identifier. {node['data']['label']} to {base_var_name}"
+            )
+
+        # Make the variable name unique by appending a number if needed
+        var_name = base_var_name
+        counter = 1
+        while var_name in used_var_names:
+            var_name = f"{base_var_name}_{counter}"
+            counter += 1
+
+        node["var_name"] = var_name
+        used_var_names.add(var_name)
 
         # Add pathsim class name
         block_class = map_str_to_object.get(node["type"])
@@ -53,9 +66,7 @@ def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
         node["module_name"] = block_class.__module__
 
         # Add expected arguments
-        node["expected_arguments"] = signature(
-            map_str_to_object[node["type"]]
-        ).parameters
+        node["expected_arguments"] = signature(block_class).parameters
 
         # if it's a scope, find labels
         if node["type"] == "scope":
