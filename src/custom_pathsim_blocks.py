@@ -5,14 +5,15 @@ import numpy as np
 
 
 class Process(ODE):
-    def __init__(self, residence_time=0, ic=0, gen=0):
+    def __init__(self, residence_time=0, initial_value=0, source_term=0):
         alpha = -1 / residence_time if residence_time != 0 else 0
         super().__init__(
-            func=lambda x, u, t: x * alpha + sum(u) + gen, initial_value=ic
+            func=lambda x, u, t: x * alpha + sum(u) + source_term,
+            initial_value=initial_value,
         )
         self.residence_time = residence_time
-        self.ic = ic
-        self.gen = gen
+        self.initial_value = initial_value
+        self.source_term = source_term
 
     def update(self, t):
         x = self.engine.get()
@@ -37,6 +38,22 @@ class Splitter(Block):
         u = self.inputs[0]
         # mult by fractions and update outputs
         self.outputs.update_from_array(self.fractions * u)
+
+
+class Splitter2(Splitter):
+    def __init__(self, f1, f2):
+        """
+        Splitter with two outputs, fractions are f1 and f2.
+        """
+        super().__init__(n=2, fractions=[f1, f2])
+
+
+class Splitter3(Splitter):
+    def __init__(self, f1, f2, f3):
+        """
+        Splitter with three outputs, fractions are f1, f2 and f3.
+        """
+        super().__init__(n=3, fractions=[f1, f2, f3])
 
 
 # BUBBLER SYSTEM
