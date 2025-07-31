@@ -15,10 +15,10 @@ import Plot from 'react-plotly.js';
 import ContextMenu from './ContextMenu.jsx';
 
 // Importing node components
-import {ProcessNode, ProcessNodeHorizontal} from './ProcessNode';
+import { ProcessNode, ProcessNodeHorizontal } from './ProcessNode';
 import DelayNode from './DelayNode';
 import SourceNode from './ConstantNode';
-import {AmplifierNode, AmplifierNodeReverse} from './AmplifierNode';
+import { AmplifierNode, AmplifierNodeReverse } from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
@@ -70,6 +70,7 @@ export default function App() {
   const [copiedNode, setCopiedNode] = useState(null);
   const [copyFeedback, setCopyFeedback] = useState('');
   const ref = useRef(null);
+  const [csvData, setCsvData] = useState(null);
 
   // Solver parameters state
   const [solverParams, setSolverParams] = useState({
@@ -127,20 +128,20 @@ export default function App() {
       }
     } else {
       // Fallback for browsers (like Firefox and Safari) that don't support File System Access API
-      const blob = new Blob([JSON.stringify(graphData, null, 2)], { 
-        type: 'application/json' 
+      const blob = new Blob([JSON.stringify(graphData, null, 2)], {
+        type: 'application/json'
       });
-      
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'fuel-cycle-graph.json';
-      
+
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       alert('Graph downloaded successfully!');
     }
   };
@@ -163,16 +164,16 @@ export default function App() {
 
         const file = await fileHandle.getFile();
         const text = await file.text();
-        
+
         try {
           const graphData = JSON.parse(text);
-          
+
           // Validate that it's a valid graph file
           if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
             alert("Invalid file format. Please select a valid graph JSON file.");
             return;
           }
-          
+
           // Load the graph data
           const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
           setNodes(loadedNodes || []);
@@ -191,7 +192,7 @@ export default function App() {
             extra_params: '{}'
           });
           setGlobalVariables(loadedGlobalVariables ?? []);
-          
+
           alert('Graph loaded successfully!');
         } catch (error) {
           console.error('Error parsing file:', error);
@@ -210,21 +211,21 @@ export default function App() {
       fileInput.type = 'file';
       fileInput.accept = '.json';
       fileInput.style.display = 'none';
-      
+
       fileInput.onchange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const graphData = JSON.parse(e.target.result);
-            
+
             if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
               alert("Invalid file format. Please select a valid graph JSON file.");
               return;
             }
-            
+
             const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
             setNodes(loadedNodes || []);
             setEdges(loadedEdges || []);
@@ -242,18 +243,18 @@ export default function App() {
               extra_params: '{}'
             });
             setGlobalVariables(loadedGlobalVariables ?? []);
-            
+
             alert('Graph loaded successfully!');
           } catch (error) {
             console.error('Error parsing file:', error);
             alert('Error reading file. Please make sure it\'s a valid JSON file.');
           }
         };
-        
+
         reader.readAsText(file);
         document.body.removeChild(fileInput);
       };
-      
+
       document.body.appendChild(fileInput);
       fileInput.click();
     }
@@ -278,6 +279,58 @@ export default function App() {
     });
     setGlobalVariables([]);
   };
+  const downloadCsv = async () => {
+    if (!csvData) return;
+
+    const { time, series } = csvData;
+    const labels = Object.keys(series);
+    const header = ["time", ...labels].join(",");
+    const rows = [header];
+
+    time.forEach((t, i) => {
+      const row = [t];
+      for (const label of labels) {
+        const val = series[label][i] ?? "NaN";
+        row.push(val);
+      }
+      rows.push(row.join(","));
+    });
+
+    const csvString = rows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const filename = `simulation_${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
+
+    try {
+      if ("showSaveFilePicker" in window) {
+        const options = {
+          suggestedName: filename,
+          types: [{
+            description: "CSV File",
+            accept: { "text/csv": [".csv"] }
+          }]
+        };
+
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        throw new Error("showSaveFilePicker not supported");
+      }
+    } catch (err) {
+      console.warn("Falling back to automatic download:", err);
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    }
+  };
+
+
+
   // Allows user to save to python script
   const saveToPython = async () => {
     try {
@@ -372,6 +425,7 @@ export default function App() {
       if (result.success) {
         // Store results and switch to results tab
         setSimulationResults(result.plot);
+        setCsvData(result.csv_data);
         setActiveTab('results');
         alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
@@ -382,26 +436,26 @@ export default function App() {
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
-  
+
   // Functions for managing global variables
   const isValidPythonIdentifier = (name) => {
     // Check if name is empty
     if (!name) return false;
-    
+
     // Python identifier rules:
     // - Must start with letter or underscore
     // - Can contain letters, digits, underscores
     // - Cannot be a Python keyword
     const pythonKeywords = [
-      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue', 
-      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 
-      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 
+      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue',
+      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global',
+      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass',
       'raise', 'return', 'try', 'while', 'with', 'yield'
     ];
-    
+
     // Check if it's a keyword
     if (pythonKeywords.includes(name)) return false;
-    
+
     // Check pattern: must start with letter or underscore, followed by letters, digits, or underscores
     const pattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
     return pattern.test(name);
@@ -425,12 +479,12 @@ export default function App() {
     setGlobalVariables(globalVariables.map(variable => {
       if (variable.id === id) {
         const updatedVariable = { ...variable, [field]: value };
-        
+
         // Validate name field
         if (field === 'name') {
           updatedVariable.nameError = value !== '' && !isValidPythonIdentifier(value);
         }
-        
+
         return updatedVariable;
       }
       return variable;
@@ -446,7 +500,7 @@ export default function App() {
       if (params.sourceHandle) {
         edgeId += `-from_${params.sourceHandle}`;
       }
-      
+
       if (params.targetHandle) {
         edgeId += `-to_${params.targetHandle}`;
       }
@@ -527,34 +581,34 @@ export default function App() {
   const addNode = () => {
     // Get available node types from nodeTypes object
     const availableTypes = Object.keys(nodeTypes);
-    
+
     // Create options string for the prompt
     const typeOptions = availableTypes.map((type, index) => `${index + 1}. ${type}`).join('\n');
-    
+
     const userInput = prompt(
       `Select a node type by entering the number:\n\n${typeOptions}\n\nEnter your choice (1-${availableTypes.length}):`
     );
-    
+
     // If user cancels the prompt
     if (!userInput) {
       return;
     }
-    
+
     // Parse the user input
     const choiceIndex = parseInt(userInput) - 1;
-    
+
     // Validate the choice
     if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= availableTypes.length) {
       alert('Invalid choice. Please enter a number between 1 and ' + availableTypes.length);
       return;
     }
-    
+
     const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
-    
+
     // Create appropriate data based on node type
     let nodeData = { label: `${selectedType} ${newNodeId}` };
-    
+
     // Add type-specific default parameters
     switch (selectedType) {
       case 'process':
@@ -573,10 +627,10 @@ export default function App() {
         nodeData = { ...nodeData, amplitude: '1', T: '1', t_rise: '0.0', t_fall: '0.0', tau: '0.0', duty: '0.5' };
         break;
       case 'amplifier':
-        nodeData = { ...nodeData, gain: ''};
+        nodeData = { ...nodeData, gain: '' };
         break;
       case 'amplifier_reverse':
-        nodeData = { ...nodeData, gain: ''};
+        nodeData = { ...nodeData, gain: '' };
         break;
       case 'multiplier':
         break;
@@ -595,7 +649,7 @@ export default function App() {
         nodeData = { ...nodeData, tau: '' };
         break;
       case 'rng':
-        nodeData = { ...nodeData, sampling_rate: ''};
+        nodeData = { ...nodeData, sampling_rate: '' };
         break;
       case 'pid':
         nodeData = { ...nodeData, Kp: '', Ki: '', Kd: '', f_max: '' };
@@ -612,24 +666,24 @@ export default function App() {
         // For any other types, just use basic data
         break;
     }
-    
+
     const newNode = {
       id: newNodeId,
       type: selectedType,
       position: { x: 200 + nodes.length * 50, y: 200 },
       data: nodeData,
     };
-    
+
     setNodes((nds) => [...nds, newNode]);
     setNodeCounter((count) => count + 1);
   };
-  
+
   // Function to pop context menu when right-clicking on a node
   const onNodeContextMenu = useCallback(
     (event, node) => {
       // Prevent native context menu from showing
       event.preventDefault();
- 
+
       // Calculate position of the context menu. We want to make sure it
       // doesn't get positioned off-screen.
       const pane = ref.current.getBoundingClientRect();
@@ -644,7 +698,7 @@ export default function App() {
     },
     [setMenu],
   );
-  
+
   // Function to delete the selected node
   const deleteSelectedNode = () => {
     if (selectedNode) {
@@ -682,9 +736,9 @@ export default function App() {
   const duplicateNode = useCallback((nodeId, options = {}) => {
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
-    
+
     const newNodeId = nodeCounter.toString();
-    
+
     // Calculate position based on source (context menu vs keyboard)
     let position;
     if (options.fromKeyboard) {
@@ -700,7 +754,7 @@ export default function App() {
         y: node.position.y + 50,
       };
     }
- 
+
     const newNode = {
       ...node,
       selected: false,
@@ -712,12 +766,13 @@ export default function App() {
         label: node.data.label ? node.data.label.replace(node.id, newNodeId) : `${node.type} ${newNodeId}`
       }
     };
-    
+
     setNodes((nds) => [...nds, newNode]);
     setNodeCounter((count) => count + 1);
     setMenu(null); // Close the context menu
   }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
-  
+
+
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -731,12 +786,12 @@ export default function App() {
         event.preventDefault();
         setCopiedNode(selectedNode);
         setCopyFeedback(`Copied: ${selectedNode.data.label || selectedNode.id}`);
-        
+
         // Clear feedback after 2 seconds
         setTimeout(() => {
           setCopyFeedback('');
         }, 2000);
-        
+
         console.log('Node copied:', selectedNode.id);
         return;
       }
@@ -1020,6 +1075,26 @@ export default function App() {
             >
               Run
             </button>
+            {simulationResults && (
+              <button
+                style={{
+                  position: 'absolute',
+                  right: 20,
+                  top: 200,
+                  zIndex: 10,
+                  padding: '8px 12px',
+                  backgroundColor: '#78A083',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 5,
+                  cursor: 'pointer',
+                }}
+                onClick={downloadCsv}
+              >
+                Download CSV
+              </button>
+            )}
+
             <div
               style={{
                 position: 'absolute',
@@ -1191,9 +1266,9 @@ export default function App() {
                 marginBottom: '20px'
               }}>
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1202,7 +1277,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.dt}
-                    onChange={(e) => setSolverParams({...solverParams, dt: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, dt: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1215,11 +1290,11 @@ export default function App() {
                     placeholder="0.01"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1228,7 +1303,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.dt_min}
-                    onChange={(e) => setSolverParams({...solverParams, dt_min: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, dt_min: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1241,11 +1316,11 @@ export default function App() {
                     placeholder="1e-6"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1254,7 +1329,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.dt_max}
-                    onChange={(e) => setSolverParams({...solverParams, dt_max: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, dt_max: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1267,11 +1342,11 @@ export default function App() {
                     placeholder="1.0"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1279,7 +1354,7 @@ export default function App() {
                   </label>
                   <select
                     value={solverParams.Solver}
-                    onChange={(e) => setSolverParams({...solverParams, Solver: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, Solver: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1295,11 +1370,11 @@ export default function App() {
                     <option value="RKF21">RKF21</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1308,7 +1383,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.tolerance_fpi}
-                    onChange={(e) => setSolverParams({...solverParams, tolerance_fpi: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, tolerance_fpi: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1321,11 +1396,11 @@ export default function App() {
                     placeholder="1e-6"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1334,7 +1409,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.iterations_max}
-                    onChange={(e) => setSolverParams({...solverParams, iterations_max: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, iterations_max: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1347,11 +1422,11 @@ export default function App() {
                     placeholder="100"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1360,7 +1435,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.simulation_duration}
-                    onChange={(e) => setSolverParams({...solverParams, simulation_duration: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, simulation_duration: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1373,10 +1448,10 @@ export default function App() {
                     placeholder="50.0"
                   />
                 </div>
-                
+
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ 
-                    color: '#ffffff', 
+                  <label style={{
+                    color: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
                     marginBottom: '8px',
@@ -1386,7 +1461,7 @@ export default function App() {
                     <input
                       type="checkbox"
                       checked={solverParams.log === 'true'}
-                      onChange={(e) => setSolverParams({...solverParams, log: e.target.checked ? 'true' : 'false'})}
+                      onChange={(e) => setSolverParams({ ...solverParams, log: e.target.checked ? 'true' : 'false' })}
                       style={{
                         marginRight: '10px',
                         transform: 'scale(1.2)',
@@ -1396,11 +1471,11 @@ export default function App() {
                     Enable Logging
                   </label>
                 </div>
-                
+
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1408,7 +1483,7 @@ export default function App() {
                   </label>
                   <textarea
                     value={solverParams.extra_params}
-                    onChange={(e) => setSolverParams({...solverParams, extra_params: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, extra_params: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1433,10 +1508,10 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              
-              <div style={{ 
+
+              <div style={{
                 textAlign: 'center',
-                marginTop: '30px' 
+                marginTop: '30px'
               }}>
                 <button
                   style={{
@@ -1483,7 +1558,7 @@ export default function App() {
                 </button>
               </div>
             </div>
-            
+
             <div style={{
               marginTop: '30px',
               padding: '20px',
@@ -1531,15 +1606,15 @@ export default function App() {
               borderRadius: '10px',
               boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
             }}>
-              <p style={{ 
-                color: '#cccccc', 
+              <p style={{
+                color: '#cccccc',
                 marginBottom: '20px',
                 textAlign: 'center',
                 fontSize: '14px'
               }}>
                 Define global variables that can be used in node definitions throughout your model.
               </p>
-              
+
               {globalVariables.length === 0 ? (
                 <div style={{
                   textAlign: 'center',
@@ -1564,9 +1639,9 @@ export default function App() {
                       border: '1px solid #555'
                     }}>
                       <div>
-                        <label style={{ 
-                          color: '#ffffff', 
-                          display: 'block', 
+                        <label style={{
+                          color: '#ffffff',
+                          display: 'block',
                           marginBottom: '5px',
                           fontSize: '12px',
                           fontWeight: 'bold'
@@ -1600,9 +1675,9 @@ export default function App() {
                         )}
                       </div>
                       <div>
-                        <label style={{ 
-                          color: '#ffffff', 
-                          display: 'block', 
+                        <label style={{
+                          color: '#ffffff',
+                          display: 'block',
                           marginBottom: '5px',
                           fontSize: '12px',
                           fontWeight: 'bold'
@@ -1633,7 +1708,7 @@ export default function App() {
                           {/* Empty space to match error message height */}
                         </div>
                       </div>
-                      <div style={{ 
+                      <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         height: '100%',
@@ -1661,7 +1736,7 @@ export default function App() {
                   ))}
                 </div>
               )}
-              
+
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
@@ -1703,7 +1778,7 @@ export default function App() {
                 </button>
               </div>
             </div>
-            
+
             <div style={{
               marginTop: '30px',
               padding: '20px',
@@ -1752,6 +1827,8 @@ export default function App() {
                 }}
                 style={{ width: '100%', height: '600px' }}
               />
+
+
             ) : (
               <p style={{ color: '#666', fontSize: '18px' }}>
                 No simulation results yet. Run a simulation from the Graph Editor tab to see results here.

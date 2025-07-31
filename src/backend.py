@@ -112,6 +112,21 @@ def run_pathsim():
         # Generate the plot
         scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
 
+        # Cache data for CSV download
+        csv_payload = {
+            "time": [],
+            "series": {}  
+        }
+        max_len = 0
+        for scope in scopes:
+            time, values = scope.read()
+            max_len = max(max_len, len(time))
+            csv_payload["time"] = time.tolist() 
+            for i, series in enumerate(values):
+                label = scope.labels[i] if i < len(scope.labels) else f"{scope.label} {i}"
+                csv_payload["series"][label] = series.tolist()
+
+
         if len(scopes) == 1:
             # Single subplot case
             fig = go.Figure()
@@ -153,13 +168,13 @@ def run_pathsim():
         # Convert plot to JSON
         plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-        return jsonify(
-            {
+        return jsonify({
                 "success": True,
                 "plot": plot_data,
-                "message": "Pathsim simulation completed successfully",
-            }
-        )
+                "csv_data": csv_payload,
+                "message": "Pathsim simulation completed successfully"
+            })
+
 
     except Exception as e:
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
