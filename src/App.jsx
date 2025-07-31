@@ -52,6 +52,9 @@ const nodeTypes = {
   splitter3: Splitter3Node,
   wall: WallNode,
   bubbler: BubblerNode,
+  white_noise: SourceNode,
+  pink_noise: SourceNode,
+
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -613,6 +616,12 @@ export default function App() {
         break;
       case 'bubbler':
         nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
+        break;
+      case 'white_noise':
+        nodeData = { ...nodeData, spectral_density: '1', sampling_rate: '' };
+        break;
+      case 'pink_noise':
+        nodeData = { ...nodeData, spectral_density: '1', num_octaves: '16', sampling_rate: '' };
         break;
       default:
         // For any other types, just use basic data
