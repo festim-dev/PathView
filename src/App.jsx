@@ -82,14 +82,8 @@ export default function App() {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
 
-  // Function to save a graph
+  // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
-    const filename = prompt("Your file will be saved in the saved_graphs folder. Enter a name for your file:");
-    // if user cancels the prompt, filename will be null
-    if (!filename) {
-      alert("Save cancelled.");
-      return;
-    }
     const graphData = {
       nodes,
       edges,
@@ -98,78 +92,75 @@ export default function App() {
       globalVariables
     };
 
-    try {
-      const response = await fetch('http://localhost:8000/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename,
-          graph: graphData,
-        }),
-      });
+    // Check if File System Access API is supported
+    if ('showSaveFilePicker' in window) {
+      try {
+        // Modern approach: Use File System Access API for proper "Save As" dialog
+        const fileHandle = await window.showSaveFilePicker({
+          suggestedName: 'fuel-cycle-graph.json',
+          types: [{
+            description: 'JSON files',
+            accept: {
+              'application/json': ['.json']
+            }
+          }]
+        });
 
-      const result = await response.json();
-      alert(result.message);
-    } catch (error) {
-      console.error('Error saving graph:', error);
-    }
-  };
-  // Function to load a saved graph
-  const loadGraphOld = async () => {
-    const filename = prompt("Enter the name of a file from the saved_graphs folder to load:");
-    if (!filename) return;
+        // Create a writable stream and write the data
+        const writable = await fileHandle.createWritable();
+        await writable.write(JSON.stringify(graphData, null, 2));
+        await writable.close();
 
-    try {
-      const response = await fetch('http://localhost:8000/load', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename }),
-      });
-
-      if (!response.ok) {
-        alert("Failed to load file.");
-        return;
+        // Success message
+        alert('Graph saved successfully!');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error saving file:', error);
+          alert('Failed to save file.');
+        }
+        // User cancelled the dialog - no error message needed
       }
-
-      const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = await response.json();
-      setNodes(loadedNodes);
-      setEdges(loadedEdges);
-      setSelectedNode(null);
-      setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-      setSolverParams(loadedSolverParams ?? {
-        dt: '0.01',
-        dt_min: '1e-6',
-        dt_max: '1.0',
-        Solver: 'SSPRK22',
-        tolerance_fpi: '1e-6',
-        iterations_max: '100',
-        log: 'true',
-        simulation_duration: '50.0',
-        extra_params: '{}'
+    } else {
+      // Fallback for browsers (like Firefox and Safari) that don't support File System Access API
+      const blob = new Blob([JSON.stringify(graphData, null, 2)], { 
+        type: 'application/json' 
       });
-      setGlobalVariables(loadedGlobalVariables ?? []);
-    } catch (error) {
-      console.error('Error loading graph:', error);
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'fuel-cycle-graph.json';
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert('Graph downloaded successfully!');
     }
   };
+
   // Function to load a saved graph from computer
-  const loadGraph = () => {
-    // Create a file input element
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    
-    // Handle file selection
-    fileInput.onchange = (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      // Read the file
-      const reader = new FileReader();
-      reader.onload = (e) => {
+  const loadGraph = async () => {
+    // Check if File System Access API is supported
+    if ('showOpenFilePicker' in window) {
+      try {
+        // Modern approach: Use File System Access API
+        const [fileHandle] = await window.showOpenFilePicker({
+          types: [{
+            description: 'JSON files',
+            accept: {
+              'application/json': ['.json']
+            }
+          }],
+          multiple: false
+        });
+
+        const file = await fileHandle.getFile();
+        const text = await file.text();
+        
         try {
-          const graphData = JSON.parse(e.target.result);
+          const graphData = JSON.parse(text);
           
           // Validate that it's a valid graph file
           if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
@@ -196,22 +187,71 @@ export default function App() {
           });
           setGlobalVariables(loadedGlobalVariables ?? []);
           
-          // alert('Graph loaded successfully from your computer!');
+          alert('Graph loaded successfully!');
         } catch (error) {
           console.error('Error parsing file:', error);
           alert('Error reading file. Please make sure it\'s a valid JSON file.');
         }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error opening file:', error);
+          alert('Failed to open file.');
+        }
+        // User cancelled the dialog - no error message needed
+      }
+    } else {
+      // Fallback for browsers that don't support File System Access API
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json';
+      fileInput.style.display = 'none';
+      
+      fileInput.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const graphData = JSON.parse(e.target.result);
+            
+            if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
+              alert("Invalid file format. Please select a valid graph JSON file.");
+              return;
+            }
+            
+            const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
+            setNodes(loadedNodes || []);
+            setEdges(loadedEdges || []);
+            setSelectedNode(null);
+            setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
+            setSolverParams(loadedSolverParams ?? {
+              dt: '0.01',
+              dt_min: '1e-6',
+              dt_max: '1.0',
+              Solver: 'SSPRK22',
+              tolerance_fpi: '1e-6',
+              iterations_max: '100',
+              log: 'true',
+              simulation_duration: '50.0',
+              extra_params: '{}'
+            });
+            setGlobalVariables(loadedGlobalVariables ?? []);
+            
+            alert('Graph loaded successfully!');
+          } catch (error) {
+            console.error('Error parsing file:', error);
+            alert('Error reading file. Please make sure it\'s a valid JSON file.');
+          }
+        };
+        
+        reader.readAsText(file);
+        document.body.removeChild(fileInput);
       };
       
-      reader.readAsText(file);
-      
-      // Clean up
-      document.body.removeChild(fileInput);
-    };
-    
-    // Add to DOM and trigger click
-    document.body.appendChild(fileInput);
-    fileInput.click();
+      document.body.appendChild(fileInput);
+      fileInput.click();
+    }
   };
 
   // Allows user to clear user inputs and go back to default settings
@@ -266,7 +306,7 @@ export default function App() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        alert('Python script generated and downloaded successfully!');
+        // alert('Python script generated and downloaded successfully!');
       } else {
         alert(`Error generating Python script: ${result.error}`);
       }
