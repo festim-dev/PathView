@@ -295,18 +295,47 @@ export default function App() {
       const result = await response.json();
 
       if (result.success) {
-        // Create a downloadable file with the generated Python script
-        const blob = new Blob([result.script], { type: 'text/python' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'generated_fuel_cycle_script.py';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // Check if File System Access API is supported
+        if ('showSaveFilePicker' in window) {
+          try {
+            // Modern approach: Use File System Access API for proper "Save As" dialog
+            const fileHandle = await window.showSaveFilePicker({
+              suggestedName: 'fuel_cycle_script.py',
+              types: [{
+                description: 'Python files',
+                accept: {
+                  'text/x-python': ['.py']
+                }
+              }]
+            });
 
-        // alert('Python script generated and downloaded successfully!');
+            // Create a writable stream and write the Python script
+            const writable = await fileHandle.createWritable();
+            await writable.write(result.script);
+            await writable.close();
+
+            alert('Python script generated and saved successfully!');
+          } catch (error) {
+            if (error.name !== 'AbortError') {
+              console.error('Error saving Python file:', error);
+              alert('Failed to save Python script.');
+            }
+            // User cancelled the dialog - no error message needed
+          }
+        } else {
+          // Fallback for browsers (Firefox, Safari) that don't support File System Access API
+          const blob = new Blob([result.script], { type: 'text/x-python' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'fuel_cycle_script.py';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          alert('Python script generated and downloaded to your default downloads folder!');
+        }
       } else {
         alert(`Error generating Python script: ${result.error}`);
       }
