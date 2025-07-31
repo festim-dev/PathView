@@ -19,7 +19,7 @@ from pathsim.blocks import (
     PID,
     Schedule,
 )
-from .custom_pathsim_blocks import Process, Splitter
+from .custom_pathsim_blocks import Process, Splitter, Bubbler
 from flask import jsonify
 
 NAME_TO_SOLVER = {
@@ -46,6 +46,7 @@ map_str_to_object = {
     "integrator": Integrator,
     "function": Function,
     "delay": Delay,
+    "bubbler": Bubbler,
 }
 
 
@@ -133,6 +134,24 @@ def create_function(node: dict, eval_namespace: dict = None) -> Block:
 
     block = Function(func=func)
     return block
+
+
+def create_bubbler(node: dict) -> Bubbler:
+    """
+    Create a Bubbler block based on the node data.
+    """
+    # Extract parameters from node data
+    block = Bubbler(
+        conversion_efficiency=eval(node["data"]["conversion_efficiency"]),
+        vial_efficiency=eval(node["data"]["vial_efficiency"]),
+        replacement_times=eval(node["data"]["replacement_time"])
+        if node["data"].get("replacement_time") != ""
+        else None,
+    )
+
+    events = block.create_reset_events()
+
+    return block, events
 
 
 def create_scope(node: dict, edges, nodes) -> Scope:
@@ -326,6 +345,9 @@ def make_blocks(
                     eval(node["data"]["f3"], eval_namespace),
                 ],
             )
+        elif block_type == "bubbler":
+            block, events_bubbler = create_bubbler(node)
+            events.extend(events_bubbler)
         else:  # try automated construction
             block = auto_block_construction(node, eval_namespace)
 
@@ -370,6 +392,21 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                 assert edge["sourceHandle"], edge
                 output_index = int(edge["sourceHandle"].replace("source", "")) - 1
                 if output_index >= block.n:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Bubbler):
+                if edge["sourceHandle"] == "vial1":
+                    output_index = 0
+                elif edge["sourceHandle"] == "vial2":
+                    output_index = 1
+                elif edge["sourceHandle"] == "vial3":
+                    output_index = 2
+                elif edge["sourceHandle"] == "vial4":
+                    output_index = 3
+                elif edge["sourceHandle"] == "sample_out":
+                    output_index = 4
+                else:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )

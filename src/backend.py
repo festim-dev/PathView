@@ -8,7 +8,6 @@ from plotly.subplots import make_subplots
 import plotly
 import json as plotly_json
 
-
 from .convert_to_python import convert_graph_to_python
 from .pathsim_utils import make_pathsim_model
 from pathsim.blocks import Scope

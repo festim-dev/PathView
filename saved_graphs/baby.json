@@ -3,7 +3,7 @@
     {
       "data": {
         "amplitude": "1",
-        "delay": "1",
+        "delay": "2",
         "label": "stepsource 2"
       },
       "dragging": false,
@@ -13,10 +13,10 @@
         "width": 120
       },
       "position": {
-        "x": 339,
-        "y": 435
+        "x": 398.37785598478024,
+        "y": 489.09982434168865
       },
-      "selected": false,
+      "selected": true,
       "type": "stepsource"
     },
     {
@@ -41,7 +41,7 @@
     {
       "data": {
         "gain": "-1",
-        "label": "amplifier 4"
+        "label": "x (-1)"
       },
       "dragging": false,
       "id": "4",
@@ -67,7 +67,7 @@
         "width": 120
       },
       "position": {
-        "x": 875,
+        "x": 859.1659050707252,
         "y": 126
       },
       "selected": false,
@@ -111,8 +111,8 @@
     {
       "data": {
         "initial_value": "",
-        "label": "process 8",
-        "residence_time": "10",
+        "label": "BABY",
+        "residence_time": "(k_IV + k_OV)/baby_vol",
         "source_term": ""
       },
       "dragging": false,
@@ -122,146 +122,15 @@
         "width": 200
       },
       "position": {
-        "x": 1102,
-        "y": 571
+        "x": 1020.1905095320806,
+        "y": 573.6390158215457
       },
       "selected": false,
       "type": "process"
     },
     {
       "data": {
-        "f1": "0.9",
-        "f2": "0.1",
-        "label": "Collection eff."
-      },
-      "dragging": false,
-      "id": "11",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 1305,
-        "y": 698
-      },
-      "selected": false,
-      "type": "splitter2"
-    },
-    {
-      "data": {
-        "f1": "0.9",
-        "f2": "0.1",
-        "label": "Collection eff."
-      },
-      "dragging": false,
-      "id": "13",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 1312,
-        "y": 871
-      },
-      "selected": false,
-      "type": "splitter2"
-    },
-    {
-      "data": {
-        "f1": "0.99",
-        "f2": "0.01",
-        "label": "HT -> HTO eff."
-      },
-      "dragging": false,
-      "id": "14",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 1353.9258928782547,
-        "y": 1099.0441878253396
-      },
-      "selected": false,
-      "type": "splitter2"
-    },
-    {
-      "data": {
-        "f1": "0.9",
-        "f2": "0.1",
-        "label": "Collection eff."
-      },
-      "dragging": false,
-      "id": "16",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 1659,
-        "y": 771
-      },
-      "selected": false,
-      "type": "splitter2"
-    },
-    {
-      "data": {
-        "f1": "0.9",
-        "f2": "0.1",
-        "label": "Collection eff."
-      },
-      "dragging": false,
-      "id": "18",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 1667,
-        "y": 951
-      },
-      "selected": false,
-      "type": "splitter2"
-    },
-    {
-      "data": {
-        "initial_value": "",
-        "label": "ambient air",
-        "reset_times": ""
-      },
-      "dragging": false,
-      "id": "19",
-      "measured": {
-        "height": 48,
-        "width": 200
-      },
-      "position": {
-        "x": 2040,
-        "y": 913
-      },
-      "selected": false,
-      "type": "integrator"
-    },
-    {
-      "data": {
-        "label": "adder 20"
-      },
-      "dragging": false,
-      "id": "20",
-      "measured": {
-        "height": 64,
-        "width": 64
-      },
-      "position": {
-        "x": 1769,
-        "y": 1185
-      },
-      "selected": false,
-      "type": "adder"
-    },
-    {
-      "data": {
-        "label": "Inventories"
+        "label": "IV vial activity"
       },
       "dragging": false,
       "id": "21",
@@ -270,28 +139,11 @@
         "width": 120
       },
       "position": {
-        "x": 1822.4225842692827,
-        "y": 260.99001087345584
+        "x": 1949.5229665105167,
+        "y": 563.941606900507
       },
       "selected": false,
       "type": "scope"
-    },
-    {
-      "data": {
-        "label": "adder 0"
-      },
-      "dragging": false,
-      "id": "0",
-      "measured": {
-        "height": 64,
-        "width": 64
-      },
-      "position": {
-        "x": 1517.8462568023597,
-        "y": 978.8349758222805
-      },
-      "selected": false,
-      "type": "adder"
     },
     {
       "data": {
@@ -306,65 +158,86 @@
         "width": 120
       },
       "position": {
-        "x": 865.0782538373575,
-        "y": 719.9802025169162
+        "x": 1394.0782538373574,
+        "y": 743.9802025169162
       },
       "selected": false,
       "type": "splitter2"
     },
     {
-      "id": "24",
-      "type": "integrator",
+      "id": "23",
+      "type": "bubbler",
       "position": {
-        "x": 1455,
-        "y": 316
+        "x": 1595,
+        "y": 722
       },
       "data": {
-        "label": "IV 1",
-        "initial_value": "",
-        "reset_times": ""
+        "label": "IV bubbler",
+        "conversion_efficiency": "0.95",
+        "vial_efficiency": "0.9",
+        "replacement_time": "np.arange(5, 50, step=3)"
       },
       "measured": {
-        "width": 200,
-        "height": 48
+        "width": 230,
+        "height": 160
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "24",
+      "type": "splitter2",
+      "position": {
+        "x": 1193,
+        "y": 851
+      },
+      "data": {
+        "label": "IV vs OV",
+        "f1": "k_IV/(k_IV + k_OV)",
+        "f2": "k_OV/(k_IV + k_OV)"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
       },
       "selected": false,
       "dragging": false
     },
     {
       "id": "25",
-      "type": "integrator",
+      "type": "splitter2",
       "position": {
-        "x": 1525,
-        "y": 416
+        "x": 1410.747877541758,
+        "y": 965.2139451372932
       },
       "data": {
-        "label": "IV 2",
-        "initial_value": "",
-        "reset_times": ""
+        "label": "soluble vs insoluble",
+        "f1": "0.01",
+        "f2": "0.99"
       },
       "measured": {
-        "width": 200,
-        "height": 48
+        "width": 120,
+        "height": 120
       },
       "selected": false,
       "dragging": false
     },
     {
       "id": "26",
-      "type": "integrator",
+      "type": "bubbler",
       "position": {
-        "x": 1532,
-        "y": 505
+        "x": 1602.4670834180595,
+        "y": 970.2206053879095
       },
       "data": {
-        "label": "IV 3",
-        "initial_value": "",
-        "reset_times": ""
+        "label": "OV bubbler",
+        "conversion_efficiency": "0.95",
+        "vial_efficiency": "0.9",
+        "replacement_time": "np.arange(5, 50, step=5)"
       },
       "measured": {
-        "width": 200,
-        "height": 48
+        "width": 230,
+        "height": 160
       },
       "selected": false,
       "dragging": false
@@ -373,17 +246,51 @@
       "id": "27",
       "type": "integrator",
       "position": {
-        "x": 1640,
-        "y": 572
+        "x": 2059.579367811878,
+        "y": 919.8031067000171
       },
       "data": {
-        "label": "IV 4",
+        "label": "environment",
         "initial_value": "",
         "reset_times": ""
       },
       "measured": {
         "width": 200,
         "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "28",
+      "type": "scope",
+      "position": {
+        "x": 1923.4902343023584,
+        "y": 1097.1334152526842
+      },
+      "data": {
+        "label": "OV vial activity"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "30",
+      "type": "scope",
+      "position": {
+        "x": 916,
+        "y": 786
+      },
+      "data": {
+        "label": "BABY inventory"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
       },
       "selected": false,
       "dragging": false
@@ -506,219 +413,10 @@
       "type": "smoothstep"
     },
     {
-      "data": {},
-      "id": "e11-13-from_source2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "11",
-      "sourceHandle": "source2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "13",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e13-14-from_source2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "13",
-      "sourceHandle": "source2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "14",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e16-18-from_source2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "16",
-      "sourceHandle": "source2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "18",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e14-20-from_source2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "14",
-      "sourceHandle": "source2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "20",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e18-20-from_source2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "18",
-      "sourceHandle": "source2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "20",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e20-19",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "20",
-      "sourceHandle": null,
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "19",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e8-1-from_mass_flow_rate",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "8",
-      "sourceHandle": "mass_flow_rate",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "1",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e1-11-from_source1",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "1",
-      "sourceHandle": "source1",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "11",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e1-0-from_source2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "1",
-      "sourceHandle": "source2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "0",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e0-16",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "0",
-      "sourceHandle": null,
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "16",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e14-0-from_source1",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "14",
-      "sourceHandle": "source1",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "0",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "id": "e24-21",
+      "id": "e24-1-from_source1",
       "source": "24",
-      "target": "21",
-      "sourceHandle": null,
+      "target": "1",
+      "sourceHandle": "source1",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -734,10 +432,48 @@
       }
     },
     {
-      "id": "e25-21",
-      "source": "25",
+      "id": "e1-23-from_source1-to_sample_in_soluble",
+      "source": "1",
+      "target": "23",
+      "sourceHandle": "source1",
+      "targetHandle": "sample_in_soluble",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-23-from_source2-to_sample_in_insoluble",
+      "source": "1",
+      "target": "23",
+      "sourceHandle": "source2",
+      "targetHandle": "sample_in_insoluble",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e23-21-from_vial1",
+      "source": "23",
       "target": "21",
-      "sourceHandle": null,
+      "sourceHandle": "vial1",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -753,10 +489,10 @@
       }
     },
     {
-      "id": "e26-21",
-      "source": "26",
+      "id": "e23-21-from_vial2",
+      "source": "23",
       "target": "21",
-      "sourceHandle": null,
+      "sourceHandle": "vial2",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -772,10 +508,10 @@
       }
     },
     {
-      "id": "e27-21",
-      "source": "27",
+      "id": "e23-21-from_vial3",
+      "source": "23",
       "target": "21",
-      "sourceHandle": null,
+      "sourceHandle": "vial3",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -791,10 +527,29 @@
       }
     },
     {
-      "id": "e11-24-from_source1",
-      "source": "11",
+      "id": "e23-21-from_vial4",
+      "source": "23",
+      "target": "21",
+      "sourceHandle": "vial4",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e8-24-from_mass_flow_rate",
+      "source": "8",
       "target": "24",
-      "sourceHandle": "source1",
+      "sourceHandle": "mass_flow_rate",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -810,10 +565,10 @@
       }
     },
     {
-      "id": "e13-25-from_source1",
-      "source": "13",
+      "id": "e24-25-from_source2",
+      "source": "24",
       "target": "25",
-      "sourceHandle": "source1",
+      "sourceHandle": "source2",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -829,10 +584,48 @@
       }
     },
     {
-      "id": "e16-26-from_source1",
-      "source": "16",
+      "id": "e25-26-from_source1-to_sample_in_soluble",
+      "source": "25",
       "target": "26",
       "sourceHandle": "source1",
+      "targetHandle": "sample_in_soluble",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e25-26-from_source2-to_sample_in_insoluble",
+      "source": "25",
+      "target": "26",
+      "sourceHandle": "source2",
+      "targetHandle": "sample_in_insoluble",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e23-27-from_sample_out",
+      "source": "23",
+      "target": "27",
+      "sourceHandle": "sample_out",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -848,10 +641,105 @@
       }
     },
     {
-      "id": "e18-27-from_source1",
-      "source": "18",
+      "id": "e26-27-from_sample_out",
+      "source": "26",
       "target": "27",
-      "sourceHandle": "source1",
+      "sourceHandle": "sample_out",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e26-28-from_vial1",
+      "source": "26",
+      "target": "28",
+      "sourceHandle": "vial1",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e26-28-from_vial2",
+      "source": "26",
+      "target": "28",
+      "sourceHandle": "vial2",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e26-28-from_vial3",
+      "source": "26",
+      "target": "28",
+      "sourceHandle": "vial3",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e26-28-from_vial4",
+      "source": "26",
+      "target": "28",
+      "sourceHandle": "vial4",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e8-30-from_inv",
+      "source": "8",
+      "target": "30",
+      "sourceHandle": "inv",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -867,24 +755,36 @@
       }
     }
   ],
-  "nodeCounter": 28,
+  "nodeCounter": 31,
   "solverParams": {
-    "Solver": "SSPRK22",
     "dt": "0.01",
-    "dt_max": "1.0",
     "dt_min": "1e-6",
-    "extra_params": "{}",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
     "iterations_max": "100",
     "log": "true",
-    "simulation_duration": "duration",
-    "tolerance_fpi": "1e-6"
+    "simulation_duration": "50.0",
+    "extra_params": "{\"tolerance_lte_rel\":1e-4, \"tolerance_lte_abs\":1e-9}"
   },
   "globalVariables": [
     {
-      "id": "1753728685046",
-      "name": "duration",
-      "nameError": false,
-      "value": "50"
+      "id": "1753792090540",
+      "name": "baby_vol",
+      "value": "1",
+      "nameError": false
+    },
+    {
+      "id": "1753797344108",
+      "name": "k_IV",
+      "value": "5",
+      "nameError": false
+    },
+    {
+      "id": "1753797380350",
+      "name": "k_OV",
+      "value": "1",
+      "nameError": false
     }
   ]
 }
