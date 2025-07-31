@@ -22,6 +22,7 @@ from pathsim.blocks import (
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
 from .custom_pathsim_blocks import Process, Splitter, Bubbler
 from flask import jsonify
+import inspect
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
@@ -299,14 +300,21 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
 
     block_class = map_str_to_object[block_type]
 
-    # skip 'self'
-    parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
+    parameters_for_class = inspect.signature(block_class.__init__).parameters
+    parameters = {}
+    for k, value in parameters_for_class.items():
+        if k == "self":
+            continue
+        user_input = node["data"][k]
+        if user_input == "":
+            if value.default is inspect._empty:
+                raise ValueError(
+                    f"expected parameter for {k} in {block_type} ({node['label']})"
+                )
+            parameters[k] = value.default
+        else:
+            parameters[k] = eval(user_input, eval_namespace)
 
-    parameters = {
-        k: eval(v, eval_namespace)
-        for k, v in node["data"].items()
-        if k in parameters_for_class
-    }
     return block_class(**parameters)
 
 
