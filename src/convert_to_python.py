@@ -1,151 +1,183 @@
 from jinja2 import Environment, FileSystemLoader
-import json
 import os
+from inspect import signature
+
+from pathsim.blocks import Scope
+from .custom_pathsim_blocks import (
+    Process,
+    Splitter,
+)
+from .pathsim_utils import (
+    map_str_to_object,
+    make_blocks,
+    make_connections,
+    make_global_variables,
+)
 
 
-def process_graph_data(json_file: str) -> dict:
-    """Process the JSON graph data and prepare it for template rendering."""
-    data = json.load(open(json_file))
-
-    return process_graph_data_from_dict(data)
-
-
-def main():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    templates_dir = os.path.join(current_dir, "templates")
-
-    environment = Environment(loader=FileSystemLoader(templates_dir))
-    template = environment.get_template("template.py")
-
-    results_filename = os.path.join(current_dir, "..", "generated_script.py")
-
-    # Process the graph data
-    test_file_path = os.path.join(current_dir, "..", "saved_graphs", "test3.json")
-    context = process_graph_data(test_file_path)
-
-    # Render the template
-    with open(results_filename, mode="w", encoding="utf-8") as results:
-        results.write(template.render(context))
-        print(f"... wrote {results_filename}")
-
-
-def convert_graph_to_python(
-    graph_data: dict, output_filename: str = "generated_script.py"
-) -> str:
-    """Convert graph data to Python script and return the generated code."""
+def convert_graph_to_python(graph_data: dict) -> str:
+    """Convert graph data to a Python script as a string."""
     # Get the directory of this file to properly reference templates
     current_dir = os.path.dirname(os.path.abspath(__file__))
     templates_dir = os.path.join(current_dir, "templates")
 
     environment = Environment(loader=FileSystemLoader(templates_dir))
-    template = environment.get_template("template.py")
+    template = environment.get_template("template_with_macros.py")
 
     # Process the graph data
     context = process_graph_data_from_dict(graph_data)
 
     # Render the template
-    generated_code = template.render(context)
+    return template.render(context)
 
-    # Write to file
-    output_path = os.path.join(current_dir, "..", output_filename)
-    with open(output_path, mode="w", encoding="utf-8") as results:
-        results.write(generated_code)
 
-    return generated_code
+def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
+    """
+    Given a list of node and edge data as dictionaries, process the nodes to create
+    variable names, class names, and expected arguments for each node.
+
+    Returns:
+        The processed node data with variable names, class names, and expected arguments.
+    """
+    nodes = nodes.copy()
+    used_var_names = set()
+
+    for node in nodes:
+        # Make a variable name from the label
+        invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
+        base_var_name = node["data"]["label"].lower().replace(" ", "_")
+        for char in invalid_chars:
+            base_var_name = base_var_name.replace(char, "")
+
+        # Ensure the base variable name is a valid identifier
+        if not base_var_name.isidentifier():
+            raise ValueError(
+                f"Variable name must be a valid identifier. {node['data']['label']} to {base_var_name}"
+            )
+
+        # Make the variable name unique by appending a number if needed
+        var_name = base_var_name
+        counter = 1
+        while var_name in used_var_names:
+            var_name = f"{base_var_name}_{counter}"
+            counter += 1
+
+        node["var_name"] = var_name
+        used_var_names.add(var_name)
+
+        # Add pathsim class name
+        block_class = map_str_to_object.get(node["type"])
+        node["class_name"] = block_class.__name__
+        node["module_name"] = block_class.__module__
+
+        # Add expected arguments
+        node["expected_arguments"] = signature(block_class).parameters
+
+        # if it's a scope, find labels
+        if node["type"] == "scope":
+            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
+            incoming_edges.sort(key=lambda x: x["source"])
+            node["labels"] = []
+            for incoming_edge in incoming_edges:
+                source_node = next(
+                    (n for n in nodes if n["id"] == incoming_edge["source"])
+                )
+
+                # TODO take care of duplicated labels
+                node["labels"].append(source_node["data"]["label"])
+    return nodes
+
+
+# TODO: this is effectively a duplicate of pathsim_utils.make_connections
+# need to refactor
+def make_edge_data(data: dict) -> list[dict]:
+    """
+    Process edges to add source/target variable names and ports.
+
+    Does it by creating pathsim.blocks and Connections from the data with
+    ``make_blocks`` and ``make_connections`` functions.
+
+    Then, since the data (source/target blocks, ports) is already in the
+    connections, we can simply read the ports id from the actual pathsim
+    connections and add them to the edges.
+
+    Args:
+        data: The graph data containing "nodes" and "edges".
+
+    Returns:
+        The processed edges with source/target variable names and ports.
+    """
+    data = data.copy()
+
+    # we need the namespace since we call make_blocks
+    namespace = make_global_variables(data["globalVariables"])
+    blocks, _ = make_blocks(data["nodes"], data["edges"], eval_namespace=namespace)
+
+    # Process each node and its sorted incoming edges to create connections
+    block_to_input_index = {b: 0 for b in blocks}
+    for node in data["nodes"]:
+        outgoing_edges = [
+            edge for edge in data["edges"] if edge["source"] == node["id"]
+        ]
+        outgoing_edges.sort(key=lambda x: x["target"])
+
+        block = next((b for b in blocks if b.id == node["id"]))
+
+        for edge in outgoing_edges:
+            target_block = next((b for b in blocks if b.id == edge["target"]))
+            target_node = next((n for n in data["nodes"] if n["id"] == edge["target"]))
+            if isinstance(block, Process):
+                if edge["sourceHandle"] == "inv":
+                    output_index = 0
+                elif edge["sourceHandle"] == "mass_flow_rate":
+                    output_index = 1
+                    assert block.residence_time != 0, (
+                        "Residence time must be non-zero for mass flow rate output."
+                    )
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Splitter):
+                # Splitter outputs are always in order, so we can use the handle directly
+                assert edge["sourceHandle"], edge
+                output_index = int(edge["sourceHandle"].replace("source", "")) - 1
+                if output_index >= block.n:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            else:
+                output_index = 0
+
+            if isinstance(target_block, Scope):
+                input_index = target_block._connections_order.index(edge["id"])
+            else:
+                input_index = block_to_input_index[target_block]
+
+            edge["source_var_name"] = node["var_name"]
+            edge["target_var_name"] = target_node["var_name"]
+            edge["source_port"] = f"[{output_index}]"
+            edge["target_port"] = f"[{input_index}]"
+            block_to_input_index[target_block] += 1
+
+    return data["edges"]
 
 
 def process_graph_data_from_dict(data: dict) -> dict:
-    """Process graph data from a dictionary (same as process_graph_data but takes dict instead of file path)."""
-    # Clean up labels for variable names
-    for block in data["nodes"]:
-        block["data"]["label"] = block["data"]["label"].lower().replace(" ", "_")
+    """
+    Process graph data from a dictionary.
 
-    def find_node_by_id(node_id: str) -> dict:
-        for node in data["nodes"]:
-            if node["id"] == node_id:
-                return node
-        return None
+    Adds variable names, class names, and expected arguments to nodes,
+    and processes edges to include source/target variable names and ports.
 
-    # Process each node to determine its incoming connections and betas
-    processed_blocks = []
+    This processed data can then be more easily used to generate Python code.
+    """
+    data = data.copy()
 
-    for node in data["nodes"]:
-        # Find all incoming edges to this node
-        incoming_edges = [
-            edge for edge in data["edges"] if edge["target"] == node["id"]
-        ]
+    # Process nodes to create variable names and class names
+    data["nodes"] = process_node_data(data["nodes"], data["edges"])
 
-        # Sort incoming edges by source id to ensure consistent ordering
-        incoming_edges.sort(key=lambda x: x["source"])
+    # Process to add source/target variable names to edges + ports
+    data["edges"] = make_edge_data(data)
 
-        # Calculate transfer fractions and source blocks for this node
-        transfer_fractions = []
-        source_block_labels = []
-
-        for edge in incoming_edges:
-            source_node = find_node_by_id(edge["source"])
-            outgoing_edges = [
-                edge for edge in data["edges"] if edge["source"] == source_node["id"]
-            ]
-            # default transfer fraction split equally
-            f = edge["data"].get("weight", 1 / len(outgoing_edges))
-
-            # Create transfer fraction variable name
-            f_var_name = f"f_{source_node['data']['label']}_{node['data']['label']}"
-
-            transfer_fractions.append(
-                {
-                    "var_name": f_var_name,
-                    "value": f,
-                    "source_label": source_node["data"]["label"],
-                    "target_label": node["data"]["label"],
-                }
-            )
-            source_block_labels.append(source_node["data"]["label"])
-
-        # Create processed block info
-        processed_block = {
-            "id": node["id"],
-            "data": node["data"],
-            "transfer_fractions": transfer_fractions,
-            "source_block_labels": source_block_labels,
-            "incoming_edges": incoming_edges,
-        }
-        processed_blocks.append(processed_block)
-
-    # Collect all transfer fractions for global variable generation
-    all_transfer_fractions = []
-    for block in processed_blocks:
-        all_transfer_fractions.extend(block["transfer_fractions"])
-
-    # Create connection data with proper indexing
-    connection_data = []
-
-    # for nodes with several inputs, the order of the connection needs to
-    # be the same as the order of the transfer fractions (which are sorted by source id)
-    for block in processed_blocks:
-        target_input_index = 0
-        # Use the sorted incoming edges from each block to maintain order consistency
-        for edge in block["incoming_edges"]:
-            source_label = find_node_by_id(edge["source"])["data"]["label"]
-            target_label = block["data"]["label"]
-
-            connection_data.append(
-                {
-                    "source": source_label,
-                    "target": target_label,
-                    "target_input_index": target_input_index,
-                }
-            )
-
-            target_input_index += 1
-
-    return {
-        "blocks": processed_blocks,
-        "connection_data": connection_data,
-        "transfer_fractions": all_transfer_fractions,
-    }
-
-
-if __name__ == "__main__":
-    main()
+    return data
