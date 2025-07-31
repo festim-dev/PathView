@@ -158,7 +158,7 @@ def test_bubbler_has_reset_times():
     }
     code = convert_graph_to_python(sample_data)
     print(code)
-    assert "bubbler_1.reset()" in code
+    assert "bubbler_1.create_reset_events()" in code
 
 
 if __name__ == "__main__":
