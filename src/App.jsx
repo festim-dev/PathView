@@ -610,8 +610,10 @@ export default function App() {
         break;
       case 'wall':
         nodeData = { ...nodeData, thickness: '', temperature: '', D_0: '1', E_D: '0', n_vertices: '100' };
+        break;
       case 'bubbler':
         nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
+        break;
       default:
         // For any other types, just use basic data
         break;

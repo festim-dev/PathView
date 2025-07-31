@@ -220,7 +220,7 @@ class FestimWall(Block):
         model.temperature = self.temperature
 
         model.settings = F.Settings(
-            atol=1e-10, rtol=1e-10, transient=True, final_time=self.final_time
+            atol=1e-10, rtol=1e-10, transient=True, final_time=1
         )
 
         model.settings.stepsize = F.Stepsize(initial_value=1)
