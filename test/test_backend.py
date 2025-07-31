@@ -1,4 +1,8 @@
-from src.backend import create_integrator, auto_block_construction, create_function
+from src.pathsim_utils import (
+    create_integrator,
+    auto_block_construction,
+    create_function,
+)
 from src.custom_pathsim_blocks import Process, Splitter
 
 import pathsim.blocks
