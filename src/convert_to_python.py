@@ -6,6 +6,7 @@ from pathsim.blocks import Scope
 from .custom_pathsim_blocks import (
     Process,
     Splitter,
+    Bubbler,
 )
 from .pathsim_utils import (
     map_str_to_object,
@@ -143,6 +144,21 @@ def make_edge_data(data: dict) -> list[dict]:
                 assert edge["sourceHandle"], edge
                 output_index = int(edge["sourceHandle"].replace("source", "")) - 1
                 if output_index >= block.n:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Bubbler):
+                if edge["sourceHandle"] == "vial1":
+                    output_index = 0
+                elif edge["sourceHandle"] == "vial2":
+                    output_index = 1
+                elif edge["sourceHandle"] == "vial3":
+                    output_index = 2
+                elif edge["sourceHandle"] == "vial4":
+                    output_index = 3
+                elif edge["sourceHandle"] == "sample_out":
+                    output_index = 4
+                else:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
