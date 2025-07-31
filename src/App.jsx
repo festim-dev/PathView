@@ -51,6 +51,7 @@ const nodeTypes = {
   splitter3: Splitter3Node,
   bubbler: BubblerNode,
   white_noise: SourceNode,
+  pink_noise: SourceNode,
 
 };
 
@@ -611,8 +612,11 @@ export default function App() {
       case 'bubbler':
         nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
         break;
-        case 'white_noise':
+      case 'white_noise':
         nodeData = { ...nodeData, spectral_density: '1', sampling_rate: '' };
+        break;
+      case 'pink_noise':
+        nodeData = { ...nodeData, spectral_density: '1', num_octaves: '16', sampling_rate: '' };
         break;
       default:
         // For any other types, just use basic data

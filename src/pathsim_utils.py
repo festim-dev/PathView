@@ -19,7 +19,7 @@ from pathsim.blocks import (
     PID,
     Schedule,
 )
-from pathsim.blocks.noise import WhiteNoise
+from pathsim.blocks.noise import WhiteNoise, PinkNoise
 from .custom_pathsim_blocks import Process, Splitter, Bubbler
 from flask import jsonify
 
@@ -49,6 +49,7 @@ map_str_to_object = {
     "delay": Delay,
     "bubbler": Bubbler,
     "white_noise": WhiteNoise,
+    "pink_noise": PinkNoise,
 }
 
 
