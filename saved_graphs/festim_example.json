@@ -1,28 +1,6 @@
 {
   "nodes": [
     {
-      "id": "2",
-      "type": "wall",
-      "position": {
-        "x": 919.6228024037504,
-        "y": 398.2293552785672
-      },
-      "data": {
-        "label": "wall 2",
-        "thickness": "1",
-        "temperature": "300",
-        "D_0": "0.01",
-        "E_D": "0",
-        "n_vertices": "100"
-      },
-      "measured": {
-        "width": 70,
-        "height": 200
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
       "id": "4",
       "type": "constant",
       "position": {
@@ -54,7 +32,7 @@
         "width": 120,
         "height": 140
       },
-      "selected": true,
+      "selected": false,
       "dragging": false
     },
     {
@@ -92,72 +70,38 @@
       },
       "selected": false,
       "dragging": false
+    },
+    {
+      "id": "12",
+      "type": "wall",
+      "position": {
+        "x": 952,
+        "y": 417
+      },
+      "data": {
+        "label": "wall",
+        "thickness": "1",
+        "surface_area": "1",
+        "temperature": "300",
+        "D_0": "0.05",
+        "E_D": "0",
+        "n_vertices": "100"
+      },
+      "measured": {
+        "width": 70,
+        "height": 200
+      },
+      "selected": true,
+      "dragging": false
     }
   ],
   "edges": [
-    {
-      "id": "e4-2-to_c_L",
-      "source": "4",
-      "target": "2",
-      "sourceHandle": null,
-      "targetHandle": "c_L",
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "e2-5-from_flux_L",
-      "source": "2",
-      "target": "5",
-      "sourceHandle": "flux_L",
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
     {
       "id": "e4-9",
       "source": "4",
       "target": "9",
       "sourceHandle": null,
       "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "e10-2-to_c_0",
-      "source": "10",
-      "target": "2",
-      "sourceHandle": null,
-      "targetHandle": "c_0",
       "type": "smoothstep",
       "data": {},
       "style": {
@@ -189,9 +133,66 @@
         "height": 20,
         "color": "#ECDFCC"
       }
+    },
+    {
+      "id": "e10-12-to_c_0",
+      "source": "10",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": "c_0",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-12-to_c_L",
+      "source": "4",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": "c_L",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e12-5-from_flux_L",
+      "source": "12",
+      "target": "5",
+      "sourceHandle": "flux_L",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
     }
   ],
-  "nodeCounter": 11,
+  "nodeCounter": 13,
   "solverParams": {
     "dt": "0.02",
     "dt_min": "1e-6",

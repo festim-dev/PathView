@@ -609,7 +609,7 @@ export default function App() {
         nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
         break;
       case 'wall':
-        nodeData = { ...nodeData, thickness: '', temperature: '', D_0: '1', E_D: '0', n_vertices: '100' };
+        nodeData = { ...nodeData, thickness: '', surface_area: '1', temperature: '', D_0: '1', E_D: '0', n_vertices: '100' };
         break;
       case 'bubbler':
         nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
