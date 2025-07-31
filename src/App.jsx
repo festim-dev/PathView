@@ -115,7 +115,7 @@ export default function App() {
     }
   };
   // Function to load a saved graph
-  const loadGraph = async () => {
+  const loadGraphOld = async () => {
     const filename = prompt("Enter the name of a file from the saved_graphs folder to load:");
     if (!filename) return;
 
@@ -152,6 +152,68 @@ export default function App() {
       console.error('Error loading graph:', error);
     }
   };
+  // Function to load a saved graph from computer
+  const loadGraph = () => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+    fileInput.style.display = 'none';
+    
+    // Handle file selection
+    fileInput.onchange = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Read the file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const graphData = JSON.parse(e.target.result);
+          
+          // Validate that it's a valid graph file
+          if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
+            alert("Invalid file format. Please select a valid graph JSON file.");
+            return;
+          }
+          
+          // Load the graph data
+          const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
+          setNodes(loadedNodes || []);
+          setEdges(loadedEdges || []);
+          setSelectedNode(null);
+          setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
+          setSolverParams(loadedSolverParams ?? {
+            dt: '0.01',
+            dt_min: '1e-6',
+            dt_max: '1.0',
+            Solver: 'SSPRK22',
+            tolerance_fpi: '1e-6',
+            iterations_max: '100',
+            log: 'true',
+            simulation_duration: '50.0',
+            extra_params: '{}'
+          });
+          setGlobalVariables(loadedGlobalVariables ?? []);
+          
+          // alert('Graph loaded successfully from your computer!');
+        } catch (error) {
+          console.error('Error parsing file:', error);
+          alert('Error reading file. Please make sure it\'s a valid JSON file.');
+        }
+      };
+      
+      reader.readAsText(file);
+      
+      // Clean up
+      document.body.removeChild(fileInput);
+    };
+    
+    // Add to DOM and trigger click
+    document.body.appendChild(fileInput);
+    fileInput.click();
+  };
+
   // Allows user to clear user inputs and go back to default settings
   const resetGraph = () => {
     setNodes(initialNodes);
