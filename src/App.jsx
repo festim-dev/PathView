@@ -28,6 +28,7 @@ import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './Splitters';
 import BubblerNode from './BubblerNode';
+import WallNode from './WallNode';
 
 // Add nodes as a node type for this script
 const nodeTypes = {
@@ -48,6 +49,7 @@ const nodeTypes = {
   pid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
+  wall: WallNode,
   bubbler: BubblerNode,
 };
 
@@ -600,6 +602,8 @@ export default function App() {
       case 'splitter3':
         nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
         break;
+      case 'wall':
+        nodeData = { ...nodeData, thickness: '', temperature: '', D_0: '1', E_D: '0', n_vertices: '100' };
       case 'bubbler':
         nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_time: '' };
       default:

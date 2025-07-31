@@ -176,9 +176,7 @@ class Bubbler(Subsystem):
 
 
 class FestimWall(Block):
-    def __init__(
-        self, thickness, temperature, D_0, E_D, n_vertices=100, final_time=100
-    ):
+    def __init__(self, thickness, temperature, D_0, E_D, n_vertices=100):
         super().__init__()
         try:
             import festim as F
@@ -190,7 +188,6 @@ class FestimWall(Block):
         self.D_0 = D_0
         self.E_D = E_D
         self.n_vertices = n_vertices
-        self.final_time = final_time
         self.t = 0.0
 
         self.initialise_festim_model()
