@@ -169,4 +169,5 @@ class Bubbler(Subsystem):
             )
         for i, vial in enumerate(self.vials):
             events.extend(self._create_reset_events_one_vial(vial, reset_times[i]))
+
         return events

@@ -470,7 +470,7 @@ export default function App() {
         nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
         break;
       case 'bubbler':
-        nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_time: '' };
+        nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
       default:
         // For any other types, just use basic data
         break;

@@ -136,7 +136,7 @@ def test_bubbler_has_reset_times():
                 "type": "bubbler",
                 "data": {
                     "label": "bubbler_1",
-                    "replacement_time": "[10, 20]",
+                    "replacement_times": "[10, 20]",
                     "conversion_efficiency": "1",
                     "vial_efficiency": "0.8",
                 },

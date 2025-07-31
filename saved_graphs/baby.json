@@ -175,7 +175,7 @@
         "label": "IV bubbler",
         "conversion_efficiency": "0.95",
         "vial_efficiency": "0.9",
-        "replacement_time": "np.arange(5, 50, step=3)"
+        "replacement_times": "np.arange(5, 50, step=3)"
       },
       "measured": {
         "width": 230,
@@ -233,7 +233,7 @@
         "label": "OV bubbler",
         "conversion_efficiency": "0.95",
         "vial_efficiency": "0.9",
-        "replacement_time": "np.arange(5, 50, step=5)"
+        "replacement_times": "np.arange(5, 50, step=5)"
       },
       "measured": {
         "width": 230,

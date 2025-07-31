@@ -144,8 +144,8 @@ def create_bubbler(node: dict) -> Bubbler:
     block = Bubbler(
         conversion_efficiency=eval(node["data"]["conversion_efficiency"]),
         vial_efficiency=eval(node["data"]["vial_efficiency"]),
-        replacement_times=eval(node["data"]["replacement_time"])
-        if node["data"].get("replacement_time") != ""
+        replacement_times=eval(node["data"]["replacement_times"])
+        if node["data"].get("replacement_times") != ""
         else None,
     )
 
