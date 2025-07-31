@@ -20,7 +20,7 @@ from pathsim.blocks import (
     Schedule,
 )
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
-from .custom_pathsim_blocks import Process, Splitter, Bubbler
+from .custom_pathsim_blocks import Process, Splitter, Splitter2, Splitter3, Bubbler
 from flask import jsonify
 import inspect
 
@@ -36,8 +36,8 @@ map_str_to_object = {
     "amplifier": Amplifier,
     "amplifier_reverse": Amplifier,
     "scope": Scope,
-    "splitter2": Splitter,
-    "splitter3": Splitter,
+    "splitter2": Splitter2,
+    "splitter3": Splitter3,
     "adder": Adder,
     "adder_reverse": Adder,
     "multiplier": Multiplier,
@@ -305,6 +305,10 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     for k, value in parameters_for_class.items():
         if k == "self":
             continue
+        # Skip 'operations' for Adder, as it is handled separately
+        # https://github.com/festim-dev/fuel-cycle-sim/issues/73
+        if k in ["operations"]:
+            continue
         user_input = node["data"][k]
         if user_input == "":
             if value.default is inspect._empty:
@@ -340,21 +344,15 @@ def make_blocks(
                 tau=eval(node["data"]["delay"], eval_namespace),
             )
         elif block_type == "splitter2":
-            block = Splitter(
-                n=2,
-                fractions=[
-                    eval(node["data"]["f1"], eval_namespace),
-                    eval(node["data"]["f2"], eval_namespace),
-                ],
+            block = Splitter2(
+                f1=eval(node["data"]["f1"], eval_namespace),
+                f2=eval(node["data"]["f2"], eval_namespace),
             )
         elif block_type == "splitter3":
-            block = Splitter(
-                n=3,
-                fractions=[
-                    eval(node["data"]["f1"], eval_namespace),
-                    eval(node["data"]["f2"], eval_namespace),
-                    eval(node["data"]["f3"], eval_namespace),
-                ],
+            block = Splitter3(
+                f1=eval(node["data"]["f1"], eval_namespace),
+                f2=eval(node["data"]["f2"], eval_namespace),
+                f3=eval(node["data"]["f3"], eval_namespace),
             )
         elif block_type == "bubbler":
             block, events_bubbler = create_bubbler(node)
