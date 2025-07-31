@@ -612,7 +612,7 @@ export default function App() {
         nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
         break;
         case 'white_noise':
-        nodeData = { ...nodeData, spectral_density: '', noise: '', sampling_rate: '' };
+        nodeData = { ...nodeData, spectral_density: '1', sampling_rate: '' };
         break;
       default:
         // For any other types, just use basic data
