@@ -56,6 +56,14 @@ NODE_TEMPLATES = {
         "data": {"f1": "1/3", "f2": "1/3", "f3": "1/3", "label": "Splitter 3"},
     },
     "scope": {"type": "scope", "data": {"label": "Scope"}},
+    "white_noise": {
+        "type": "white_noise",
+        "data": {"spectral_density": "1", "sampling_rate": "2", "label": "White Noise Source"},
+    },
+    "pink_noise": {
+        "type": "pink_noise",
+        "data": {"spectral_density": "1", "num_octaves": "16", "sampling_rate": "5", "label": "Pink Noise Source"},
+    },
 }
 
 
@@ -119,6 +127,8 @@ def test_create_integrator():
         ("process", Process),
         ("splitter2", Splitter),
         ("splitter3", Splitter),
+        ("white_noise", pathsim.blocks.noise.WhiteNoise),
+        ("pink_noise", pathsim.blocks.noise.PinkNoise),
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
@@ -142,6 +152,8 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("process", Process),
         ("splitter2", Splitter),
         ("splitter3", Splitter),
+        ("white_noise", pathsim.blocks.noise.WhiteNoise),
+        ("pink_noise", pathsim.blocks.noise.PinkNoise),
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):
