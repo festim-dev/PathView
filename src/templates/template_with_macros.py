@@ -2,6 +2,7 @@ import pathsim
 from pathsim import Simulation, Connection
 import numpy as np
 import matplotlib.pyplot as plt
+import src
 {# Import macros #}
 {% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_stepsource, create_connections -%}
 

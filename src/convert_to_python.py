@@ -48,7 +48,9 @@ def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
         )
 
         # Add pathsim class name
-        node["class_name"] = map_str_to_object[node["type"]].__name__
+        block_class = map_str_to_object.get(node["type"])
+        node["class_name"] = block_class.__name__
+        node["module_name"] = block_class.__module__
 
         # Add expected arguments
         node["expected_arguments"] = signature(

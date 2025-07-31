@@ -1,6 +1,6 @@
 {# Macro-based approach for block creation #}
 {% macro create_block(node) -%}
-{{ node["var_name"] }} = pathsim.blocks.{{ node["class_name"] }}(
+{{ node["var_name"] }} = {{ node["module_name"] }}.{{ node["class_name"] }}(
     {%- for arg in node["expected_arguments"] %}
     {%- if node["data"].get(arg) -%}
     {{ arg }}={{ node["data"].get(arg) }}{% if not loop.last %}, {% endif %}
