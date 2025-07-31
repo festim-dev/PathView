@@ -1,11 +1,12 @@
 import React from 'react';
 import { Handle } from '@xyflow/react';
 
-export default function ProcessNode({ data }) {
+export function ProcessNode({ data }) {
   return (
     <div
       style={{
         width: 180,
+        height: 100,
         background: '#DDE6ED',
         color: 'black',
         borderRadius: 12,
@@ -47,3 +48,51 @@ export default function ProcessNode({ data }) {
     </div>
   );
 }
+
+export function ProcessNodeHorizontal({ data }) {
+  return (
+    <div
+      style={{
+        width: 100,
+        height: 180,
+        background: '#DDE6ED',
+        color: 'black',
+        borderRadius: 12,
+        padding: 10,
+        fontWeight: 'bold',
+        position: 'relative',
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ marginBottom: 4 }}>{data.label}</div>
+
+      <Handle type="target" position="left" style={{ background: '#555'}} />
+      {/* Label for inv handle */}
+      <div style={{ 
+        position: 'absolute', 
+        right: '5px',
+        top: '29%', 
+        transform: 'translateX(-50%)', 
+        fontSize: '12px',
+        fontWeight: 'normal'
+      }}>
+        I
+      </div>
+      <Handle type="source" id="inv" position="right" style={{ background: '#555', top: '33%' }} />
+
+
+      {/* Label for mass_flow_rate handle */}
+      <div style={{ 
+        position: 'absolute', 
+        right: '5px',
+        top: '60%', 
+        fontSize: '12px',
+        fontWeight: 'normal',
+      }}>
+        I/τ
+      </div>
+      <Handle type="source" id="mass_flow_rate" position="right" style={{ background: '#555', top: '66%' }} />
+    </div>
+  );
+}
+

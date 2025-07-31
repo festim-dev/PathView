@@ -8,13 +8,15 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start:backend": "python ./src/backend.py",
+    "start:backend": "python -m src.backend",
     "start:both": "concurrently \"npm run dev\" \"npm run start:backend\""
   },
   "dependencies": {
     "@xyflow/react": "^12.8.1",
+    "plotly.js": "^3.0.3",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
