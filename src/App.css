@@ -59,3 +59,36 @@
 .read-the-docs {
   color: #888;
 } */
+
+/* Context menu styles */
+.context-menu {
+  position: absolute;
+  background: rgb(73, 71, 71);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.context-menu button:hover {
+  background-color: #f0f0f06c;
+}
+
+.context-menu p {
+  margin: 0.5em;
+  font-size: 12px;
+  color: #666;
+}

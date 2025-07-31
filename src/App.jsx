@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -12,6 +12,7 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 import Plot from 'react-plotly.js';
 
+import ContextMenu from './ContextMenu.jsx';
 
 // Importing node components
 import {ProcessNode, ProcessNodeHorizontal} from './ProcessNode';
@@ -65,7 +66,11 @@ export default function App() {
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [nodeCounter, setNodeCounter] = useState(1);
-  
+  const [menu, setMenu] = useState(null);
+  const [copiedNode, setCopiedNode] = useState(null);
+  const [copyFeedback, setCopyFeedback] = useState('');
+  const ref = useRef(null);
+
   // Solver parameters state
   const [solverParams, setSolverParams] = useState({
     dt: '0.01',
@@ -501,6 +506,7 @@ export default function App() {
   const onPaneClick = () => {
     setSelectedNode(null);
     setSelectedEdge(null);
+    setMenu(null); // Close context menu when clicking on pane
     // Reset all edge styles when deselecting
     setEdges((eds) =>
       eds.map((e) => ({
@@ -617,6 +623,28 @@ export default function App() {
     setNodes((nds) => [...nds, newNode]);
     setNodeCounter((count) => count + 1);
   };
+  
+  // Function to pop context menu when right-clicking on a node
+  const onNodeContextMenu = useCallback(
+    (event, node) => {
+      // Prevent native context menu from showing
+      event.preventDefault();
+ 
+      // Calculate position of the context menu. We want to make sure it
+      // doesn't get positioned off-screen.
+      const pane = ref.current.getBoundingClientRect();
+      setMenu({
+        id: node.id,
+        top: event.clientY < pane.height - 200 && event.clientY,
+        left: event.clientX < pane.width - 200 && event.clientX,
+        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
+        bottom:
+          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+      });
+    },
+    [setMenu],
+  );
+  
   // Function to delete the selected node
   const deleteSelectedNode = () => {
     if (selectedNode) {
@@ -649,11 +677,81 @@ export default function App() {
       setSelectedEdge(null);
     }
   };
+
+  // Function to duplicate a node
+  const duplicateNode = useCallback((nodeId, options = {}) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    const newNodeId = nodeCounter.toString();
+    
+    // Calculate position based on source (context menu vs keyboard)
+    let position;
+    if (options.fromKeyboard) {
+      // For keyboard shortcuts, place the duplicate at a more visible offset
+      position = {
+        x: node.position.x + 100,
+        y: node.position.y + 100,
+      };
+    } else {
+      // For context menu, use smaller offset
+      position = {
+        x: node.position.x + 50,
+        y: node.position.y + 50,
+      };
+    }
+ 
+    const newNode = {
+      ...node,
+      selected: false,
+      dragging: false,
+      id: newNodeId,
+      position,
+      data: {
+        ...node.data,
+        label: node.data.label ? node.data.label.replace(node.id, newNodeId) : `${node.type} ${newNodeId}`
+      }
+    };
+    
+    setNodes((nds) => [...nds, newNode]);
+    setNodeCounter((count) => count + 1);
+    setMenu(null); // Close the context menu
+  }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
+  
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
       // Don't trigger deletion if user is typing in an input field
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // Handle Ctrl+C (copy)
+      if (event.ctrlKey && event.key === 'c' && selectedNode) {
+        event.preventDefault();
+        setCopiedNode(selectedNode);
+        setCopyFeedback(`Copied: ${selectedNode.data.label || selectedNode.id}`);
+        
+        // Clear feedback after 2 seconds
+        setTimeout(() => {
+          setCopyFeedback('');
+        }, 2000);
+        
+        console.log('Node copied:', selectedNode.id);
+        return;
+      }
+
+      // Handle Ctrl+V (paste)
+      if (event.ctrlKey && event.key === 'v' && copiedNode) {
+        event.preventDefault();
+        duplicateNode(copiedNode.id, { fromKeyboard: true });
+        return;
+      }
+
+      // Handle Ctrl+D (duplicate selected node directly)
+      if (event.ctrlKey && event.key === 'd' && selectedNode) {
+        event.preventDefault();
+        duplicateNode(selectedNode.id, { fromKeyboard: true });
         return;
       }
 
@@ -670,7 +768,7 @@ export default function App() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedEdge, selectedNode]);
+  }, [selectedEdge, selectedNode, copiedNode, duplicateNode, setCopyFeedback]);
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -749,6 +847,7 @@ export default function App() {
       {activeTab === 'graph' && (
         <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
           <ReactFlow
+            ref={ref}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -757,11 +856,32 @@ export default function App() {
             onNodeClick={onNodeClick}
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
+            onNodeContextMenu={onNodeContextMenu}
             nodeTypes={nodeTypes}
           >
             <Controls />
             <MiniMap />
             <Background variant="dots" gap={12} size={1} />
+            {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
+            {copyFeedback && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 20,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#78A083',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: 4,
+                  zIndex: 1000,
+                  fontSize: '14px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                }}
+              >
+                {copyFeedback}
+              </div>
+            )}
             <button
               style={{
                 position: 'absolute',
@@ -900,6 +1020,27 @@ export default function App() {
             >
               Run
             </button>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '50%',
+                right: 20,
+                backgroundColor: 'rgba(0, 0, 0, 0.31)',
+                color: 'white',
+                padding: '8px 12px',
+                borderRadius: 4,
+                fontSize: '12px',
+                zIndex: 10,
+                maxWidth: '200px',
+              }}
+            >
+              <strong>Keyboard Shortcuts:</strong><br />
+              Ctrl+C: Copy selected node<br />
+              Ctrl+V: Paste copied node<br />
+              Ctrl+D: Duplicate selected node<br />
+              Del/Backspace: Delete selection<br />
+              Right-click: Context menu
+            </div>
           </ReactFlow>
           {selectedNode && (
             <div
