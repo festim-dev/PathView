@@ -71,6 +71,7 @@ sample_data = {
         sample_data,
         "test_files/constant_delay_scope.json",
         "test_files/custom_nodes.json",
+        "test_files/same_label.json",
     ],
 )
 def test_nested_templates(data):

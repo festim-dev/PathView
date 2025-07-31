@@ -2,6 +2,11 @@ from jinja2 import Environment, FileSystemLoader
 import os
 from inspect import signature
 
+from pathsim.blocks import Scope
+from .custom_pathsim_blocks import (
+    Process,
+    Splitter,
+)
 from .pathsim_utils import (
     map_str_to_object,
     make_blocks,
@@ -83,6 +88,8 @@ def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
     return nodes
 
 
+# TODO: this is effectively a duplicate of pathsim_utils.make_connections
+# need to refactor
 def make_edge_data(data: dict) -> list[dict]:
     """
     Process edges to add source/target variable names and ports.
@@ -105,36 +112,53 @@ def make_edge_data(data: dict) -> list[dict]:
     # we need the namespace since we call make_blocks
     namespace = make_global_variables(data["globalVariables"])
     blocks, _ = make_blocks(data["nodes"], data["edges"], eval_namespace=namespace)
-    connections = make_connections(data["nodes"], data["edges"], blocks)
 
-    # we can simply read the ports id from the actual pathsim connections
+    # Process each node and its sorted incoming edges to create connections
+    block_to_input_index = {b: 0 for b in blocks}
     for node in data["nodes"]:
         outgoing_edges = [
             edge for edge in data["edges"] if edge["source"] == node["id"]
         ]
         outgoing_edges.sort(key=lambda x: x["target"])
 
-        for edge in outgoing_edges:
-            target_node = next((n for n in data["nodes"] if n["id"] == edge["target"]))
+        block = next((b for b in blocks if b.id == node["id"]))
 
-            # find corresponding connection
-            connection = next(
-                (
-                    c
-                    for c in connections
-                    if c.source.block.id == node["id"]
-                    and c.targets[0].block.id == edge["target"]
-                )
-            )
-            source_block_port = connection.source.ports
-            assert len(connection.targets) == 1, (
-                "Connection must have exactly one target port."
-            )
-            target_block_port = connection.targets[0].ports
+        for edge in outgoing_edges:
+            target_block = next((b for b in blocks if b.id == edge["target"]))
+            target_node = next((n for n in data["nodes"] if n["id"] == edge["target"]))
+            if isinstance(block, Process):
+                if edge["sourceHandle"] == "inv":
+                    output_index = 0
+                elif edge["sourceHandle"] == "mass_flow_rate":
+                    output_index = 1
+                    assert block.residence_time != 0, (
+                        "Residence time must be non-zero for mass flow rate output."
+                    )
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Splitter):
+                # Splitter outputs are always in order, so we can use the handle directly
+                assert edge["sourceHandle"], edge
+                output_index = int(edge["sourceHandle"].replace("source", "")) - 1
+                if output_index >= block.n:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            else:
+                output_index = 0
+
+            if isinstance(target_block, Scope):
+                input_index = target_block._connections_order.index(edge["id"])
+            else:
+                input_index = block_to_input_index[target_block]
+
             edge["source_var_name"] = node["var_name"]
             edge["target_var_name"] = target_node["var_name"]
-            edge["source_port"] = str(source_block_port)
-            edge["target_port"] = str(target_block_port)
+            edge["source_port"] = f"[{output_index}]"
+            edge["target_port"] = f"[{input_index}]"
+            block_to_input_index[target_block] += 1
 
     return data["edges"]
 
