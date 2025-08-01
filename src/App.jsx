@@ -1075,25 +1075,7 @@ export default function App() {
             >
               Run
             </button>
-            {simulationResults && (
-              <button
-                style={{
-                  position: 'absolute',
-                  right: 20,
-                  top: 200,
-                  zIndex: 10,
-                  padding: '8px 12px',
-                  backgroundColor: '#78A083',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 5,
-                  cursor: 'pointer',
-                }}
-                onClick={downloadCsv}
-              >
-                Download CSV
-              </button>
-            )}
+
 
             <div
               style={{
@@ -1800,7 +1782,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Results Tab */}
       {activeTab === 'results' && (
         <div style={{
           width: '100%',
@@ -1814,21 +1795,36 @@ export default function App() {
             textAlign: 'center',
           }}>
             {simulationResults ? (
-              <Plot
-                data={JSON.parse(simulationResults).data}
-                layout={{
-                  ...JSON.parse(simulationResults).layout,
-                  autosize: true,
-                }}
-                config={{
-                  responsive: true,
-                  displayModeBar: true,
-                  modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
-                }}
-                style={{ width: '100%', height: '600px' }}
-              />
+              <>
+              <div style={{ textAlign: 'right', padding: '0 20px 10px 20px' }}>
+                <button
+                  style={{
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={downloadCsv}
+                >
+                  Download CSV
+                </button>
+                </div>
+                <Plot
+                  data={JSON.parse(simulationResults).data}
+                  layout={{
+                    ...JSON.parse(simulationResults).layout,
+                    autosize: true,
+                  }}
+                  config={{
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
+                  }}
+                  style={{ width: '100%', height: '600px' }}
+                />
 
-
+              </>
             ) : (
               <p style={{ color: '#666', fontSize: '18px' }}>
                 No simulation results yet. Run a simulation from the Graph Editor tab to see results here.
