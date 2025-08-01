@@ -3,7 +3,7 @@ from src.pathsim_utils import (
     auto_block_construction,
     create_function,
 )
-from src.custom_pathsim_blocks import Process, Splitter
+from src.custom_pathsim_blocks import Process, Splitter2, Splitter3
 
 import pathsim.blocks
 
@@ -33,17 +33,17 @@ NODE_TEMPLATES = {
         "data": {"expression": "3*x**2", "label": "Function"},
     },
     "delay": {"type": "delay", "data": {"tau": "1.0", "label": "Delay"}},
-    "rng": {"type": "rng", "data": {"seed": "42", "label": "RNG"}},
+    "rng": {"type": "rng", "data": {"sampling_rate": "2", "label": "RNG"}},
     "pid": {
         "type": "pid",
-        "data": {"kp": "1.0", "ki": "0.0", "kd": "0.0", "label": "PID"},
+        "data": {"Kp": "1.0", "Ki": "0.0", "Kd": "0.0", "f_max": "100", "label": "PID"},
     },
     "process": {
         "type": "process",
         "data": {
             "residence_time": "1.0",
-            "ic": "0.0",
-            "gen": "0.0",
+            "initial_value": "0.0",
+            "source_term": "0.0",
             "label": "Process",
         },
     },
@@ -56,6 +56,23 @@ NODE_TEMPLATES = {
         "data": {"f1": "1/3", "f2": "1/3", "f3": "1/3", "label": "Splitter 3"},
     },
     "scope": {"type": "scope", "data": {"label": "Scope"}},
+    "white_noise": {
+        "type": "white_noise",
+        "data": {
+            "spectral_density": "1",
+            "sampling_rate": "2",
+            "label": "White Noise Source",
+        },
+    },
+    "pink_noise": {
+        "type": "pink_noise",
+        "data": {
+            "spectral_density": "1",
+            "num_octaves": "16",
+            "sampling_rate": "5",
+            "label": "Pink Noise Source",
+        },
+    },
 }
 
 
@@ -117,8 +134,10 @@ def test_create_integrator():
         ("rng", pathsim.blocks.RNG),
         ("pid", pathsim.blocks.PID),
         ("process", Process),
-        ("splitter2", Splitter),
-        ("splitter3", Splitter),
+        ("splitter2", Splitter2),
+        ("splitter3", Splitter3),
+        ("white_noise", pathsim.blocks.noise.WhiteNoise),
+        ("pink_noise", pathsim.blocks.noise.PinkNoise),
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
@@ -140,8 +159,8 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("rng", pathsim.blocks.RNG),
         ("pid", pathsim.blocks.PID),
         ("process", Process),
-        ("splitter2", Splitter),
-        ("splitter3", Splitter),
+        ("white_noise", pathsim.blocks.noise.WhiteNoise),
+        ("pink_noise", pathsim.blocks.noise.PinkNoise),
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):

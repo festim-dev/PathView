@@ -3,11 +3,7 @@ import os
 from inspect import signature
 
 from pathsim.blocks import Scope
-from .custom_pathsim_blocks import (
-    Process,
-    Splitter,
-    Bubbler,
-)
+from .custom_pathsim_blocks import Process, Splitter, Bubbler, FestimWall
 from .pathsim_utils import (
     map_str_to_object,
     make_blocks,
@@ -162,11 +158,29 @@ def make_edge_data(data: dict) -> list[dict]:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
+            elif isinstance(block, FestimWall):
+                if edge["sourceHandle"] == "flux_0":
+                    output_index = 0
+                elif edge["sourceHandle"] == "flux_L":
+                    output_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
             else:
                 output_index = 0
 
             if isinstance(target_block, Scope):
                 input_index = target_block._connections_order.index(edge["id"])
+            elif isinstance(target_block, FestimWall):
+                if edge["targetHandle"] == "c_0":
+                    input_index = 0
+                elif edge["targetHandle"] == "c_L":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
             else:
                 input_index = block_to_input_index[target_block]
 

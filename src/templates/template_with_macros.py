@@ -48,7 +48,9 @@ my_simulation = Simulation(
     iterations_max={{ solverParams["iterations_max"] }},
     log={{ solverParams["log"].capitalize() }},
     tolerance_fpi={{ solverParams["tolerance_fpi"] }},
+    {%- if solverParams["extra_params"] != '' -%}
     **{{ solverParams["extra_params"] }},
+    {%- endif -%}
 )
 
 if __name__ == "__main__":
