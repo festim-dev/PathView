@@ -11,6 +11,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import Plot from 'react-plotly.js';
+import { getApiEndpoint } from './config.js';
 
 import ContextMenu from './ContextMenu.jsx';
 
@@ -294,7 +295,7 @@ export default function App() {
         globalVariables
       };
 
-      const response = await fetch('http://localhost:8000/convert-to-python', {
+      const response = await fetch(getApiEndpoint('/convert-to-python'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,7 +365,7 @@ export default function App() {
         globalVariables
       };
 
-      const response = await fetch('http://localhost:8000/run-pathsim', {
+      const response = await fetch(getApiEndpoint('/run-pathsim'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
