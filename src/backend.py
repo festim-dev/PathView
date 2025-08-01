@@ -12,12 +12,31 @@ from .convert_to_python import convert_graph_to_python
 from .pathsim_utils import make_pathsim_model
 from pathsim.blocks import Scope
 
-app = Flask(__name__)
-CORS(
-    app,
-    resources={r"/*": {"origins": "http://localhost:5173"}},
-    supports_credentials=True,
-)
+# Configure Flask app for Cloud Run
+app = Flask(__name__, static_folder="../dist", static_url_path="")
+
+# Configure CORS based on environment
+if os.getenv("FLASK_ENV") == "production":
+    # Production: Allow Cloud Run domains and common domains
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": ["*"],  # Allow all origins for Cloud Run
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+            }
+        },
+    )
+else:
+    # Development: Only allow localhost
+    CORS(
+        app,
+        resources={
+            r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}
+        },
+        supports_credentials=True,
+    )
 
 
 # Creates directory for saved graphs
@@ -25,8 +44,17 @@ SAVE_DIR = "saved_graphs"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 
-# Health check endpoint for CI/CD
-@app.route("/", methods=["GET"])
+# Serve React frontend for production
+@app.route("/")
+def serve_frontend():
+    """Serve the React frontend in production."""
+    if os.getenv("FLASK_ENV") == "production":
+        return app.send_static_file("index.html")
+    else:
+        return jsonify({"message": "Fuel Cycle Simulator API", "status": "running"})
+
+
+# Health check endpoint for Cloud Run
 @app.route("/health", methods=["GET"])
 def health_check():
     return jsonify(
@@ -184,5 +212,16 @@ def run_pathsim():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+# Catch-all route for React Router (SPA routing)
+@app.route("/<path:path>")
+def catch_all(path):
+    """Serve React app for all routes in production (for client-side routing)."""
+    if os.getenv("FLASK_ENV") == "production":
+        return app.send_static_file("index.html")
+    else:
+        return jsonify({"error": "Route not found"}), 404
+
+
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    port = int(os.getenv("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=os.getenv("FLASK_ENV") != "production")
