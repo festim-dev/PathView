@@ -37,6 +37,9 @@ sample_data = {
             "type": "scope",
             "data": {
                 "label": "scope_1",
+                "labels": "",
+                "sampling_rate": "",
+                "t_wait": "",
             },
         },
     ],
