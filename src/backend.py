@@ -18,17 +18,23 @@ app = Flask(__name__, static_folder="../dist", static_url_path="")
 # Configure CORS based on environment
 if os.getenv("FLASK_ENV") == "production":
     # Production: Allow Cloud Run domains and common domains
-    CORS(app, 
-         resources={r"/*": {
-             "origins": ["*"],  # Allow all origins for Cloud Run
-             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-             "allow_headers": ["Content-Type", "Authorization"]
-         }})
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": ["*"],  # Allow all origins for Cloud Run
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+            }
+        },
+    )
 else:
     # Development: Only allow localhost
     CORS(
         app,
-        resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}},
+        resources={
+            r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}
+        },
         supports_credentials=True,
     )
 
