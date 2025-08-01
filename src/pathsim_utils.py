@@ -437,11 +437,24 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
             else:
+                # make sure that the source block has only one output port (ie. that sourceHandle is None)
+                assert edge["sourceHandle"] is None, (
+                    f"Source block {block.id} has multiple output ports, "
+                    "but connection method hasn't been implemented."
+                )
                 output_index = 0
 
             if isinstance(target_block, Scope):
                 input_index = target_block._connections_order.index(edge["id"])
-            # TODO we should do the same for all blocks with several input/target ports
+            elif isinstance(target_block, Bubbler):
+                if edge["targetHandle"] == "sample_in_soluble":
+                    input_index = 0
+                elif edge["targetHandle"] == "sample_in_insoluble":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
             elif isinstance(target_block, FestimWall):
                 if edge["targetHandle"] == "c_0":
                     input_index = 0
@@ -452,6 +465,11 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                         f"Invalid target handle '{edge['targetHandle']}' for {edge}."
                     )
             else:
+                # make sure that the target block has only one input port (ie. that targetHandle is None)
+                assert edge["targetHandle"] is None, (
+                    f"Target block {target_block.id} has multiple input ports, "
+                    "but connection method hasn't been implemented."
+                )
                 input_index = block_to_input_index[target_block]
 
             connection = Connection(
