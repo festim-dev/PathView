@@ -99,29 +99,6 @@ const DnDFlow = () => {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
-
-      // check if the dropped element is valid
-      if (!type) {
-        return;
-      }
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-      const newNode = {
-        id: getId(),
-        type,
-        position,
-        data: { label: `${type} node` },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-    },
-    [screenToFlowPosition, type],
-  );
   const onDragStart = (event, nodeType) => {
     setType(nodeType);
     event.dataTransfer.setData('text/plain', nodeType);
@@ -162,6 +139,56 @@ const DnDFlow = () => {
       return {};
     }
   };
+
+  const onDrop = useCallback(
+    async (event) => {
+      event.preventDefault();
+
+      // check if the dropped element is valid
+      if (!type) {
+        return;
+      }
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      const newNodeId = nodeCounter.toString();
+
+      // Fetch default values for this node type
+      let defaults = {};
+      try {
+        defaults = await fetchDefaultValues(type);
+      } catch (error) {
+        console.warn(`Failed to fetch default values for ${type}, using empty defaults:`, error);
+        defaults = {};
+      }
+
+      // Store default values for this node type
+      setDefaultValues(prev => ({
+        ...prev,
+        [type]: defaults
+      }));
+
+      // Create node data with label and initialize all expected fields as empty strings
+      let nodeData = { label: `${type} ${newNodeId}` };
+
+      // Initialize all expected parameters as empty strings
+      Object.keys(defaults).forEach(key => {
+        nodeData[key] = '';
+      });
+
+      const newNode = {
+        id: newNodeId,
+        type: type,
+        position: position,
+        data: nodeData,
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+      setNodeCounter((count) => count + 1);
+    },
+    [screenToFlowPosition, type, nodeCounter, fetchDefaultValues, setDefaultValues, setNodes, setNodeCounter],
+  );
 
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
