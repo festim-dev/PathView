@@ -156,6 +156,9 @@ const DnDFlow = () => {
 
       // Fetch default values for this node type
       let defaults = {};
+
+      // NOTE this slows things down
+      // Consider caching these defaults
       try {
         defaults = await fetchDefaultValues(type);
       } catch (error) {
