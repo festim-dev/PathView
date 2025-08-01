@@ -98,7 +98,7 @@ export default function App() {
   // Function to fetch default values for a node type
   const fetchDefaultValues = async (nodeType) => {
     try {
-      const response = await fetch(`http://localhost:8000/default-values/${nodeType}`);
+      const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
       if (response.ok) {
         const defaults = await response.json();
         return defaults;
