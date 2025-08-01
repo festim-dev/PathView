@@ -3,11 +3,7 @@ import os
 from inspect import signature
 
 from pathsim.blocks import Scope
-from .custom_pathsim_blocks import (
-    Process,
-    Splitter,
-    Bubbler,
-)
+from .custom_pathsim_blocks import Process, Splitter, Bubbler, FestimWall
 from .pathsim_utils import (
     map_str_to_object,
     make_blocks,
@@ -162,12 +158,49 @@ def make_edge_data(data: dict) -> list[dict]:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
+            elif isinstance(block, FestimWall):
+                if edge["sourceHandle"] == "flux_0":
+                    output_index = 0
+                elif edge["sourceHandle"] == "flux_L":
+                    output_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
             else:
+                # make sure that the source block has only one output port (ie. that sourceHandle is None)
+                assert edge["sourceHandle"] is None, (
+                    f"Source block {block.id} has multiple output ports, "
+                    "but connection method hasn't been implemented."
+                )
                 output_index = 0
 
             if isinstance(target_block, Scope):
                 input_index = target_block._connections_order.index(edge["id"])
+            elif isinstance(target_block, Bubbler):
+                if edge["targetHandle"] == "sample_in_soluble":
+                    input_index = 0
+                elif edge["targetHandle"] == "sample_in_insoluble":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
+            elif isinstance(target_block, FestimWall):
+                if edge["targetHandle"] == "c_0":
+                    input_index = 0
+                elif edge["targetHandle"] == "c_L":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
             else:
+                # make sure that the target block has only one input port (ie. that targetHandle is None)
+                assert edge["targetHandle"] is None, (
+                    f"Target block {target_block.id} has multiple input ports, "
+                    "but connection method hasn't been implemented."
+                )
                 input_index = block_to_input_index[target_block]
 
             edge["source_var_name"] = node["var_name"]

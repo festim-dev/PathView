@@ -1,0 +1,208 @@
+{
+  "nodes": [
+    {
+      "id": "4",
+      "type": "constant",
+      "position": {
+        "x": 1093.1885987981248,
+        "y": 271.20138523630243
+      },
+      "data": {
+        "label": "cL",
+        "value": "0"
+      },
+      "measured": {
+        "width": 205,
+        "height": 53
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "scope",
+      "position": {
+        "x": 1271,
+        "y": 457
+      },
+      "data": {
+        "label": "scope 5"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "9",
+      "type": "scope",
+      "position": {
+        "x": 967.9637725351604,
+        "y": 81.60628755860085
+      },
+      "data": {
+        "label": "scope 9"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "10",
+      "type": "stepsource",
+      "position": {
+        "x": 589,
+        "y": 224
+      },
+      "data": {
+        "label": "stepsource 10",
+        "amplitude": "1",
+        "delay": "0.2"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "12",
+      "type": "wall",
+      "position": {
+        "x": 952,
+        "y": 417
+      },
+      "data": {
+        "label": "wall",
+        "thickness": "1",
+        "surface_area": "1",
+        "temperature": "300",
+        "D_0": "0.05",
+        "E_D": "0",
+        "n_vertices": "100"
+      },
+      "measured": {
+        "width": 70,
+        "height": 200
+      },
+      "selected": true,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e4-9",
+      "source": "4",
+      "target": "9",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e10-9",
+      "source": "10",
+      "target": "9",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e10-12-to_c_0",
+      "source": "10",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": "c_0",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-12-to_c_L",
+      "source": "4",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": "c_L",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e12-5-from_flux_L",
+      "source": "12",
+      "target": "5",
+      "sourceHandle": "flux_L",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 13,
+  "solverParams": {
+    "dt": "0.02",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "2",
+    "extra_params": "{}"
+  },
+  "globalVariables": []
+}
