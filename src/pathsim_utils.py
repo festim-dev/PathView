@@ -20,7 +20,14 @@ from pathsim.blocks import (
     Schedule,
 )
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
-from .custom_pathsim_blocks import Process, Splitter, Splitter2, Splitter3, Bubbler
+from .custom_pathsim_blocks import (
+    Process,
+    Splitter,
+    Splitter2,
+    Splitter3,
+    Bubbler,
+    FestimWall,
+)
 from flask import jsonify
 import inspect
 
@@ -49,6 +56,7 @@ map_str_to_object = {
     "function": Function,
     "delay": Delay,
     "bubbler": Bubbler,
+    "wall": FestimWall,
     "white_noise": WhiteNoise,
     "pink_noise": PinkNoise,
 }
@@ -419,11 +427,30 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
+            elif isinstance(block, FestimWall):
+                if edge["sourceHandle"] == "flux_0":
+                    output_index = 0
+                elif edge["sourceHandle"] == "flux_L":
+                    output_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
             else:
                 output_index = 0
 
             if isinstance(target_block, Scope):
                 input_index = target_block._connections_order.index(edge["id"])
+            # TODO we should do the same for all blocks with several input/target ports
+            elif isinstance(target_block, FestimWall):
+                if edge["targetHandle"] == "c_0":
+                    input_index = 0
+                elif edge["targetHandle"] == "c_L":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
             else:
                 input_index = block_to_input_index[target_block]
 
