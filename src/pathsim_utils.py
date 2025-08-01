@@ -153,13 +153,8 @@ def create_bubbler(node: dict) -> Bubbler:
     Create a Bubbler block based on the node data.
     """
     # Extract parameters from node data
-    block = Bubbler(
-        conversion_efficiency=eval(node["data"]["conversion_efficiency"]),
-        vial_efficiency=eval(node["data"]["vial_efficiency"]),
-        replacement_times=eval(node["data"]["replacement_times"])
-        if node["data"].get("replacement_times") != ""
-        else None,
-    )
+    parameters = get_parameters_for_block_class(Bubbler, node, eval_namespace=globals())
+    block = Bubbler(**parameters)
 
     events = block.create_reset_events()
 
@@ -193,7 +188,11 @@ def create_scope(node: dict, edges, nodes) -> Scope:
             if edge["sourceHandle"]:
                 labels[i] += f" ({edge['sourceHandle']})"
 
-    block = Scope(labels=labels)
+    parameters = get_parameters_for_block_class(Scope, node, eval_namespace=globals())
+    # remove labels from parameters, as they are set separately
+    parameters.pop("labels", None)
+
+    block = Scope(labels=labels, **parameters)
     block._connections_order = connections_order
 
     return block
@@ -297,17 +296,19 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     if eval_namespace is None:
         eval_namespace = globals()
 
-    block_type = node["type"]
+    if node["type"] not in map_str_to_object:
+        raise ValueError(f"Unknown block type: {node['type']}")
 
-    if eval_namespace is None:
-        eval_namespace = globals()
+    block_class = map_str_to_object[node["type"]]
 
-    block_type = node["type"]
-    if block_type not in map_str_to_object:
-        raise ValueError(f"Unknown block type: {block_type}")
+    parameters = get_parameters_for_block_class(
+        block_class, node, eval_namespace=eval_namespace
+    )
 
-    block_class = map_str_to_object[block_type]
+    return block_class(**parameters)
 
+
+def get_parameters_for_block_class(block_class, node, eval_namespace):
     parameters_for_class = inspect.signature(block_class.__init__).parameters
     parameters = {}
     for k, value in parameters_for_class.items():
@@ -321,13 +322,12 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
         if user_input == "":
             if value.default is inspect._empty:
                 raise ValueError(
-                    f"expected parameter for {k} in {block_type} ({node['label']})"
+                    f"expected parameter for {k} in {node['type']} ({node['label']})"
                 )
             parameters[k] = value.default
         else:
             parameters[k] = eval(user_input, eval_namespace)
-
-    return block_class(**parameters)
+    return parameters
 
 
 def make_blocks(

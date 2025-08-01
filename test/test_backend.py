@@ -2,8 +2,9 @@ from src.pathsim_utils import (
     create_integrator,
     auto_block_construction,
     create_function,
+    create_bubbler,
 )
-from src.custom_pathsim_blocks import Process, Splitter2, Splitter3
+from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler
 
 import pathsim.blocks
 
@@ -27,6 +28,14 @@ NODE_TEMPLATES = {
     "integrator": {
         "type": "integrator",
         "data": {"initial_value": "0.0", "label": "Integrator", "reset_times": ""},
+    },
+    "bubbler": {
+        "type": "bubbler",
+        "data": {
+            "conversion_efficiency": "",
+            "replacement_times": "",
+            "vial_efficiency": "",
+        },
     },
     "function": {
         "type": "function",
@@ -186,3 +195,22 @@ def test_create_function():
     block = create_function(node, eval_namespace={"b": 2.5})
     assert isinstance(block, pathsim.blocks.Function)
     assert block.func(2) == 3 * 2**2 + 2.5
+
+
+def test_create_bubbler():
+    node = {
+        "id": "6",
+        "type": "bubbler",
+        "position": {"x": 627, "y": 357},
+        "data": {
+            "label": "bubbler 6",
+            "conversion_efficiency": "",
+            "replacement_times": "[1, 2, 3]",
+            "vial_efficiency": "",
+        },
+        "measured": {"width": 230, "height": 160},
+        "selected": False,
+        "dragging": False,
+    }
+    block, events = create_bubbler(node)
+    assert isinstance(block, Bubbler)
