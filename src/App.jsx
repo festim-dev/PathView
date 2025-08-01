@@ -61,7 +61,6 @@ const nodeTypes = {
   bubbler: BubblerNode,
   white_noise: SourceNode,
   pink_noise: SourceNode,
-
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -858,13 +857,9 @@ const DnDFlow = () => {
   }, [selectedEdge, selectedNode, copiedNode, duplicateNode, setCopyFeedback]);
   
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Tab Navigation */}
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         height: '50px',
         backgroundColor: '#2c2c2c',
         display: 'flex',
@@ -932,9 +927,21 @@ const DnDFlow = () => {
 
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
-        <div className="dndflow">
-          <div className="reactflow-wrapper" ref={reactFlowWrapper}>
-            <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          {/* Sidebar */}
+          <div style={{
+            width: '250px',
+            backgroundColor: '#1e1e2f',
+            borderRight: '1px solid #ccc',
+            padding: '20px',
+            overflowY: 'auto'
+          }}>
+            <Sidebar />
+          </div>
+          
+          {/* Main Graph Area */}
+          <div className="dndflow" style={{ flex: 1, position: 'relative' }}>
+            <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
               <ReactFlow
                 ref={ref}
                 nodes={nodes}
@@ -1139,7 +1146,6 @@ const DnDFlow = () => {
                 </div>
               </ReactFlow>
             </div>
-            <Sidebar />
           </div>
           {selectedNode && (
             <div
