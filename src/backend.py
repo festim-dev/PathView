@@ -7,9 +7,10 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly
 import json as plotly_json
+import inspect
 
 from .convert_to_python import convert_graph_to_python
-from .pathsim_utils import make_pathsim_model
+from .pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope
 
 # Configure Flask app for Cloud Run
@@ -60,6 +61,30 @@ def health_check():
     return jsonify(
         {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
     ), 200
+
+
+# returns default values for parameters of a node
+@app.route("/default-values/<string:node_type>", methods=["GET"])
+def get_default_values(node_type):
+    try:
+        if node_type not in map_str_to_object:
+            return jsonify({"error": f"Unknown node type: {node_type}"}), 400
+
+        block_class = map_str_to_object[node_type]
+        parameters_for_class = inspect.signature(block_class.__init__).parameters
+        default_values = {}
+        for param in parameters_for_class:
+            if param != "self":  # Skip 'self' parameter
+                default_value = parameters_for_class[param].default
+                if default_value is inspect._empty:
+                    default_values[param] = None  # Handle empty defaults
+                else:
+                    default_values[param] = default_value
+        return jsonify(default_values)
+    except Exception as e:
+        return jsonify(
+            {"error": f"Could not get default values for {node_type}: {str(e)}"}
+        ), 400
 
 
 # Function to save graphs

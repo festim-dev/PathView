@@ -56,6 +56,44 @@ class Splitter3(Splitter):
         super().__init__(n=3, fractions=[f1, f2, f3])
 
 
+class Integrator(pathsim.blocks.Integrator):
+    """Integrator block with a reset method."""
+
+    def __init__(self, initial_value=0.0, reset_times=None):
+        """
+        Args:
+            initial_value: Initial value of the integrator.
+            reset_times: List of times at which the integrator is reset. If None, no reset events are created.
+        """
+        super().__init__(initial_value=initial_value)
+        self.reset_times = reset_times
+
+    def create_reset_events(self):
+        """Create reset events for the integrator based on the reset times.
+
+        Raises:
+            ValueError: If reset_times is not valid.
+
+        Returns:
+            list of reset events.
+        """
+        if self.reset_times is None:
+            return []
+        if isinstance(self.reset_times, (int, float)):
+            reset_times = [self.reset_times]
+        elif isinstance(self.reset_times, list) and all(
+            isinstance(t, (int, float)) for t in self.reset_times
+        ):
+            reset_times = self.reset_times
+        else:
+            raise ValueError("reset_times must be a single value or a list of times")
+
+        return [
+            pathsim.blocks.Schedule(t_start=t, t_end=t, func_act=self.reset)
+            for t in reset_times
+        ]
+
+
 # BUBBLER SYSTEM
 
 

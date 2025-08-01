@@ -2,8 +2,10 @@ from src.pathsim_utils import (
     create_integrator,
     auto_block_construction,
     create_function,
+    create_bubbler,
+    create_scope,
 )
-from src.custom_pathsim_blocks import Process, Splitter2, Splitter3
+from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
 
 import pathsim.blocks
 
@@ -27,6 +29,14 @@ NODE_TEMPLATES = {
     "integrator": {
         "type": "integrator",
         "data": {"initial_value": "0.0", "label": "Integrator", "reset_times": ""},
+    },
+    "bubbler": {
+        "type": "bubbler",
+        "data": {
+            "conversion_efficiency": "",
+            "replacement_times": "",
+            "vial_efficiency": "",
+        },
     },
     "function": {
         "type": "function",
@@ -55,7 +65,10 @@ NODE_TEMPLATES = {
         "type": "splitter3",
         "data": {"f1": "1/3", "f2": "1/3", "f3": "1/3", "label": "Splitter 3"},
     },
-    "scope": {"type": "scope", "data": {"label": "Scope"}},
+    "scope": {
+        "type": "scope",
+        "data": {"label": "Scope", "sampling_rate": "", "labels": ""},
+    },
     "white_noise": {
         "type": "white_noise",
         "data": {
@@ -118,7 +131,7 @@ def test_create_integrator():
     }
     integrator, events = create_integrator(node)
 
-    assert isinstance(integrator, pathsim.blocks.Integrator)
+    assert isinstance(integrator, Integrator)
     assert integrator.initial_value == 0
     for event in events:
         assert isinstance(event, pathsim.blocks.Schedule)
@@ -186,3 +199,34 @@ def test_create_function():
     block = create_function(node, eval_namespace={"b": 2.5})
     assert isinstance(block, pathsim.blocks.Function)
     assert block.func(2) == 3 * 2**2 + 2.5
+
+
+def test_create_bubbler():
+    node = {
+        "id": "6",
+        "type": "bubbler",
+        "position": {"x": 627, "y": 357},
+        "data": {
+            "label": "bubbler 6",
+            "conversion_efficiency": "",
+            "replacement_times": "[1, 2, 3]",
+            "vial_efficiency": "",
+        },
+        "measured": {"width": 230, "height": 160},
+        "selected": False,
+        "dragging": False,
+    }
+    block, events = create_bubbler(node)
+    assert isinstance(block, Bubbler)
+
+
+def test_make_scope():
+    node = {
+        "id": "7",
+        "type": "scope",
+        "data": {"label": "scope 7", "sampling_rate": "", "labels": "", "t_wait": ""},
+    }
+    block = create_scope(node, edges=[], nodes=[node])
+    assert isinstance(block, pathsim.blocks.Scope)
+    assert block.labels == []
+    assert block.sampling_rate is None

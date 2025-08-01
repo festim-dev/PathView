@@ -93,6 +93,24 @@ export default function App() {
 
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
+  const [defaultValues, setDefaultValues] = useState({});
+
+  // Function to fetch default values for a node type
+  const fetchDefaultValues = async (nodeType) => {
+    try {
+      const response = await fetch(`http://localhost:8000/default-values/${nodeType}`);
+      if (response.ok) {
+        const defaults = await response.json();
+        return defaults;
+      } else {
+        console.error('Failed to fetch default values');
+        return {};
+      }
+    } catch (error) {
+      console.error('Error fetching default values:', error);
+      return {};
+    }
+  };
 
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
@@ -584,7 +602,7 @@ export default function App() {
     );
   };
   // Function to add a new node to the graph
-  const addNode = () => {
+  const addNode = async () => {
     // Get available node types from nodeTypes object
     const availableTypes = Object.keys(nodeTypes);
 
@@ -611,78 +629,24 @@ export default function App() {
 
     const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
-
-    // Create appropriate data based on node type
+    
+    // Fetch default values for this node type
+    const defaults = await fetchDefaultValues(selectedType);
+    
+    // Store default values for this node type
+    setDefaultValues(prev => ({
+      ...prev,
+      [selectedType]: defaults
+    }));
+    
+    // Create node data with label and initialize all expected fields as empty strings
     let nodeData = { label: `${selectedType} ${newNodeId}` };
-
-    // Add type-specific default parameters
-    switch (selectedType) {
-      case 'process':
-        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
-        break;
-      case 'process_horizontal':
-        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
-        break;
-      case 'constant':
-        nodeData = { ...nodeData, value: '' };
-        break;
-      case 'stepsource':
-        nodeData = { ...nodeData, amplitude: '1', delay: '1' };
-        break;
-      case 'pulsesource':
-        nodeData = { ...nodeData, amplitude: '1', T: '1', t_rise: '0.0', t_fall: '0.0', tau: '0.0', duty: '0.5' };
-        break;
-      case 'amplifier':
-        nodeData = { ...nodeData, gain: '' };
-        break;
-      case 'amplifier_reverse':
-        nodeData = { ...nodeData, gain: '' };
-        break;
-      case 'multiplier':
-        break;
-      case 'integrator':
-        nodeData = { ...nodeData, initial_value: '', reset_times: '' };
-        break;
-      case 'adder':
-        break;
-      case 'scope':
-        nodeData = { ...nodeData };
-        break;
-      case 'function':
-        nodeData = { ...nodeData, expression: '' };
-        break;
-      case 'delay':
-        nodeData = { ...nodeData, tau: '' };
-        break;
-      case 'rng':
-        nodeData = { ...nodeData, sampling_rate: '' };
-        break;
-      case 'pid':
-        nodeData = { ...nodeData, Kp: '', Ki: '', Kd: '', f_max: '' };
-        break;
-      case 'splitter2':
-        nodeData = { ...nodeData, f1: '0.5', f2: '0.5' };
-        break;
-      case 'splitter3':
-        nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
-        break;
-      case 'wall':
-        nodeData = { ...nodeData, thickness: '', surface_area: '1', temperature: '', D_0: '1', E_D: '0', n_vertices: '100' };
-        break;
-      case 'bubbler':
-        nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_times: '' };
-        break;
-      case 'white_noise':
-        nodeData = { ...nodeData, spectral_density: '1', sampling_rate: '' };
-        break;
-      case 'pink_noise':
-        nodeData = { ...nodeData, spectral_density: '1', num_octaves: '16', sampling_rate: '' };
-        break;
-      default:
-        // For any other types, just use basic data
-        break;
-    }
-
+    
+    // Initialize all expected parameters as empty strings
+    Object.keys(defaults).forEach(key => {
+      nodeData[key] = '';
+    });
+    
     const newNode = {
       id: newNodeId,
       type: selectedType,
@@ -1132,37 +1096,78 @@ export default function App() {
               }}
             >
               <h3>{selectedNode.data.label}</h3>
-              {Object.entries(selectedNode.data)
-                .map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '10px' }}>
-                    <label>{key}:</label>
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e) => {
-                        const newValue = e.target.value;
-                        const updatedNode = {
-                          ...selectedNode,
-                          data: { ...selectedNode.data, [key]: newValue },
-                        };
+              {(() => {
+                // Get default values for this node type
+                const nodeDefaults = defaultValues[selectedNode.type] || {};
+                
+                // Create a list of all possible parameters (both current data and defaults)
+                const allParams = new Set([
+                  ...Object.keys(selectedNode.data),
+                  ...Object.keys(nodeDefaults)
+                ]);
+                
+                return Array.from(allParams)
+                  .map(key => {
+                    const currentValue = selectedNode.data[key] || '';
+                    const defaultValue = nodeDefaults[key];
+                    const placeholder = defaultValue !== undefined && defaultValue !== null ? 
+                      String(defaultValue) : '';
+                    
+                    return (
+                      <div key={key} style={{ marginBottom: '10px' }}>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          display: 'block', 
+                          marginBottom: '4px',
+                          fontSize: '14px'
+                        }}>
+                          {key}:
+                        </label>
+                        <input
+                          type="text"
+                          value={currentValue}
+                          placeholder={placeholder}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            const updatedNode = {
+                              ...selectedNode,
+                              data: { ...selectedNode.data, [key]: newValue },
+                            };
 
-                        setNodes((nds) =>
-                          nds.map((node) =>
-                            node.id === selectedNode.id ? updatedNode : node
-                          )
-                        );
-                        setSelectedNode(updatedNode);
-
-                      }}
-
-                      style={{ width: '100%', marginTop: 4 }}
-                    />
-                  </div>
-                ))}
+                            setNodes((nds) =>
+                              nds.map((node) =>
+                                node.id === selectedNode.id ? updatedNode : node
+                              )
+                            );
+                            setSelectedNode(updatedNode);
+                          }}
+                          style={{ 
+                            width: '100%', 
+                            marginTop: 4,
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #555',
+                            backgroundColor: '#2a2a3e',
+                            color: '#ffffff',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                    );
+                  });
+              })()}
 
               <br />
               <button
-                style={{ marginTop: 10 }}
+                style={{ 
+                  marginTop: 10,
+                  padding: '8px 16px',
+                  backgroundColor: '#666',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
                 onClick={() => setSelectedNode(null)}
               >
                 Close

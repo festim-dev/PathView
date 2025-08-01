@@ -12,7 +12,6 @@ from pathsim.blocks import (
     Amplifier,
     Adder,
     Multiplier,
-    Integrator,
     Function,
     Delay,
     RNG,
@@ -27,6 +26,7 @@ from .custom_pathsim_blocks import (
     Splitter3,
     Bubbler,
     FestimWall,
+    Integrator,
 )
 from flask import jsonify
 import inspect
@@ -82,24 +82,13 @@ def create_integrator(
     if eval_namespace is None:
         eval_namespace = globals()
 
-    block = Integrator(
-        initial_value=eval(node["data"]["initial_value"], eval_namespace)
-        if node["data"].get("initial_value") and node["data"]["initial_value"] != ""
-        else 0.0,
+    parameters = get_parameters_for_block_class(
+        Integrator, node, eval_namespace=eval_namespace
     )
+
+    block = Integrator(**parameters)
     # add events to reset integrator if needed
-    events = []
-    if node["data"]["reset_times"] != "":
-
-        def reset_itg(_):
-            block.reset()
-
-        reset_times = eval(node["data"]["reset_times"], eval_namespace)
-        if isinstance(reset_times, (int, float)):
-            # If it's a single number, convert it to a list
-            reset_times = [reset_times]
-        for t in reset_times:
-            events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+    events = block.create_reset_events()
     return block, events
 
 
@@ -153,20 +142,15 @@ def create_bubbler(node: dict) -> Bubbler:
     Create a Bubbler block based on the node data.
     """
     # Extract parameters from node data
-    block = Bubbler(
-        conversion_efficiency=eval(node["data"]["conversion_efficiency"]),
-        vial_efficiency=eval(node["data"]["vial_efficiency"]),
-        replacement_times=eval(node["data"]["replacement_times"])
-        if node["data"].get("replacement_times") != ""
-        else None,
-    )
+    parameters = get_parameters_for_block_class(Bubbler, node, eval_namespace=globals())
+    block = Bubbler(**parameters)
 
     events = block.create_reset_events()
 
     return block, events
 
 
-def create_scope(node: dict, edges, nodes) -> Scope:
+def make_labels_for_scope(node: dict, edges: list, nodes: list) -> list[str]:
     # Find all incoming edges to this node and sort by source id for consistent ordering
     incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
     incoming_edges.sort(key=lambda x: x["source"])
@@ -193,8 +177,17 @@ def create_scope(node: dict, edges, nodes) -> Scope:
             if edge["sourceHandle"]:
                 labels[i] += f" ({edge['sourceHandle']})"
 
-    block = Scope(labels=labels)
+    return labels, connections_order
+
+
+def create_scope(node: dict, edges, nodes) -> Scope:
+    block = auto_block_construction(node, eval_namespace=globals())
+
+    # override labels + add connections order
+    # TODO this should be done in "make connections"
+    labels, connections_order = make_labels_for_scope(node, edges, nodes)
     block._connections_order = connections_order
+    block.labels = labels
 
     return block
 
@@ -297,17 +290,19 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     if eval_namespace is None:
         eval_namespace = globals()
 
-    block_type = node["type"]
+    if node["type"] not in map_str_to_object:
+        raise ValueError(f"Unknown block type: {node['type']}")
 
-    if eval_namespace is None:
-        eval_namespace = globals()
+    block_class = map_str_to_object[node["type"]]
 
-    block_type = node["type"]
-    if block_type not in map_str_to_object:
-        raise ValueError(f"Unknown block type: {block_type}")
+    parameters = get_parameters_for_block_class(
+        block_class, node, eval_namespace=eval_namespace
+    )
 
-    block_class = map_str_to_object[block_type]
+    return block_class(**parameters)
 
+
+def get_parameters_for_block_class(block_class, node, eval_namespace):
     parameters_for_class = inspect.signature(block_class.__init__).parameters
     parameters = {}
     for k, value in parameters_for_class.items():
@@ -321,13 +316,12 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
         if user_input == "":
             if value.default is inspect._empty:
                 raise ValueError(
-                    f"expected parameter for {k} in {block_type} ({node['label']})"
+                    f"expected parameter for {k} in {node['type']} ({node['label']})"
                 )
             parameters[k] = value.default
         else:
             parameters[k] = eval(user_input, eval_namespace)
-
-    return block_class(**parameters)
+    return parameters
 
 
 def make_blocks(

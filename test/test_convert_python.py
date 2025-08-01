@@ -37,6 +37,9 @@ sample_data = {
             "type": "scope",
             "data": {
                 "label": "scope_1",
+                "labels": "",
+                "sampling_rate": "",
+                "t_wait": "",
             },
         },
     ],
@@ -102,6 +105,7 @@ sample_data = {
         "test_files/constant_delay_scope.json",
         "test_files/custom_nodes.json",
         "test_files/same_label.json",
+        "test_files/bubbler.json",
     ],
 )
 def test_nested_templates(data):
