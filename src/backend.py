@@ -7,17 +7,37 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly
 import json as plotly_json
+import inspect
 
 from .convert_to_python import convert_graph_to_python
-from .pathsim_utils import make_pathsim_model
+from .pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope
 
-app = Flask(__name__)
-CORS(
-    app,
-    resources={r"/*": {"origins": "http://localhost:5173"}},
-    supports_credentials=True,
-)
+# Configure Flask app for Cloud Run
+app = Flask(__name__, static_folder="../dist", static_url_path="")
+
+# Configure CORS based on environment
+if os.getenv("FLASK_ENV") == "production":
+    # Production: Allow Cloud Run domains and common domains
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": ["*"],  # Allow all origins for Cloud Run
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+            }
+        },
+    )
+else:
+    # Development: Only allow localhost
+    CORS(
+        app,
+        resources={
+            r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}
+        },
+        supports_credentials=True,
+    )
 
 
 # Creates directory for saved graphs
@@ -25,13 +45,56 @@ SAVE_DIR = "saved_graphs"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 
-# Health check endpoint for CI/CD
-@app.route("/", methods=["GET"])
+# Serve React frontend for production
+@app.route("/")
+def serve_frontend():
+    """Serve the React frontend in production."""
+    if os.getenv("FLASK_ENV") == "production":
+        return app.send_static_file("index.html")
+    else:
+        return jsonify({"message": "Fuel Cycle Simulator API", "status": "running"})
+
+
+# Health check endpoint for Cloud Run
 @app.route("/health", methods=["GET"])
 def health_check():
     return jsonify(
         {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
     ), 200
+
+
+# returns default values for parameters of a node
+@app.route("/default-values/<string:node_type>", methods=["GET"])
+def get_default_values(node_type):
+    try:
+        if node_type not in map_str_to_object:
+            return jsonify({"error": f"Unknown node type: {node_type}"}), 400
+
+        block_class = map_str_to_object[node_type]
+        parameters_for_class = inspect.signature(block_class.__init__).parameters
+        default_values = {}
+        for param in parameters_for_class:
+            if param != "self":  # Skip 'self' parameter
+                default_value = parameters_for_class[param].default
+                if default_value is inspect._empty:
+                    default_values[param] = None  # Handle empty defaults
+                else:
+                    default_values[param] = default_value
+                    # check if default value is serializable to JSON
+                    if not isinstance(
+                        default_value, (int, float, str, bool, list, dict)
+                    ):
+                        # Attempt to convert to JSON serializable type
+                        try:
+                            default_values[param] = json.dumps(default_value)
+                        except TypeError:
+                            # If conversion fails, set to a string 'default'
+                            default_values[param] = "default"
+        return jsonify(default_values)
+    except Exception as e:
+        return jsonify(
+            {"error": f"Could not get default values for {node_type}: {str(e)}"}
+        ), 400
 
 
 # Function to save graphs
@@ -95,6 +158,22 @@ def convert_to_python():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+# Helper function to extract CSV payload from scopes
+def make_csv_payload(scopes):
+    csv_payload = {"time": [], "series": {}}
+
+    max_len = 0
+    for scope in scopes:
+        time, values = scope.read()
+        max_len = max(max_len, len(time))
+        csv_payload["time"] = time.tolist()
+        for i, series in enumerate(values):
+            label = scope.labels[i] if i < len(scope.labels) else f"{scope.label} {i}"
+            csv_payload["series"][label] = series.tolist()
+
+    return csv_payload
+
+
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
 def run_pathsim():
@@ -111,6 +190,8 @@ def run_pathsim():
 
         # Generate the plot
         scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
+
+        csv_payload = make_csv_payload(scopes)
 
         if len(scopes) == 1:
             # Single subplot case
@@ -157,6 +238,7 @@ def run_pathsim():
             {
                 "success": True,
                 "plot": plot_data,
+                "csv_data": csv_payload,
                 "message": "Pathsim simulation completed successfully",
             }
         )
@@ -165,5 +247,16 @@ def run_pathsim():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
+# Catch-all route for React Router (SPA routing)
+@app.route("/<path:path>")
+def catch_all(path):
+    """Serve React app for all routes in production (for client-side routing)."""
+    if os.getenv("FLASK_ENV") == "production":
+        return app.send_static_file("index.html")
+    else:
+        return jsonify({"error": "Route not found"}), 404
+
+
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    port = int(os.getenv("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=os.getenv("FLASK_ENV") != "production")

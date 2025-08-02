@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -11,24 +11,27 @@ import {
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import Plot from 'react-plotly.js';
+import { getApiEndpoint } from './config.js';
 
+import ContextMenu from './ContextMenu.jsx';
 
 // Importing node components
-import {ProcessNode, ProcessNodeHorizontal} from './ProcessNode';
+import { ProcessNode, ProcessNodeHorizontal } from './ProcessNode';
 import DelayNode from './DelayNode';
 import SourceNode from './ConstantNode';
-import {AmplifierNode, AmplifierNodeReverse} from './AmplifierNode';
+import { AmplifierNode, AmplifierNodeReverse } from './AmplifierNode';
 import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
 import StepSourceNode from './StepSourceNode';
-import FunctionNode from './FunctionNode';
+import {createFunctionNode} from './FunctionNode';
 import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './Splitters';
 import VialNode from './VialNode';
 import BubblerNode from './BubblerNode';
+import WallNode from './WallNode';
 
 // Add nodes as a node type for this script
 const nodeTypes = {
@@ -36,6 +39,7 @@ const nodeTypes = {
   process_horizontal: ProcessNodeHorizontal,
   delay: DelayNode,
   constant: SourceNode,
+  source: SourceNode,
   stepsource: StepSourceNode,
   pulsesource: SourceNode,
   amplifier: AmplifierNode,
@@ -44,13 +48,17 @@ const nodeTypes = {
   adder: AdderNode,
   multiplier: MultiplierNode,
   scope: ScopeNode,
-  function: FunctionNode,
+  function: createFunctionNode(1, 1), // Default FunctionNode with 1 input and 1 output
+  function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
   rng: DefaultNode,
   pid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
   vial: VialNode,
-  bubbler: BubblerNode
+  wall: WallNode,
+  bubbler: BubblerNode,
+  white_noise: SourceNode,
+  pink_noise: SourceNode,
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -67,7 +75,12 @@ export default function App() {
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [nodeCounter, setNodeCounter] = useState(1);
-  
+  const [menu, setMenu] = useState(null);
+  const [copiedNode, setCopiedNode] = useState(null);
+  const [copyFeedback, setCopyFeedback] = useState('');
+  const ref = useRef(null);
+  const [csvData, setCsvData] = useState(null);
+
   // Solver parameters state
   const [solverParams, setSolverParams] = useState({
     dt: '0.01',
@@ -83,6 +96,24 @@ export default function App() {
 
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
+  const [defaultValues, setDefaultValues] = useState({});
+
+  // Function to fetch default values for a node type
+  const fetchDefaultValues = async (nodeType) => {
+    try {
+      const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
+      if (response.ok) {
+        const defaults = await response.json();
+        return defaults;
+      } else {
+        console.error('Failed to fetch default values');
+        return {};
+      }
+    } catch (error) {
+      console.error('Error fetching default values:', error);
+      return {};
+    }
+  };
 
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
@@ -124,20 +155,20 @@ export default function App() {
       }
     } else {
       // Fallback for browsers (like Firefox and Safari) that don't support File System Access API
-      const blob = new Blob([JSON.stringify(graphData, null, 2)], { 
-        type: 'application/json' 
+      const blob = new Blob([JSON.stringify(graphData, null, 2)], {
+        type: 'application/json'
       });
-      
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'fuel-cycle-graph.json';
-      
+
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       alert('Graph downloaded successfully!');
     }
   };
@@ -160,16 +191,16 @@ export default function App() {
 
         const file = await fileHandle.getFile();
         const text = await file.text();
-        
+
         try {
           const graphData = JSON.parse(text);
-          
+
           // Validate that it's a valid graph file
           if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
             alert("Invalid file format. Please select a valid graph JSON file.");
             return;
           }
-          
+
           // Load the graph data
           const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
           setNodes(loadedNodes || []);
@@ -188,7 +219,7 @@ export default function App() {
             extra_params: '{}'
           });
           setGlobalVariables(loadedGlobalVariables ?? []);
-          
+
           alert('Graph loaded successfully!');
         } catch (error) {
           console.error('Error parsing file:', error);
@@ -207,21 +238,21 @@ export default function App() {
       fileInput.type = 'file';
       fileInput.accept = '.json';
       fileInput.style.display = 'none';
-      
+
       fileInput.onchange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const graphData = JSON.parse(e.target.result);
-            
+
             if (!graphData.nodes || !Array.isArray(graphData.nodes)) {
               alert("Invalid file format. Please select a valid graph JSON file.");
               return;
             }
-            
+
             const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
             setNodes(loadedNodes || []);
             setEdges(loadedEdges || []);
@@ -239,18 +270,18 @@ export default function App() {
               extra_params: '{}'
             });
             setGlobalVariables(loadedGlobalVariables ?? []);
-            
+
             alert('Graph loaded successfully!');
           } catch (error) {
             console.error('Error parsing file:', error);
             alert('Error reading file. Please make sure it\'s a valid JSON file.');
           }
         };
-        
+
         reader.readAsText(file);
         document.body.removeChild(fileInput);
       };
-      
+
       document.body.appendChild(fileInput);
       fileInput.click();
     }
@@ -275,6 +306,58 @@ export default function App() {
     });
     setGlobalVariables([]);
   };
+  const downloadCsv = async () => {
+    if (!csvData) return;
+
+    const { time, series } = csvData;
+    const labels = Object.keys(series);
+    const header = ["time", ...labels].join(",");
+    const rows = [header];
+
+    time.forEach((t, i) => {
+      const row = [t];
+      for (const label of labels) {
+        const val = series[label][i] ?? "NaN";
+        row.push(val);
+      }
+      rows.push(row.join(","));
+    });
+
+    const csvString = rows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const filename = `simulation_${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
+
+    try {
+      if ("showSaveFilePicker" in window) {
+        const options = {
+          suggestedName: filename,
+          types: [{
+            description: "CSV File",
+            accept: { "text/csv": [".csv"] }
+          }]
+        };
+
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        throw new Error("showSaveFilePicker not supported");
+      }
+    } catch (err) {
+      console.warn("Falling back to automatic download:", err);
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    }
+  };
+
+
+
   // Allows user to save to python script
   const saveToPython = async () => {
     try {
@@ -286,7 +369,7 @@ export default function App() {
         globalVariables
       };
 
-      const response = await fetch('http://localhost:8000/convert-to-python', {
+      const response = await fetch(getApiEndpoint('/convert-to-python'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -356,7 +439,7 @@ export default function App() {
         globalVariables
       };
 
-      const response = await fetch('http://localhost:8000/run-pathsim', {
+      const response = await fetch(getApiEndpoint('/run-pathsim'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -369,6 +452,7 @@ export default function App() {
       if (result.success) {
         // Store results and switch to results tab
         setSimulationResults(result.plot);
+        setCsvData(result.csv_data);
         setActiveTab('results');
         alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
@@ -379,26 +463,26 @@ export default function App() {
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
   };
-  
+
   // Functions for managing global variables
   const isValidPythonIdentifier = (name) => {
     // Check if name is empty
     if (!name) return false;
-    
+
     // Python identifier rules:
     // - Must start with letter or underscore
     // - Can contain letters, digits, underscores
     // - Cannot be a Python keyword
     const pythonKeywords = [
-      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue', 
-      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 
-      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 
+      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue',
+      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global',
+      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass',
       'raise', 'return', 'try', 'while', 'with', 'yield'
     ];
-    
+
     // Check if it's a keyword
     if (pythonKeywords.includes(name)) return false;
-    
+
     // Check pattern: must start with letter or underscore, followed by letters, digits, or underscores
     const pattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
     return pattern.test(name);
@@ -422,12 +506,12 @@ export default function App() {
     setGlobalVariables(globalVariables.map(variable => {
       if (variable.id === id) {
         const updatedVariable = { ...variable, [field]: value };
-        
+
         // Validate name field
         if (field === 'name') {
           updatedVariable.nameError = value !== '' && !isValidPythonIdentifier(value);
         }
-        
+
         return updatedVariable;
       }
       return variable;
@@ -443,7 +527,7 @@ export default function App() {
       if (params.sourceHandle) {
         edgeId += `-from_${params.sourceHandle}`;
       }
-      
+
       if (params.targetHandle) {
         edgeId += `-to_${params.targetHandle}`;
       }
@@ -503,6 +587,7 @@ export default function App() {
   const onPaneClick = () => {
     setSelectedNode(null);
     setSelectedEdge(null);
+    setMenu(null); // Close context menu when clicking on pane
     // Reset all edge styles when deselecting
     setEdges((eds) =>
       eds.map((e) => ({
@@ -520,94 +605,50 @@ export default function App() {
     );
   };
   // Function to add a new node to the graph
-  const addNode = () => {
+  const addNode = async () => {
     // Get available node types from nodeTypes object
     const availableTypes = Object.keys(nodeTypes);
-    
+
     // Create options string for the prompt
     const typeOptions = availableTypes.map((type, index) => `${index + 1}. ${type}`).join('\n');
-    
+
     const userInput = prompt(
       `Select a node type by entering the number:\n\n${typeOptions}\n\nEnter your choice (1-${availableTypes.length}):`
     );
-    
+
     // If user cancels the prompt
     if (!userInput) {
       return;
     }
-    
+
     // Parse the user input
     const choiceIndex = parseInt(userInput) - 1;
-    
+
     // Validate the choice
     if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= availableTypes.length) {
       alert('Invalid choice. Please enter a number between 1 and ' + availableTypes.length);
       return;
     }
-    
+
     const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
     
-    // Create appropriate data based on node type
+    // Fetch default values for this node type
+    const defaults = await fetchDefaultValues(selectedType);
+    
+    // Store default values for this node type
+    setDefaultValues(prev => ({
+      ...prev,
+      [selectedType]: defaults
+    }));
+    
+    // Create node data with label and initialize all expected fields as empty strings
     let nodeData = { label: `${selectedType} ${newNodeId}` };
     
-    // Add type-specific default parameters
-    switch (selectedType) {
-      case 'process':
-        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
-        break;
-      case 'process_horizontal':
-        nodeData = { ...nodeData, residence_time: '', source_term: '', initial_value: '' };
-        break;
-      case 'constant':
-        nodeData = { ...nodeData, value: '' };
-        break;
-      case 'stepsource':
-        nodeData = { ...nodeData, amplitude: '1', delay: '1' };
-        break;
-      case 'pulsesource':
-        nodeData = { ...nodeData, amplitude: '1', T: '1', t_rise: '0.0', t_fall: '0.0', tau: '0.0', duty: '0.5' };
-        break;
-      case 'amplifier':
-        nodeData = { ...nodeData, gain: ''};
-        break;
-      case 'amplifier_reverse':
-        nodeData = { ...nodeData, gain: ''};
-        break;
-      case 'multiplier':
-        break;
-      case 'integrator':
-        nodeData = { ...nodeData, initial_value: '', reset_times: '' };
-        break;
-      case 'adder':
-        break;
-      case 'scope':
-        nodeData = { ...nodeData };
-        break;
-      case 'function':
-        nodeData = { ...nodeData, expression: '' };
-        break;
-      case 'delay':
-        nodeData = { ...nodeData, tau: '' };
-        break;
-      case 'rng':
-        nodeData = { ...nodeData, sampling_rate: ''};
-        break;
-      case 'pid':
-        nodeData = { ...nodeData, Kp: '', Ki: '', Kd: '', f_max: '' };
-        break;
-      case 'splitter2':
-        nodeData = { ...nodeData, f1: '0.5', f2: '0.5' };
-        break;
-      case 'splitter3':
-        nodeData = { ...nodeData, f1: '1/3', f2: '1/3', f3: '1/3' };
-        break;
-      case 'bubbler':
-        nodeData = { ...nodeData, conversion_efficiency: '0.95', vial_efficiency: '0.9', replacement_time: '' };
-      default:
-        // For any other types, just use basic data
-        break;
-    }
+    // Initialize all expected parameters as empty strings
+    Object.keys(defaults).forEach(key => {
+      nodeData[key] = '';
+    });
     
     const newNode = {
       id: newNodeId,
@@ -615,10 +656,32 @@ export default function App() {
       position: { x: 200 + nodes.length * 50, y: 200 },
       data: nodeData,
     };
-    
+
     setNodes((nds) => [...nds, newNode]);
     setNodeCounter((count) => count + 1);
   };
+
+  // Function to pop context menu when right-clicking on a node
+  const onNodeContextMenu = useCallback(
+    (event, node) => {
+      // Prevent native context menu from showing
+      event.preventDefault();
+
+      // Calculate position of the context menu. We want to make sure it
+      // doesn't get positioned off-screen.
+      const pane = ref.current.getBoundingClientRect();
+      setMenu({
+        id: node.id,
+        top: event.clientY < pane.height - 200 && event.clientY,
+        left: event.clientX < pane.width - 200 && event.clientX,
+        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
+        bottom:
+          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+      });
+    },
+    [setMenu],
+  );
+
   // Function to delete the selected node
   const deleteSelectedNode = () => {
     if (selectedNode) {
@@ -651,11 +714,82 @@ export default function App() {
       setSelectedEdge(null);
     }
   };
+
+  // Function to duplicate a node
+  const duplicateNode = useCallback((nodeId, options = {}) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    const newNodeId = nodeCounter.toString();
+
+    // Calculate position based on source (context menu vs keyboard)
+    let position;
+    if (options.fromKeyboard) {
+      // For keyboard shortcuts, place the duplicate at a more visible offset
+      position = {
+        x: node.position.x + 100,
+        y: node.position.y + 100,
+      };
+    } else {
+      // For context menu, use smaller offset
+      position = {
+        x: node.position.x + 50,
+        y: node.position.y + 50,
+      };
+    }
+
+    const newNode = {
+      ...node,
+      selected: false,
+      dragging: false,
+      id: newNodeId,
+      position,
+      data: {
+        ...node.data,
+        label: node.data.label ? node.data.label.replace(node.id, newNodeId) : `${node.type} ${newNodeId}`
+      }
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+    setNodeCounter((count) => count + 1);
+    setMenu(null); // Close the context menu
+  }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
+
+
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
       // Don't trigger deletion if user is typing in an input field
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // Handle Ctrl+C (copy)
+      if (event.ctrlKey && event.key === 'c' && selectedNode) {
+        event.preventDefault();
+        setCopiedNode(selectedNode);
+        setCopyFeedback(`Copied: ${selectedNode.data.label || selectedNode.id}`);
+
+        // Clear feedback after 2 seconds
+        setTimeout(() => {
+          setCopyFeedback('');
+        }, 2000);
+
+        console.log('Node copied:', selectedNode.id);
+        return;
+      }
+
+      // Handle Ctrl+V (paste)
+      if (event.ctrlKey && event.key === 'v' && copiedNode) {
+        event.preventDefault();
+        duplicateNode(copiedNode.id, { fromKeyboard: true });
+        return;
+      }
+
+      // Handle Ctrl+D (duplicate selected node directly)
+      if (event.ctrlKey && event.key === 'd' && selectedNode) {
+        event.preventDefault();
+        duplicateNode(selectedNode.id, { fromKeyboard: true });
         return;
       }
 
@@ -672,7 +806,7 @@ export default function App() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedEdge, selectedNode]);
+  }, [selectedEdge, selectedNode, copiedNode, duplicateNode, setCopyFeedback]);
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -751,6 +885,7 @@ export default function App() {
       {activeTab === 'graph' && (
         <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
           <ReactFlow
+            ref={ref}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -759,11 +894,32 @@ export default function App() {
             onNodeClick={onNodeClick}
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
+            onNodeContextMenu={onNodeContextMenu}
             nodeTypes={nodeTypes}
           >
             <Controls />
             <MiniMap />
             <Background variant="dots" gap={12} size={1} />
+            {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
+            {copyFeedback && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 20,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#78A083',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: 4,
+                  zIndex: 1000,
+                  fontSize: '14px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                }}
+              >
+                {copyFeedback}
+              </div>
+            )}
             <button
               style={{
                 position: 'absolute',
@@ -902,6 +1058,29 @@ export default function App() {
             >
               Run
             </button>
+
+
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '50%',
+                right: 20,
+                backgroundColor: 'rgba(0, 0, 0, 0.31)',
+                color: 'white',
+                padding: '8px 12px',
+                borderRadius: 4,
+                fontSize: '12px',
+                zIndex: 10,
+                maxWidth: '200px',
+              }}
+            >
+              <strong>Keyboard Shortcuts:</strong><br />
+              Ctrl+C: Copy selected node<br />
+              Ctrl+V: Paste copied node<br />
+              Ctrl+D: Duplicate selected node<br />
+              Del/Backspace: Delete selection<br />
+              Right-click: Context menu
+            </div>
           </ReactFlow>
           {selectedNode && (
             <div
@@ -920,37 +1099,78 @@ export default function App() {
               }}
             >
               <h3>{selectedNode.data.label}</h3>
-              {Object.entries(selectedNode.data)
-                .map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '10px' }}>
-                    <label>{key}:</label>
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e) => {
-                        const newValue = e.target.value;
-                        const updatedNode = {
-                          ...selectedNode,
-                          data: { ...selectedNode.data, [key]: newValue },
-                        };
+              {(() => {
+                // Get default values for this node type
+                const nodeDefaults = defaultValues[selectedNode.type] || {};
+                
+                // Create a list of all possible parameters (both current data and defaults)
+                const allParams = new Set([
+                  ...Object.keys(selectedNode.data),
+                  ...Object.keys(nodeDefaults)
+                ]);
+                
+                return Array.from(allParams)
+                  .map(key => {
+                    const currentValue = selectedNode.data[key] || '';
+                    const defaultValue = nodeDefaults[key];
+                    const placeholder = defaultValue !== undefined && defaultValue !== null ? 
+                      String(defaultValue) : '';
+                    
+                    return (
+                      <div key={key} style={{ marginBottom: '10px' }}>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          display: 'block', 
+                          marginBottom: '4px',
+                          fontSize: '14px'
+                        }}>
+                          {key}:
+                        </label>
+                        <input
+                          type="text"
+                          value={currentValue}
+                          placeholder={placeholder}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            const updatedNode = {
+                              ...selectedNode,
+                              data: { ...selectedNode.data, [key]: newValue },
+                            };
 
-                        setNodes((nds) =>
-                          nds.map((node) =>
-                            node.id === selectedNode.id ? updatedNode : node
-                          )
-                        );
-                        setSelectedNode(updatedNode);
-
-                      }}
-
-                      style={{ width: '100%', marginTop: 4 }}
-                    />
-                  </div>
-                ))}
+                            setNodes((nds) =>
+                              nds.map((node) =>
+                                node.id === selectedNode.id ? updatedNode : node
+                              )
+                            );
+                            setSelectedNode(updatedNode);
+                          }}
+                          style={{ 
+                            width: '100%', 
+                            marginTop: 4,
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #555',
+                            backgroundColor: '#2a2a3e',
+                            color: '#ffffff',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                    );
+                  });
+              })()}
 
               <br />
               <button
-                style={{ marginTop: 10 }}
+                style={{ 
+                  marginTop: 10,
+                  padding: '8px 16px',
+                  backgroundColor: '#666',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
                 onClick={() => setSelectedNode(null)}
               >
                 Close
@@ -1052,9 +1272,9 @@ export default function App() {
                 marginBottom: '20px'
               }}>
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1063,7 +1283,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.dt}
-                    onChange={(e) => setSolverParams({...solverParams, dt: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, dt: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1076,11 +1296,11 @@ export default function App() {
                     placeholder="0.01"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1089,7 +1309,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.dt_min}
-                    onChange={(e) => setSolverParams({...solverParams, dt_min: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, dt_min: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1102,11 +1322,11 @@ export default function App() {
                     placeholder="1e-6"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1115,7 +1335,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.dt_max}
-                    onChange={(e) => setSolverParams({...solverParams, dt_max: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, dt_max: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1128,11 +1348,11 @@ export default function App() {
                     placeholder="1.0"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1140,7 +1360,7 @@ export default function App() {
                   </label>
                   <select
                     value={solverParams.Solver}
-                    onChange={(e) => setSolverParams({...solverParams, Solver: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, Solver: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1156,11 +1376,11 @@ export default function App() {
                     <option value="RKF21">RKF21</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1169,7 +1389,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.tolerance_fpi}
-                    onChange={(e) => setSolverParams({...solverParams, tolerance_fpi: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, tolerance_fpi: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1182,11 +1402,11 @@ export default function App() {
                     placeholder="1e-6"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1195,7 +1415,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.iterations_max}
-                    onChange={(e) => setSolverParams({...solverParams, iterations_max: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, iterations_max: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1208,11 +1428,11 @@ export default function App() {
                     placeholder="100"
                   />
                 </div>
-                
+
                 <div>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1221,7 +1441,7 @@ export default function App() {
                   <input
                     type="text"
                     value={solverParams.simulation_duration}
-                    onChange={(e) => setSolverParams({...solverParams, simulation_duration: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, simulation_duration: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1234,10 +1454,10 @@ export default function App() {
                     placeholder="50.0"
                   />
                 </div>
-                
+
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ 
-                    color: '#ffffff', 
+                  <label style={{
+                    color: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
                     marginBottom: '8px',
@@ -1247,7 +1467,7 @@ export default function App() {
                     <input
                       type="checkbox"
                       checked={solverParams.log === 'true'}
-                      onChange={(e) => setSolverParams({...solverParams, log: e.target.checked ? 'true' : 'false'})}
+                      onChange={(e) => setSolverParams({ ...solverParams, log: e.target.checked ? 'true' : 'false' })}
                       style={{
                         marginRight: '10px',
                         transform: 'scale(1.2)',
@@ -1257,11 +1477,11 @@ export default function App() {
                     Enable Logging
                   </label>
                 </div>
-                
+
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
+                  <label style={{
+                    color: '#ffffff',
+                    display: 'block',
                     marginBottom: '8px',
                     fontWeight: 'bold'
                   }}>
@@ -1269,7 +1489,7 @@ export default function App() {
                   </label>
                   <textarea
                     value={solverParams.extra_params}
-                    onChange={(e) => setSolverParams({...solverParams, extra_params: e.target.value})}
+                    onChange={(e) => setSolverParams({ ...solverParams, extra_params: e.target.value })}
                     style={{
                       width: '95%',
                       padding: '10px',
@@ -1294,10 +1514,10 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              
-              <div style={{ 
+
+              <div style={{
                 textAlign: 'center',
-                marginTop: '30px' 
+                marginTop: '30px'
               }}>
                 <button
                   style={{
@@ -1344,7 +1564,7 @@ export default function App() {
                 </button>
               </div>
             </div>
-            
+
             <div style={{
               marginTop: '30px',
               padding: '20px',
@@ -1392,15 +1612,15 @@ export default function App() {
               borderRadius: '10px',
               boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
             }}>
-              <p style={{ 
-                color: '#cccccc', 
+              <p style={{
+                color: '#cccccc',
                 marginBottom: '20px',
                 textAlign: 'center',
                 fontSize: '14px'
               }}>
                 Define global variables that can be used in node definitions throughout your model.
               </p>
-              
+
               {globalVariables.length === 0 ? (
                 <div style={{
                   textAlign: 'center',
@@ -1425,9 +1645,9 @@ export default function App() {
                       border: '1px solid #555'
                     }}>
                       <div>
-                        <label style={{ 
-                          color: '#ffffff', 
-                          display: 'block', 
+                        <label style={{
+                          color: '#ffffff',
+                          display: 'block',
                           marginBottom: '5px',
                           fontSize: '12px',
                           fontWeight: 'bold'
@@ -1461,9 +1681,9 @@ export default function App() {
                         )}
                       </div>
                       <div>
-                        <label style={{ 
-                          color: '#ffffff', 
-                          display: 'block', 
+                        <label style={{
+                          color: '#ffffff',
+                          display: 'block',
                           marginBottom: '5px',
                           fontSize: '12px',
                           fontWeight: 'bold'
@@ -1494,7 +1714,7 @@ export default function App() {
                           {/* Empty space to match error message height */}
                         </div>
                       </div>
-                      <div style={{ 
+                      <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         height: '100%',
@@ -1522,7 +1742,7 @@ export default function App() {
                   ))}
                 </div>
               )}
-              
+
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
@@ -1564,7 +1784,7 @@ export default function App() {
                 </button>
               </div>
             </div>
-            
+
             <div style={{
               marginTop: '30px',
               padding: '20px',
@@ -1586,7 +1806,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Results Tab */}
       {activeTab === 'results' && (
         <div style={{
           width: '100%',
@@ -1600,19 +1819,36 @@ export default function App() {
             textAlign: 'center',
           }}>
             {simulationResults ? (
-              <Plot
-                data={JSON.parse(simulationResults).data}
-                layout={{
-                  ...JSON.parse(simulationResults).layout,
-                  autosize: true,
-                }}
-                config={{
-                  responsive: true,
-                  displayModeBar: true,
-                  modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
-                }}
-                style={{ width: '100%', height: '600px' }}
-              />
+              <>
+              <div style={{ textAlign: 'right', padding: '0 20px 10px 20px' }}>
+                <button
+                  style={{
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={downloadCsv}
+                >
+                  Download CSV
+                </button>
+                </div>
+                <Plot
+                  data={JSON.parse(simulationResults).data}
+                  layout={{
+                    ...JSON.parse(simulationResults).layout,
+                    autosize: true,
+                  }}
+                  config={{
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
+                  }}
+                  style={{ width: '100%', height: '600px' }}
+                />
+
+              </>
             ) : (
               <p style={{ color: '#666', fontSize: '18px' }}>
                 No simulation results yet. Run a simulation from the Graph Editor tab to see results here.

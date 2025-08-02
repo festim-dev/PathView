@@ -2,31 +2,49 @@
   "nodes": [
     {
       "id": "1",
-      "type": "constant",
+      "type": "bubbler",
       "position": {
-        "x": 267.2529959675403,
-        "y": 181.3890542768167
+        "x": 644,
+        "y": 335
       },
       "data": {
-        "label": "name_of_block",
-        "value": "1"
+        "label": "bubbler 1",
+        "conversion_efficiency": "",
+        "replacement_times": "",
+        "vial_efficiency": ""
       },
       "measured": {
-        "width": 206,
-        "height": 54
+        "width": 230,
+        "height": 160
       },
-      "selected": false,
+      "selected": true,
       "dragging": false
     },
     {
       "id": "2",
-      "type": "scope",
+      "type": "constant",
       "position": {
-        "x": 921.1032555042848,
-        "y": 400.9936264496624
+        "x": 250,
+        "y": 200
       },
       "data": {
-        "label": "scope 2",
+        "label": "constant 2",
+        "value": ""
+      },
+      "measured": {
+        "width": 205,
+        "height": 53
+      }
+    },
+    {
+      "id": "3",
+      "type": "scope",
+      "position": {
+        "x": 1165,
+        "y": 314
+      },
+      "data": {
+        "label": "scope 3",
         "labels": "",
         "sampling_rate": "",
         "t_wait": ""
@@ -37,34 +55,15 @@
       },
       "selected": false,
       "dragging": false
-    },
-    {
-      "id": "3",
-      "type": "splitter2",
-      "position": {
-        "x": 568,
-        "y": 270
-      },
-      "data": {
-        "label": "my_splitter",
-        "f1": "0.5",
-        "f2": "0.5"
-      },
-      "measured": {
-        "width": 120,
-        "height": 120
-      },
-      "selected": false,
-      "dragging": false
     }
   ],
   "edges": [
     {
-      "id": "e1-2",
-      "source": "1",
-      "target": "2",
+      "id": "e2-1-to_sample_in_soluble",
+      "source": "2",
+      "target": "1",
       "sourceHandle": null,
-      "targetHandle": null,
+      "targetHandle": "sample_in_soluble",
       "type": "smoothstep",
       "data": {},
       "style": {
@@ -79,10 +78,29 @@
       }
     },
     {
-      "id": "e1-3",
+      "id": "e2-1-to_sample_in_insoluble",
+      "source": "2",
+      "target": "1",
+      "sourceHandle": null,
+      "targetHandle": "sample_in_insoluble",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-3-from_vial1",
       "source": "1",
       "target": "3",
-      "sourceHandle": null,
+      "sourceHandle": "vial1",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -98,10 +116,10 @@
       }
     },
     {
-      "id": "e3-2-from_source2",
-      "source": "3",
-      "target": "2",
-      "sourceHandle": "source2",
+      "id": "e1-3-from_vial2",
+      "source": "1",
+      "target": "3",
+      "sourceHandle": "vial2",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -117,10 +135,29 @@
       }
     },
     {
-      "id": "e3-2-from_source1",
-      "source": "3",
-      "target": "2",
-      "sourceHandle": "source1",
+      "id": "e1-3-from_vial3",
+      "source": "1",
+      "target": "3",
+      "sourceHandle": "vial3",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-3-from_vial4",
+      "source": "1",
+      "target": "3",
+      "sourceHandle": "vial4",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -136,7 +173,7 @@
       }
     }
   ],
-  "nodeCounter": 5,
+  "nodeCounter": 4,
   "solverParams": {
     "dt": "0.01",
     "dt_min": "1e-6",

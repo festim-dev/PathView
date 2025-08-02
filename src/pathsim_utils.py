@@ -7,20 +7,30 @@ from pathsim.blocks import (
     Scope,
     Block,
     Constant,
+    Source,
     StepSource,
     PulseSource,
     Amplifier,
     Adder,
     Multiplier,
-    Integrator,
     Function,
     Delay,
     RNG,
     PID,
     Schedule,
 )
-from .custom_pathsim_blocks import Process, Splitter, Bubbler
+from pathsim.blocks.noise import WhiteNoise, PinkNoise
+from .custom_pathsim_blocks import (
+    Process,
+    Splitter,
+    Splitter2,
+    Splitter3,
+    Bubbler,
+    FestimWall,
+    Integrator,
+)
 from flask import jsonify
+import inspect
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
@@ -29,13 +39,14 @@ NAME_TO_SOLVER = {
 }
 map_str_to_object = {
     "constant": Constant,
+    "source": Source,
     "stepsource": StepSource,
     "pulsesource": PulseSource,
     "amplifier": Amplifier,
     "amplifier_reverse": Amplifier,
     "scope": Scope,
-    "splitter2": Splitter,
-    "splitter3": Splitter,
+    "splitter2": Splitter2,
+    "splitter3": Splitter3,
     "adder": Adder,
     "adder_reverse": Adder,
     "multiplier": Multiplier,
@@ -45,8 +56,12 @@ map_str_to_object = {
     "pid": PID,
     "integrator": Integrator,
     "function": Function,
+    "function2to2": Function,
     "delay": Delay,
     "bubbler": Bubbler,
+    "wall": FestimWall,
+    "white_noise": WhiteNoise,
+    "pink_noise": PinkNoise,
 }
 
 
@@ -70,70 +85,14 @@ def create_integrator(
     if eval_namespace is None:
         eval_namespace = globals()
 
-    block = Integrator(
-        initial_value=eval(node["data"]["initial_value"], eval_namespace)
-        if node["data"].get("initial_value") and node["data"]["initial_value"] != ""
-        else 0.0,
+    parameters = get_parameters_for_block_class(
+        Integrator, node, eval_namespace=eval_namespace
     )
+
+    block = Integrator(**parameters)
     # add events to reset integrator if needed
-    events = []
-    if node["data"]["reset_times"] != "":
-
-        def reset_itg(_):
-            block.reset()
-
-        reset_times = eval(node["data"]["reset_times"], eval_namespace)
-        if isinstance(reset_times, (int, float)):
-            # If it's a single number, convert it to a list
-            reset_times = [reset_times]
-        for t in reset_times:
-            events.append(Schedule(t_start=t, t_end=t, func_act=reset_itg))
+    events = block.create_reset_events()
     return block, events
-
-
-def create_function(node: dict, eval_namespace: dict = None) -> Block:
-    if eval_namespace is None:
-        eval_namespace = globals()
-
-    # Convert the expression string to a lambda function
-    expression = node["data"].get("expression", "x")
-
-    # Create a safe lambda function from the expression
-    # The expression should use 'x' as the variable
-    try:
-        # Create a lambda function from the expression string
-        # We'll allow common mathematical operations and numpy functions
-
-        # Safe namespace for eval - merge with global variables
-        safe_namespace = {
-            "x": 0,  # placeholder
-            "np": np,
-            "math": math,
-            "sin": np.sin,
-            "cos": np.cos,
-            "tan": np.tan,
-            "exp": np.exp,
-            "log": np.log,
-            "sqrt": np.sqrt,
-            "abs": abs,
-            "pow": pow,
-            "pi": np.pi,
-            "e": np.e,
-            **eval_namespace,  # Include global variables
-        }
-
-        # Test the expression first to ensure it's valid
-        eval(expression.replace("x", "1"), safe_namespace)
-
-        # Create the actual function
-        def func(x):
-            return eval(expression, {**safe_namespace, "x": x})
-
-    except Exception as e:
-        raise ValueError(f"Invalid function expression: {expression}. Error: {e}")
-
-    block = Function(func=func)
-    return block
 
 
 def create_bubbler(node: dict) -> Bubbler:
@@ -141,20 +100,15 @@ def create_bubbler(node: dict) -> Bubbler:
     Create a Bubbler block based on the node data.
     """
     # Extract parameters from node data
-    block = Bubbler(
-        conversion_efficiency=eval(node["data"]["conversion_efficiency"]),
-        vial_efficiency=eval(node["data"]["vial_efficiency"]),
-        replacement_times=eval(node["data"]["replacement_time"])
-        if node["data"].get("replacement_time") != ""
-        else None,
-    )
+    parameters = get_parameters_for_block_class(Bubbler, node, eval_namespace=globals())
+    block = Bubbler(**parameters)
 
     events = block.create_reset_events()
 
     return block, events
 
 
-def create_scope(node: dict, edges, nodes) -> Scope:
+def make_labels_for_scope(node: dict, edges: list, nodes: list) -> list[str]:
     # Find all incoming edges to this node and sort by source id for consistent ordering
     incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
     incoming_edges.sort(key=lambda x: x["source"])
@@ -181,8 +135,17 @@ def create_scope(node: dict, edges, nodes) -> Scope:
             if edge["sourceHandle"]:
                 labels[i] += f" ({edge['sourceHandle']})"
 
-    block = Scope(labels=labels)
+    return labels, connections_order
+
+
+def create_scope(node: dict, edges, nodes) -> Scope:
+    block = auto_block_construction(node, eval_namespace=globals())
+
+    # override labels + add connections order
+    # TODO this should be done in "make connections"
+    labels, connections_order = make_labels_for_scope(node, edges, nodes)
     block._connections_order = connections_order
+    block.labels = labels
 
     return block
 
@@ -285,26 +248,38 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     if eval_namespace is None:
         eval_namespace = globals()
 
-    block_type = node["type"]
+    if node["type"] not in map_str_to_object:
+        raise ValueError(f"Unknown block type: {node['type']}")
 
-    if eval_namespace is None:
-        eval_namespace = globals()
+    block_class = map_str_to_object[node["type"]]
 
-    block_type = node["type"]
-    if block_type not in map_str_to_object:
-        raise ValueError(f"Unknown block type: {block_type}")
+    parameters = get_parameters_for_block_class(
+        block_class, node, eval_namespace=eval_namespace
+    )
 
-    block_class = map_str_to_object[block_type]
-
-    # skip 'self'
-    parameters_for_class = block_class.__init__.__code__.co_varnames[1:]
-
-    parameters = {
-        k: eval(v, eval_namespace)
-        for k, v in node["data"].items()
-        if k in parameters_for_class
-    }
     return block_class(**parameters)
+
+
+def get_parameters_for_block_class(block_class, node, eval_namespace):
+    parameters_for_class = inspect.signature(block_class.__init__).parameters
+    parameters = {}
+    for k, value in parameters_for_class.items():
+        if k == "self":
+            continue
+        # Skip 'operations' for Adder, as it is handled separately
+        # https://github.com/festim-dev/fuel-cycle-sim/issues/73
+        if k in ["operations"]:
+            continue
+        user_input = node["data"][k]
+        if user_input == "":
+            if value.default is inspect._empty:
+                raise ValueError(
+                    f"expected parameter for {k} in {node['type']} ({node['label']})"
+                )
+            parameters[k] = value.default
+        else:
+            parameters[k] = eval(user_input, eval_namespace)
+    return parameters
 
 
 def make_blocks(
@@ -319,31 +294,18 @@ def make_blocks(
         if block_type == "integrator":
             block, event_int = create_integrator(node, eval_namespace)
             events.extend(event_int)
-        elif block_type == "function":
-            block = create_function(node, eval_namespace)
         elif block_type == "scope":
             block = create_scope(node, edges, nodes)
-        elif block_type == "stepsource":
-            block = StepSource(
-                amplitude=eval(node["data"]["amplitude"], eval_namespace),
-                tau=eval(node["data"]["delay"], eval_namespace),
-            )
         elif block_type == "splitter2":
-            block = Splitter(
-                n=2,
-                fractions=[
-                    eval(node["data"]["f1"], eval_namespace),
-                    eval(node["data"]["f2"], eval_namespace),
-                ],
+            block = Splitter2(
+                f1=eval(node["data"]["f1"], eval_namespace),
+                f2=eval(node["data"]["f2"], eval_namespace),
             )
         elif block_type == "splitter3":
-            block = Splitter(
-                n=3,
-                fractions=[
-                    eval(node["data"]["f1"], eval_namespace),
-                    eval(node["data"]["f2"], eval_namespace),
-                    eval(node["data"]["f3"], eval_namespace),
-                ],
+            block = Splitter3(
+                f1=eval(node["data"]["f1"], eval_namespace),
+                f2=eval(node["data"]["f2"], eval_namespace),
+                f3=eval(node["data"]["f3"], eval_namespace),
             )
         elif block_type == "bubbler":
             block, events_bubbler = create_bubbler(node)
@@ -410,12 +372,56 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
+            elif isinstance(block, FestimWall):
+                if edge["sourceHandle"] == "flux_0":
+                    output_index = 0
+                elif edge["sourceHandle"] == "flux_L":
+                    output_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
+            elif isinstance(block, Function):
+                # Function outputs are always in order, so we can use the handle directly
+                assert edge["sourceHandle"], edge
+                output_index = int(edge["sourceHandle"].replace("source-", ""))
             else:
+                # make sure that the source block has only one output port (ie. that sourceHandle is None)
+                assert edge["sourceHandle"] is None, (
+                    f"Source block {block.id} has multiple output ports, "
+                    "but connection method hasn't been implemented."
+                )
                 output_index = 0
 
             if isinstance(target_block, Scope):
                 input_index = target_block._connections_order.index(edge["id"])
+            elif isinstance(target_block, Bubbler):
+                if edge["targetHandle"] == "sample_in_soluble":
+                    input_index = 0
+                elif edge["targetHandle"] == "sample_in_insoluble":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
+            elif isinstance(target_block, FestimWall):
+                if edge["targetHandle"] == "c_0":
+                    input_index = 0
+                elif edge["targetHandle"] == "c_L":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
+            elif isinstance(target_block, Function):
+                # Function inputs are always in order, so we can use the handle directly
+                input_index = int(edge["targetHandle"].replace("target-", ""))
             else:
+                # make sure that the target block has only one input port (ie. that targetHandle is None)
+                assert edge["targetHandle"] is None, (
+                    f"Target block {target_block.id} has multiple input ports, "
+                    "but connection method hasn't been implemented."
+                )
                 input_index = block_to_input_index[target_block]
 
             connection = Connection(

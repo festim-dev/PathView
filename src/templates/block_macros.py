@@ -13,39 +13,23 @@
 {% macro create_integrator_block(node) -%}
 {{ create_block(node) }}
 
-{%- if node["data"].get("reset_times") %}
-def reset_itg(_):
-    {{ node["var_name"] }}.reset()
-
-for t in {{ node["data"].get("reset_times", "[]") }}:
-    events.append(
-        pathsim.events.Schedule(
-            t_start=t,
-            t_end=t,
-            func_act=reset_itg,
-        )
-    )
+{%- if node["data"].get("replacement_times") %}
+events_{{ node["var_name"] }} = {{ node["var_name"] }}.create_reset_events()
+events += events_{{ node["var_name"] }}
 {%- endif %}
 
 {%- endmacro -%}
 
 
-{% macro create_function_block(node) -%}
+{% macro create_bubbler_block(node) -%}
+{{ create_block(node) }}
 
-def func(x):
-    return {{ node["data"]["expression"] }}
-
-{{ node["var_name"] }} = pathsim.blocks.Function(func=func)
+{%- if node["data"].get("replacement_times") %}
+events_{{ node["var_name"] }} = {{ node["var_name"] }}.create_reset_events()
+events += events_{{ node["var_name"] }}
+{%- endif %}
 
 {%- endmacro -%}
-
-{% macro create_stepsource(node) -%}
-{{ node["var_name"] }} = pathsim.blocks.StepSource(
-    amplitude={{ node["data"]["amplitude"] }},
-    tau={{ node["data"]["delay"] }},
-)
-{%- endmacro -%}
-
 
 
 {% macro create_scope_block(node) -%}

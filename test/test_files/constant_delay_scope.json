@@ -42,7 +42,10 @@
         "y": 220
       },
       "data": {
-        "label": "scope 2"
+        "label": "scope 2",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
       },
       "measured": {
         "width": 120,

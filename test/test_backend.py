@@ -1,9 +1,10 @@
 from src.pathsim_utils import (
     create_integrator,
     auto_block_construction,
-    create_function,
+    create_bubbler,
+    create_scope,
 )
-from src.custom_pathsim_blocks import Process, Splitter
+from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
 
 import pathsim.blocks
 
@@ -28,22 +29,30 @@ NODE_TEMPLATES = {
         "type": "integrator",
         "data": {"initial_value": "0.0", "label": "Integrator", "reset_times": ""},
     },
+    "bubbler": {
+        "type": "bubbler",
+        "data": {
+            "conversion_efficiency": "",
+            "replacement_times": "",
+            "vial_efficiency": "",
+        },
+    },
     "function": {
         "type": "function",
         "data": {"expression": "3*x**2", "label": "Function"},
     },
     "delay": {"type": "delay", "data": {"tau": "1.0", "label": "Delay"}},
-    "rng": {"type": "rng", "data": {"seed": "42", "label": "RNG"}},
+    "rng": {"type": "rng", "data": {"sampling_rate": "2", "label": "RNG"}},
     "pid": {
         "type": "pid",
-        "data": {"kp": "1.0", "ki": "0.0", "kd": "0.0", "label": "PID"},
+        "data": {"Kp": "1.0", "Ki": "0.0", "Kd": "0.0", "f_max": "100", "label": "PID"},
     },
     "process": {
         "type": "process",
         "data": {
             "residence_time": "1.0",
-            "ic": "0.0",
-            "gen": "0.0",
+            "initial_value": "0.0",
+            "source_term": "0.0",
             "label": "Process",
         },
     },
@@ -55,7 +64,27 @@ NODE_TEMPLATES = {
         "type": "splitter3",
         "data": {"f1": "1/3", "f2": "1/3", "f3": "1/3", "label": "Splitter 3"},
     },
-    "scope": {"type": "scope", "data": {"label": "Scope"}},
+    "scope": {
+        "type": "scope",
+        "data": {"label": "Scope", "sampling_rate": "", "labels": ""},
+    },
+    "white_noise": {
+        "type": "white_noise",
+        "data": {
+            "spectral_density": "1",
+            "sampling_rate": "2",
+            "label": "White Noise Source",
+        },
+    },
+    "pink_noise": {
+        "type": "pink_noise",
+        "data": {
+            "spectral_density": "1",
+            "num_octaves": "16",
+            "sampling_rate": "5",
+            "label": "Pink Noise Source",
+        },
+    },
 }
 
 
@@ -101,7 +130,7 @@ def test_create_integrator():
     }
     integrator, events = create_integrator(node)
 
-    assert isinstance(integrator, pathsim.blocks.Integrator)
+    assert isinstance(integrator, Integrator)
     assert integrator.initial_value == 0
     for event in events:
         assert isinstance(event, pathsim.blocks.Schedule)
@@ -117,8 +146,10 @@ def test_create_integrator():
         ("rng", pathsim.blocks.RNG),
         ("pid", pathsim.blocks.PID),
         ("process", Process),
-        ("splitter2", Splitter),
-        ("splitter3", Splitter),
+        ("splitter2", Splitter2),
+        ("splitter3", Splitter3),
+        ("white_noise", pathsim.blocks.noise.WhiteNoise),
+        ("pink_noise", pathsim.blocks.noise.PinkNoise),
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
@@ -140,8 +171,8 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("rng", pathsim.blocks.RNG),
         ("pid", pathsim.blocks.PID),
         ("process", Process),
-        ("splitter2", Splitter),
-        ("splitter3", Splitter),
+        ("white_noise", pathsim.blocks.noise.WhiteNoise),
+        ("pink_noise", pathsim.blocks.noise.PinkNoise),
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):
@@ -158,12 +189,32 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
     assert isinstance(block, expected_class)
 
 
-def test_create_function():
+def test_create_bubbler():
     node = {
-        "data": {"expression": "3*x**2 + b", "label": "Function"},
-        "id": "10",
-        "type": "function",
+        "id": "6",
+        "type": "bubbler",
+        "position": {"x": 627, "y": 357},
+        "data": {
+            "label": "bubbler 6",
+            "conversion_efficiency": "",
+            "replacement_times": "[1, 2, 3]",
+            "vial_efficiency": "",
+        },
+        "measured": {"width": 230, "height": 160},
+        "selected": False,
+        "dragging": False,
     }
-    block = create_function(node, eval_namespace={"b": 2.5})
-    assert isinstance(block, pathsim.blocks.Function)
-    assert block.func(2) == 3 * 2**2 + 2.5
+    block, events = create_bubbler(node)
+    assert isinstance(block, Bubbler)
+
+
+def test_make_scope():
+    node = {
+        "id": "7",
+        "type": "scope",
+        "data": {"label": "scope 7", "sampling_rate": "", "labels": "", "t_wait": ""},
+    }
+    block = create_scope(node, edges=[], nodes=[node])
+    assert isinstance(block, pathsim.blocks.Scope)
+    assert block.labels == []
+    assert block.sampling_rate is None

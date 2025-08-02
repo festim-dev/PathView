@@ -58,7 +58,10 @@
     },
     {
       "data": {
-        "label": "Neutron source"
+        "label": "Neutron source",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
       },
       "dragging": false,
       "id": "5",
@@ -75,7 +78,10 @@
     },
     {
       "data": {
-        "label": "Neutron rate"
+        "label": "Neutron rate",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
       },
       "dragging": false,
       "id": "6",
@@ -130,7 +136,10 @@
     },
     {
       "data": {
-        "label": "IV vial activity"
+        "label": "IV vial activity",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
       },
       "dragging": false,
       "id": "21",
@@ -175,7 +184,7 @@
         "label": "IV bubbler",
         "conversion_efficiency": "0.95",
         "vial_efficiency": "0.9",
-        "replacement_time": "np.arange(5, 50, step=3)"
+        "replacement_times": "np.arange(5, 50, step=3)"
       },
       "measured": {
         "width": 230,
@@ -233,7 +242,7 @@
         "label": "OV bubbler",
         "conversion_efficiency": "0.95",
         "vial_efficiency": "0.9",
-        "replacement_time": "np.arange(5, 50, step=5)"
+        "replacement_times": "np.arange(5, 50, step=5)"
       },
       "measured": {
         "width": 230,
@@ -269,7 +278,10 @@
         "y": 1097.1334152526842
       },
       "data": {
-        "label": "OV vial activity"
+        "label": "OV vial activity",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
       },
       "measured": {
         "width": 120,
@@ -286,7 +298,10 @@
         "y": 786
       },
       "data": {
-        "label": "BABY inventory"
+        "label": "BABY inventory",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
       },
       "measured": {
         "width": 120,

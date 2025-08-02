@@ -1,35 +1,32 @@
 {
   "nodes": [
     {
-      "id": "1",
+      "id": "4",
       "type": "constant",
       "position": {
-        "x": 267.2529959675403,
-        "y": 181.3890542768167
+        "x": 1093.1885987981248,
+        "y": 271.20138523630243
       },
       "data": {
-        "label": "name_of_block",
-        "value": "1"
+        "label": "cL",
+        "value": "0"
       },
       "measured": {
-        "width": 206,
-        "height": 54
+        "width": 205,
+        "height": 53
       },
       "selected": false,
       "dragging": false
     },
     {
-      "id": "2",
+      "id": "5",
       "type": "scope",
       "position": {
-        "x": 921.1032555042848,
-        "y": 400.9936264496624
+        "x": 1271,
+        "y": 457
       },
       "data": {
-        "label": "scope 2",
-        "labels": "",
-        "sampling_rate": "",
-        "t_wait": ""
+        "label": "scope 5"
       },
       "measured": {
         "width": 120,
@@ -39,16 +36,33 @@
       "dragging": false
     },
     {
-      "id": "3",
-      "type": "splitter2",
+      "id": "9",
+      "type": "scope",
       "position": {
-        "x": 568,
-        "y": 270
+        "x": 967.9637725351604,
+        "y": 81.60628755860085
       },
       "data": {
-        "label": "my_splitter",
-        "f1": "0.5",
-        "f2": "0.5"
+        "label": "scope 9"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "10",
+      "type": "stepsource",
+      "position": {
+        "x": 589,
+        "y": 224
+      },
+      "data": {
+        "label": "stepsource 10",
+        "amplitude": "1",
+        "delay": "0.2"
       },
       "measured": {
         "width": 120,
@@ -56,13 +70,36 @@
       },
       "selected": false,
       "dragging": false
+    },
+    {
+      "id": "12",
+      "type": "wall",
+      "position": {
+        "x": 952,
+        "y": 417
+      },
+      "data": {
+        "label": "wall",
+        "thickness": "1",
+        "surface_area": "1",
+        "temperature": "300",
+        "D_0": "0.05",
+        "E_D": "0",
+        "n_vertices": "100"
+      },
+      "measured": {
+        "width": 70,
+        "height": 200
+      },
+      "selected": true,
+      "dragging": false
     }
   ],
   "edges": [
     {
-      "id": "e1-2",
-      "source": "1",
-      "target": "2",
+      "id": "e4-9",
+      "source": "4",
+      "target": "9",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -79,9 +116,9 @@
       }
     },
     {
-      "id": "e1-3",
-      "source": "1",
-      "target": "3",
+      "id": "e10-9",
+      "source": "10",
+      "target": "9",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -98,11 +135,11 @@
       }
     },
     {
-      "id": "e3-2-from_source2",
-      "source": "3",
-      "target": "2",
-      "sourceHandle": "source2",
-      "targetHandle": null,
+      "id": "e10-12-to_c_0",
+      "source": "10",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": "c_0",
       "type": "smoothstep",
       "data": {},
       "style": {
@@ -117,10 +154,29 @@
       }
     },
     {
-      "id": "e3-2-from_source1",
-      "source": "3",
-      "target": "2",
-      "sourceHandle": "source1",
+      "id": "e4-12-to_c_L",
+      "source": "4",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": "c_L",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e12-5-from_flux_L",
+      "source": "12",
+      "target": "5",
+      "sourceHandle": "flux_L",
       "targetHandle": null,
       "type": "smoothstep",
       "data": {},
@@ -136,16 +192,16 @@
       }
     }
   ],
-  "nodeCounter": 5,
+  "nodeCounter": 13,
   "solverParams": {
-    "dt": "0.01",
+    "dt": "0.02",
     "dt_min": "1e-6",
     "dt_max": "1.0",
     "Solver": "SSPRK22",
     "tolerance_fpi": "1e-6",
     "iterations_max": "100",
     "log": "true",
-    "simulation_duration": "50.0",
+    "simulation_duration": "2",
     "extra_params": "{}"
   },
   "globalVariables": []
