@@ -1,232 +1,314 @@
 {
   "nodes": [
     {
-      "data": {
-        "label": "\u03a3"
-      },
-      "dragging": false,
-      "id": "adder1",
-      "measured": {
-        "height": 64,
-        "width": 64
-      },
+      "id": "1",
+      "type": "integrator",
       "position": {
-        "x": 131.01485558491993,
-        "y": 198.85130164500296
+        "x": 501.13753581661877,
+        "y": 120.37249283667622
+      },
+      "data": {
+        "label": "integrator x(t)",
+        "initial_value": "x0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
       },
       "selected": false,
-      "type": "adder"
+      "dragging": false
     },
     {
-      "data": {
-        "initial_value": "5",
-        "label": "Integrator (v)"
-      },
-      "dragging": false,
-      "id": "integrator1",
-      "measured": {
-        "height": 48,
-        "width": 200
-      },
+      "id": "2",
+      "type": "scope",
       "position": {
-        "x": 202.19517549754596,
-        "y": 136.51860510759934
+        "x": 725.3982808022922,
+        "y": -45.558739255014345
+      },
+      "data": {
+        "label": "scope 2",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
       },
       "selected": false,
-      "type": "integrator"
+      "dragging": false
     },
     {
-      "data": {
-        "initial_value": "2",
-        "label": "Integrator (x)"
-      },
-      "dragging": false,
-      "id": "integrator2",
-      "measured": {
-        "height": 48,
-        "width": 200
-      },
+      "id": "3",
+      "type": "adder",
       "position": {
-        "x": 504.2248866673858,
-        "y": 108.37549541017196
+        "x": 113.96275071633238,
+        "y": 109.59598853868192
+      },
+      "data": {
+        "label": "adder 3",
+        "operations": ""
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
       },
       "selected": false,
-      "type": "integrator"
+      "dragging": false
     },
     {
-      "data": {
-        "label": "Scope",
-        "signals": [
-          "v(t)",
-          "x(t)"
-        ]
-      },
-      "dragging": false,
-      "id": "scope1",
-      "measured": {
-        "height": 120,
-        "width": 200
-      },
+      "id": "4",
+      "type": "integrator",
       "position": {
-        "x": 818.3159305646946,
-        "y": 280.3772632921635
+        "x": 239,
+        "y": 122
+      },
+      "data": {
+        "label": "integrator v(t)",
+        "initial_value": "v0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
       },
       "selected": false,
-      "type": "scope"
+      "dragging": false
     },
     {
-      "data": {
-        "gain": "-0.25",
-        "label": "Amp 1"
-      },
-      "dragging": false,
-      "id": "amp1",
-      "measured": {
-        "height": 85,
-        "width": 135
-      },
+      "id": "7",
+      "type": "amplifier_reverse",
       "position": {
-        "x": 79.92204380561972,
-        "y": 373.4144735073621
+        "x": 272.4928366762178,
+        "y": 292.1404011461318
+      },
+      "data": {
+        "label": "Amp 1",
+        "gain": "-c/m"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
       },
       "selected": false,
-      "type": "amplifier"
+      "dragging": false
     },
     {
-      "data": {
-        "gain": "-1.875",
-        "label": "Amp 2"
-      },
-      "dragging": false,
-      "id": "amp2",
-      "measured": {
-        "height": 85,
-        "width": 135
-      },
+      "id": "8",
+      "type": "amplifier_reverse",
       "position": {
-        "x": 531.2825411250742,
-        "y": 389.0557440698992
+        "x": 457.80802292263616,
+        "y": 373.9398280802293
+      },
+      "data": {
+        "label": "Amp 2",
+        "gain": "-k/m"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
       },
       "selected": false,
-      "type": "amplifier"
+      "dragging": false
     }
   ],
   "edges": [
     {
-      "id": "e1",
-      "source": "adder1",
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
       "sourceHandle": null,
-      "target": "integrator1",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e2",
-      "source": "integrator1",
+      "id": "e4-1",
+      "source": "4",
+      "target": "1",
       "sourceHandle": null,
-      "target": "integrator2",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e3",
-      "label": "x(t)",
-      "source": "integrator2",
+      "id": "e1-8",
+      "source": "1",
+      "target": "8",
       "sourceHandle": null,
-      "target": "scope1",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e4",
-      "label": "v(t)",
-      "source": "integrator1",
+      "id": "e8-3",
+      "source": "8",
+      "target": "3",
       "sourceHandle": null,
-      "target": "scope1",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e5",
-      "source": "integrator1",
+      "id": "e7-3",
+      "source": "7",
+      "target": "3",
       "sourceHandle": null,
-      "target": "amp1",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e6",
-      "source": "amp1",
+      "id": "e3-4",
+      "source": "3",
+      "target": "4",
       "sourceHandle": null,
-      "target": "adder1",
       "targetHandle": null,
-      "selected": false,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e7",
-      "source": "integrator2",
+      "id": "e4-2",
+      "source": "4",
+      "target": "2",
       "sourceHandle": null,
-      "target": "amp2",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     },
     {
-      "id": "e8",
-      "source": "amp2",
+      "id": "e4-7",
+      "source": "4",
+      "target": "7",
       "sourceHandle": null,
-      "target": "adder1",
       "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
       },
       "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
         "color": "#ECDFCC"
       }
     }
   ],
-  "nodeCounter": 1
+  "nodeCounter": 9,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "25",
+    "extra_params": "{}"
+  },
+  "globalVariables": [
+    {
+      "id": "1754159829210",
+      "name": "x0",
+      "value": "2",
+      "nameError": false
+    },
+    {
+      "id": "1754159834189",
+      "name": "v0",
+      "value": "5",
+      "nameError": false
+    },
+    {
+      "id": "1754159838558",
+      "name": "m",
+      "value": "0.8",
+      "nameError": false
+    },
+    {
+      "id": "1754159842904",
+      "name": "c",
+      "value": "0.2",
+      "nameError": false
+    },
+    {
+      "id": "1754159846822",
+      "name": "k",
+      "value": "1.5",
+      "nameError": false
+    }
+  ]
 }

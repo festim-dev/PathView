@@ -2,44 +2,6 @@
   "nodes": [
     {
       "data": {
-        "amplitude": "1",
-        "delay": "2",
-        "label": "stepsource 2"
-      },
-      "dragging": false,
-      "id": "2",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 398.37785598478024,
-        "y": 489.09982434168865
-      },
-      "selected": true,
-      "type": "stepsource"
-    },
-    {
-      "data": {
-        "amplitude": "1",
-        "delay": "4",
-        "label": "stepsource 3"
-      },
-      "dragging": false,
-      "id": "3",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 411,
-        "y": 216
-      },
-      "selected": false,
-      "type": "stepsource"
-    },
-    {
-      "data": {
         "gain": "-1",
         "label": "x (-1)"
       },
@@ -55,26 +17,6 @@
       },
       "selected": false,
       "type": "amplifier"
-    },
-    {
-      "data": {
-        "label": "Neutron source",
-        "labels": "",
-        "sampling_rate": "",
-        "t_wait": ""
-      },
-      "dragging": false,
-      "id": "5",
-      "measured": {
-        "height": 140,
-        "width": 120
-      },
-      "position": {
-        "x": 859.1659050707252,
-        "y": 126
-      },
-      "selected": false,
-      "type": "scope"
     },
     {
       "data": {
@@ -309,28 +251,67 @@
       },
       "selected": false,
       "dragging": false
+    },
+    {
+      "id": "31",
+      "type": "stepsource",
+      "position": {
+        "x": 435.96282260684967,
+        "y": 213.2008701092014
+      },
+      "data": {
+        "label": "Stepsource",
+        "amplitude": "1",
+        "tau": "4"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "32",
+      "type": "stepsource",
+      "position": {
+        "x": 324.7489008596274,
+        "y": 356.4037177393149
+      },
+      "data": {
+        "label": "Stepsource",
+        "amplitude": "1",
+        "tau": "2"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "33",
+      "type": "scope",
+      "position": {
+        "x": 889.5927227230428,
+        "y": 175.9984179832702
+      },
+      "data": {
+        "label": "Neutron source",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": true,
+      "dragging": false
     }
   ],
   "edges": [
-    {
-      "data": {},
-      "id": "e3-4",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "3",
-      "sourceHandle": null,
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "4",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
     {
       "data": {},
       "id": "e4-6",
@@ -347,45 +328,6 @@
         "strokeWidth": 2
       },
       "target": "6",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e2-6",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "2",
-      "sourceHandle": null,
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "6",
-      "targetHandle": null,
-      "type": "smoothstep"
-    },
-    {
-      "data": {},
-      "id": "e6-5",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "selected": false,
-      "source": "6",
-      "sourceHandle": null,
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "5",
       "targetHandle": null,
       "type": "smoothstep"
     },
@@ -768,9 +710,66 @@
         "height": 20,
         "color": "#ECDFCC"
       }
+    },
+    {
+      "id": "e31-4",
+      "source": "31",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e32-6",
+      "source": "32",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e6-33",
+      "source": "6",
+      "target": "33",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
     }
   ],
-  "nodeCounter": 31,
+  "nodeCounter": 34,
   "solverParams": {
     "dt": "0.01",
     "dt_min": "1e-6",

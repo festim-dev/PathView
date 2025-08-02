@@ -2,25 +2,6 @@
   "nodes": [
     {
       "data": {
-        "amplitude": "1",
-        "delay": "1",
-        "label": "Reference Input"
-      },
-      "dragging": false,
-      "id": "reference",
-      "measured": {
-        "height": 120,
-        "width": 120
-      },
-      "position": {
-        "x": 50,
-        "y": 150
-      },
-      "selected": false,
-      "type": "stepsource"
-    },
-    {
-      "data": {
         "label": "Error"
       },
       "dragging": false,
@@ -92,23 +73,6 @@
       "dragging": false
     },
     {
-      "id": "2",
-      "type": "scope",
-      "position": {
-        "x": 1084,
-        "y": 158
-      },
-      "data": {
-        "label": "scope 2"
-      },
-      "measured": {
-        "width": 120,
-        "height": 140
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
       "id": "3",
       "type": "pid",
       "position": {
@@ -128,28 +92,48 @@
       },
       "selected": false,
       "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "stepsource",
+      "position": {
+        "x": 90.83795441551936,
+        "y": 44.05817319772359
+      },
+      "data": {
+        "label": "Reference Input",
+        "amplitude": "1",
+        "tau": "1"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "scope",
+      "position": {
+        "x": 1020.7686932100712,
+        "y": 141.28116398185887
+      },
+      "data": {
+        "label": "scope 5",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
     }
   ],
   "edges": [
-    {
-      "id": "ereference-error_summer",
-      "source": "reference",
-      "target": "error_summer",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
     {
       "id": "eerror_summer-3",
       "source": "error_summer",
@@ -173,25 +157,6 @@
       "id": "e3-1",
       "source": "3",
       "target": "1",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "e1-2",
-      "source": "1",
-      "target": "2",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -266,9 +231,9 @@
       "selected": false
     },
     {
-      "id": "ereference-2",
-      "source": "reference",
-      "target": "2",
+      "id": "e4-error_summer",
+      "source": "4",
+      "target": "error_summer",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -285,9 +250,47 @@
       }
     },
     {
-      "id": "eerror_summer-2",
+      "id": "e4-5",
+      "source": "4",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "eerror_summer-5",
       "source": "error_summer",
-      "target": "2",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "efeedback_gain-5",
+      "source": "feedback_gain",
+      "target": "5",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -304,7 +307,7 @@
       }
     }
   ],
-  "nodeCounter": 4,
+  "nodeCounter": 6,
   "solverParams": {
     "dt": "0.01",
     "dt_min": "1e-6",
@@ -313,7 +316,7 @@
     "tolerance_fpi": "1e-6",
     "iterations_max": "100",
     "log": "true",
-    "simulation_duration": "50.0",
+    "simulation_duration": "35",
     "extra_params": "{}"
   },
   "globalVariables": []

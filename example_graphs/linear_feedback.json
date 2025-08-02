@@ -1,181 +1,107 @@
 {
   "nodes": [
     {
-      "data": {
-        "label": "Input Signal",
-        "amplitude": "1",
-        "delay": "3"
-      },
-      "id": "source1",
-      "measured": {
-        "height": 53,
-        "width": 205
-      },
-      "position": {
-        "x": 5,
-        "y": 185
-      },
+      "id": "1",
       "type": "stepsource",
-      "selected": false,
+      "position": {
+        "x": 283.4511234320089,
+        "y": -14.228948131394702
+      },
+      "data": {
+        "label": "Source s(t)",
+        "amplitude": "1",
+        "tau": "tau"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": true,
       "dragging": false
     },
     {
-      "data": {
-        "label": "Summer"
-      },
-      "id": "adder1",
-      "measured": {
-        "height": 64,
-        "width": 64
-      },
-      "position": {
-        "x": 422,
-        "y": 176
-      },
-      "selected": false,
-      "type": "adder",
-      "dragging": false
-    },
-    {
-      "data": {
-        "initial_value": "2",
-        "label": "Integrator"
-      },
-      "dragging": false,
-      "id": "integrator1",
-      "measured": {
-        "height": 48,
-        "width": 200
-      },
-      "position": {
-        "x": 501,
-        "y": 91
-      },
-      "selected": false,
-      "type": "integrator"
-    },
-    {
-      "data": {
-        "label": "Output Display"
-      },
-      "id": "scope1",
-      "measured": {
-        "height": 120,
-        "width": 200
-      },
-      "position": {
-        "x": 1015,
-        "y": 133
-      },
+      "id": "2",
       "type": "scope",
+      "position": {
+        "x": 884.901286500961,
+        "y": 70.57000250921425
+      },
+      "data": {
+        "label": "Scope",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
       "selected": false,
       "dragging": false
     },
     {
-      "data": {
-        "gain": "-1",
-        "label": "Feedback Gain"
-      },
-      "id": "amplifier2",
-      "measured": {
-        "height": 85,
-        "width": 135
-      },
+      "id": "4",
+      "type": "amplifier_reverse",
       "position": {
-        "x": 650,
-        "y": 350
+        "x": 539.9858345687064,
+        "y": 394.2551349419692
       },
-      "type": "amplifier",
-      "selected": false
+      "data": {
+        "label": "Amp a",
+        "gain": "a"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "integrator",
+      "position": {
+        "x": 522.9520384414344,
+        "y": 208.06441872308315
+      },
+      "data": {
+        "label": "Integrator x(t)",
+        "initial_value": "x0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "6",
+      "type": "adder",
+      "position": {
+        "x": 400,
+        "y": 200
+      },
+      "data": {
+        "label": "adder 6",
+        "operations": ""
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      }
     }
   ],
   "edges": [
     {
-      "data": {
-        "weight": 0.5
-      },
-      "id": "eamplifier2-adder1",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "amplifier2",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "adder1",
+      "id": "e5-4",
+      "source": "5",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
       "type": "smoothstep",
-      "selected": false
-    },
-    {
-      "data": {
-        "weight": 0.5
-      },
-      "id": "eadder1-integrator1",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "adder1",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "integrator1",
-      "type": "smoothstep"
-    },
-    {
-      "data": {
-        "weight": 0.5
-      },
-      "id": "eintegrator1-amplifier2",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "integrator1",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "amplifier2",
-      "type": "smoothstep",
-      "selected": false
-    },
-    {
-      "data": {
-        "weight": 0.5
-      },
-      "id": "eintegrator1-scope1",
-      "markerEnd": {
-        "color": "#ECDFCC",
-        "height": 20,
-        "type": "arrowclosed",
-        "width": 20
-      },
-      "source": "integrator1",
-      "style": {
-        "stroke": "#ECDFCC",
-        "strokeWidth": 2
-      },
-      "target": "scope1",
-      "type": "smoothstep"
-    },
-    {
-      "id": "esource1-scope1",
-      "source": "source1",
-      "target": "scope1",
-      "type": "smoothstep",
-      "data": {
-        "weight": 0.5
-      },
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
@@ -185,17 +111,16 @@
         "width": 20,
         "height": 20,
         "color": "#ECDFCC"
-      },
-      "selected": false
+      }
     },
     {
-      "id": "esource1-adder1",
-      "source": "source1",
-      "target": "adder1",
+      "id": "e5-2",
+      "source": "5",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
       "type": "smoothstep",
-      "data": {
-        "weight": 0.5
-      },
+      "data": {},
       "style": {
         "strokeWidth": 2,
         "stroke": "#ECDFCC"
@@ -205,9 +130,115 @@
         "width": 20,
         "height": 20,
         "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-6",
+      "source": "1",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
       },
-      "selected": false
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-6",
+      "source": "4",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e6-5",
+      "source": "6",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
     }
   ],
-  "nodeCounter": 1
+  "nodeCounter": 7,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "4*tau",
+    "extra_params": "{}"
+  },
+  "globalVariables": [
+    {
+      "id": "1754160227284",
+      "name": "a",
+      "value": "-1",
+      "nameError": false
+    },
+    {
+      "id": "1754160231388",
+      "name": "x0",
+      "value": "2",
+      "nameError": false
+    },
+    {
+      "id": "1754160248756",
+      "name": "tau",
+      "value": "3",
+      "nameError": false
+    }
+  ]
 }
