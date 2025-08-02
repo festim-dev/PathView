@@ -296,11 +296,6 @@ def make_blocks(
             events.extend(event_int)
         elif block_type == "scope":
             block = create_scope(node, edges, nodes)
-        elif block_type == "stepsource":
-            block = StepSource(
-                amplitude=eval(node["data"]["amplitude"], eval_namespace),
-                tau=eval(node["data"]["delay"], eval_namespace),
-            )
         elif block_type == "splitter2":
             block = Splitter2(
                 f1=eval(node["data"]["f1"], eval_namespace),
