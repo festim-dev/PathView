@@ -13,6 +13,57 @@ from .convert_to_python import convert_graph_to_python
 from .pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope
 
+# Sphinx imports for docstring processing
+try:
+    from docutils.core import publish_parts
+
+    SPHINX_AVAILABLE = True
+except ImportError:
+    SPHINX_AVAILABLE = False
+    print("Warning: Sphinx not available. Docstring formatting will be basic.")
+
+
+def docstring_to_html(docstring):
+    """Convert a Python docstring to HTML using docutils (like Sphinx does)."""
+    if not docstring:
+        return "<p>No documentation available.</p>"
+
+    if not SPHINX_AVAILABLE:
+        # Fallback: simple HTML escaping and line break conversion
+        import html
+
+        escaped = html.escape(docstring)
+        return f"<pre>{escaped}</pre>"
+
+    try:
+        # Use docutils to convert reStructuredText to HTML
+        # This is similar to what Sphinx does internally
+        overrides = {
+            "input_encoding": "utf-8",
+            "doctitle_xform": False,
+            "initial_header_level": 2,
+        }
+
+        parts = publish_parts(
+            source=docstring, writer_name="html", settings_overrides=overrides
+        )
+
+        # Return just the body content (without full HTML document structure)
+        html_content = parts["body"]
+
+        # Clean up the HTML a bit for better display in the sidebar
+        html_content = html_content.replace('<div class="document">', "<div>")
+
+        return html_content
+
+    except Exception as e:
+        # Fallback in case of any parsing errors
+        import html
+
+        escaped = html.escape(docstring)
+        return f"<pre>Error parsing docstring: {str(e)}\n\n{escaped}</pre>"
+
+
 # Configure Flask app for Cloud Run
 app = Flask(__name__, static_folder="../dist", static_url_path="")
 
@@ -105,7 +156,20 @@ def get_docs(node_type):
 
         block_class = map_str_to_object[node_type]
         docstring = inspect.getdoc(block_class)
-        return jsonify({"docstring": docstring})
+
+        # If no docstring, provide a basic description
+        if not docstring:
+            docstring = f"No documentation available for {node_type}.\n\nThis is a {node_type} block in the pathsim library."
+
+        # Convert docstring to HTML using docutils/Sphinx-style processing
+        html_content = docstring_to_html(docstring)
+
+        return jsonify(
+            {
+                "docstring": docstring,  # Keep original for backwards compatibility
+                "html": html_content,  # New HTML version
+            }
+        )
     except Exception as e:
         return jsonify({"error": f"Could not get docs for {node_type}: {str(e)}"}), 400
 

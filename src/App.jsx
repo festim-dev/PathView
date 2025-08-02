@@ -121,14 +121,23 @@ export default function App() {
       const response = await fetch(getApiEndpoint(`/get-docs/${nodeType}`));
       if (response.ok) {
         const result = await response.json();
-        return result.docstring || 'No documentation available for this node type.';
+        return {
+          html: result.html || result.docstring || 'No documentation available for this node type.',
+          text: result.docstring || 'No documentation available for this node type.'
+        };
       } else {
         console.error('Failed to fetch documentation');
-        return 'Failed to load documentation.';
+        return {
+          html: '<p>Failed to load documentation.</p>',
+          text: 'Failed to load documentation.'
+        };
       }
     } catch (error) {
       console.error('Error fetching documentation:', error);
-      return 'Error loading documentation.';
+      return {
+        html: '<p>Error loading documentation.</p>',
+        text: 'Error loading documentation.'
+      };
     }
   };
 
@@ -1224,22 +1233,24 @@ export default function App() {
                 }}>
                   Class Documentation
                 </h4>
-                <div style={{
-                  backgroundColor: '#2a2a3e',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  padding: '12px',
-                  minHeight: '120px',
-                  maxHeight: '300px',
-                  overflowY: 'auto',
-                  fontSize: '13px',
-                  lineHeight: '1.4',
-                  color: '#e8e8e8',
-                  fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap'
-                }}>
-                  {nodeDocumentation[selectedNode.type] || 'Loading documentation...'}
-                </div>
+                <div 
+                  className="documentation-content"
+                  style={{
+                    backgroundColor: '#2a2a3e',
+                    border: '1px solid #555',
+                    borderRadius: '4px',
+                    padding: '12px',
+                    minHeight: '120px',
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    fontSize: '13px',
+                    lineHeight: '1.4',
+                    color: '#e8e8e8'
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: nodeDocumentation[selectedNode.type]?.html || 'Loading documentation...'
+                  }}
+                />
               </div>
             </div>
           )}

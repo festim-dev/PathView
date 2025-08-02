@@ -92,3 +92,163 @@
   font-size: 12px;
   color: #666;
 }
+
+/* Documentation HTML rendering styles for dark theme */
+.documentation-content {
+  color: #e8e8e8;
+}
+
+.documentation-content p {
+  margin: 0.5em 0;
+  line-height: 1.4;
+}
+
+.documentation-content h1, 
+.documentation-content h2, 
+.documentation-content h3, 
+.documentation-content h4, 
+.documentation-content h5, 
+.documentation-content h6 {
+  color: #ffffff;
+  margin: 1em 0 0.5em 0;
+  font-weight: bold;
+}
+
+.documentation-content h2 {
+  font-size: 1.1em;
+  border-bottom: 1px solid #555;
+  padding-bottom: 0.2em;
+}
+
+.documentation-content h3 {
+  font-size: 1.05em;
+}
+
+.documentation-content pre {
+  background-color: #1a1a2e;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 0.8em;
+  overflow-x: auto;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.9em;
+  margin: 0.5em 0;
+}
+
+.documentation-content code {
+  background-color: #1a1a2e;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.9em;
+  color: #ffd700;
+}
+
+.documentation-content pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #e8e8e8;
+}
+
+.documentation-content ul, 
+.documentation-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.documentation-content li {
+  margin: 0.2em 0;
+}
+
+.documentation-content blockquote {
+  border-left: 3px solid #555;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  font-style: italic;
+  color: #ccc;
+}
+
+.documentation-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+}
+
+.documentation-content th, 
+.documentation-content td {
+  border: 1px solid #555;
+  padding: 0.4em;
+  text-align: left;
+}
+
+.documentation-content th {
+  background-color: #333;
+  font-weight: bold;
+}
+
+.documentation-content em {
+  font-style: italic;
+  color: #ddd;
+}
+
+.documentation-content strong {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.documentation-content a {
+  color: #78A083;
+  text-decoration: underline;
+}
+
+.documentation-content a:hover {
+  color: #9bc49f;
+}
+
+/* Docutils-specific classes */
+.documentation-content .field-list {
+  margin: 0.5em 0;
+}
+
+.documentation-content .field-name {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.documentation-content .field-body {
+  margin-left: 1em;
+}
+
+.documentation-content .literal {
+  background-color: #1a1a2e;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  font-family: 'Courier New', Consolas, monospace;
+  color: #ffd700;
+}
+
+.documentation-content .note,
+.documentation-content .warning,
+.documentation-content .tip {
+  background-color: #2a2a3e;
+  border-left: 4px solid #78A083;
+  padding: 0.8em;
+  margin: 0.5em 0;
+  border-radius: 0 3px 3px 0;
+}
+
+.documentation-content .warning {
+  border-left-color: #e74c3c;
+}
+
+.documentation-content .note .first,
+.documentation-content .warning .first,
+.documentation-content .tip .first {
+  margin-top: 0;
+}
+
+.documentation-content .note .last,
+.documentation-content .warning .last,
+.documentation-content .tip .last {
+  margin-bottom: 0;
+}
