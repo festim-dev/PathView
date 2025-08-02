@@ -147,12 +147,10 @@ def convert_to_python():
     except Exception as e:
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
+
 # Helper function to extract CSV payload from scopes
 def make_csv_payload(scopes):
-    csv_payload = {
-        "time": [],
-        "series": {}
-    }
+    csv_payload = {"time": [], "series": {}}
 
     max_len = 0
     for scope in scopes:
@@ -164,6 +162,7 @@ def make_csv_payload(scopes):
             csv_payload["series"][label] = series.tolist()
 
     return csv_payload
+
 
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
@@ -225,13 +224,14 @@ def run_pathsim():
         # Convert plot to JSON
         plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-        return jsonify({
+        return jsonify(
+            {
                 "success": True,
                 "plot": plot_data,
                 "csv_data": csv_payload,
-                "message": "Pathsim simulation completed successfully"
-            })
-
+                "message": "Pathsim simulation completed successfully",
+            }
+        )
 
     except Exception as e:
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
