@@ -12,7 +12,7 @@ from pathsim.blocks import (
     Amplifier,
     Adder,
     Multiplier,
-    Function,
+    # Function,
     Delay,
     RNG,
     PID,
@@ -27,6 +27,8 @@ from .custom_pathsim_blocks import (
     Bubbler,
     FestimWall,
     Integrator,
+    Function1to1,
+    Function2to2,
 )
 from flask import jsonify
 import inspect
@@ -53,7 +55,8 @@ map_str_to_object = {
     "rng": RNG,
     "pid": PID,
     "integrator": Integrator,
-    "function": Function,
+    "function": Function1to1,
+    "function2to2": Function2to2,
     "delay": Delay,
     "bubbler": Bubbler,
     "wall": FestimWall,
@@ -90,51 +93,6 @@ def create_integrator(
     # add events to reset integrator if needed
     events = block.create_reset_events()
     return block, events
-
-
-def create_function(node: dict, eval_namespace: dict = None) -> Block:
-    if eval_namespace is None:
-        eval_namespace = globals()
-
-    # Convert the expression string to a lambda function
-    expression = node["data"].get("expression", "x")
-
-    # Create a safe lambda function from the expression
-    # The expression should use 'x' as the variable
-    try:
-        # Create a lambda function from the expression string
-        # We'll allow common mathematical operations and numpy functions
-
-        # Safe namespace for eval - merge with global variables
-        safe_namespace = {
-            "x": 0,  # placeholder
-            "np": np,
-            "math": math,
-            "sin": np.sin,
-            "cos": np.cos,
-            "tan": np.tan,
-            "exp": np.exp,
-            "log": np.log,
-            "sqrt": np.sqrt,
-            "abs": abs,
-            "pow": pow,
-            "pi": np.pi,
-            "e": np.e,
-            **eval_namespace,  # Include global variables
-        }
-
-        # Test the expression first to ensure it's valid
-        eval(expression.replace("x", "1"), safe_namespace)
-
-        # Create the actual function
-        def func(x):
-            return eval(expression, {**safe_namespace, "x": x})
-
-    except Exception as e:
-        raise ValueError(f"Invalid function expression: {expression}. Error: {e}")
-
-    block = Function(func=func)
-    return block
 
 
 def create_bubbler(node: dict) -> Bubbler:
@@ -336,8 +294,6 @@ def make_blocks(
         if block_type == "integrator":
             block, event_int = create_integrator(node, eval_namespace)
             events.extend(event_int)
-        elif block_type == "function":
-            block = create_function(node, eval_namespace)
         elif block_type == "scope":
             block = create_scope(node, edges, nodes)
         elif block_type == "stepsource":
@@ -430,6 +386,19 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
+            elif isinstance(block, Function1to1):
+                # Function1to1 has only one output port
+                output_index = 0
+            elif isinstance(block, Function2to2):
+                # Function2to2 has two output ports
+                if edge["sourceHandle"] == "output-0":
+                    output_index = 0
+                elif edge["sourceHandle"] == "output-1":
+                    output_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+                    )
             else:
                 # make sure that the source block has only one output port (ie. that sourceHandle is None)
                 assert edge["sourceHandle"] is None, (
@@ -453,6 +422,19 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                 if edge["targetHandle"] == "c_0":
                     input_index = 0
                 elif edge["targetHandle"] == "c_L":
+                    input_index = 1
+                else:
+                    raise ValueError(
+                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
+                    )
+            elif isinstance(target_block, Function1to1):
+                # Function1to1 has only one input port
+                input_index = 0
+            elif isinstance(target_block, Function2to2):
+                # Function2to2 has two input ports
+                if edge["targetHandle"] == "input-0":
+                    input_index = 0
+                elif edge["targetHandle"] == "input-1":
                     input_index = 1
                 else:
                     raise ValueError(
