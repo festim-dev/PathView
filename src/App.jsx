@@ -123,12 +123,22 @@ const DnDFlow = () => {
   const [globalVariables, setGlobalVariables] = useState([]);
   const [defaultValues, setDefaultValues] = useState({});
 
-  // Function to fetch default values for a node type
+  // Function to fetch default values for a node type (with caching)
   const fetchDefaultValues = async (nodeType) => {
+    // Check if we already have cached values for this node type
+    if (defaultValues[nodeType]) {
+      return defaultValues[nodeType];
+    }
+
     try {
       const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
       if (response.ok) {
         const defaults = await response.json();
+        // Cache the values
+        setDefaultValues(prev => ({
+          ...prev,
+          [nodeType]: defaults
+        }));
         return defaults;
       } else {
         console.error('Failed to fetch default values');
@@ -139,6 +149,36 @@ const DnDFlow = () => {
       return {};
     }
   };
+
+  // Function to preload all default values at startup
+  const preloadDefaultValues = async () => {
+    const availableTypes = Object.keys(nodeTypes);
+    const promises = availableTypes.map(async (nodeType) => {
+      try {
+        const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
+        if (response.ok) {
+          const defaults = await response.json();
+          return { nodeType, defaults };
+        }
+      } catch (error) {
+        console.warn(`Failed to preload defaults for ${nodeType}:`, error);
+      }
+      return { nodeType, defaults: {} };
+    });
+
+    const results = await Promise.all(promises);
+    const defaultValuesCache = {};
+    results.forEach(({ nodeType, defaults }) => {
+      defaultValuesCache[nodeType] = defaults;
+    });
+
+    setDefaultValues(defaultValuesCache);
+  };
+
+  // Preload all default values when component mounts
+  useEffect(() => {
+    preloadDefaultValues();
+  }, []);
 
   const onDrop = useCallback(
     async (event) => {
@@ -157,20 +197,12 @@ const DnDFlow = () => {
       // Fetch default values for this node type
       let defaults = {};
 
-      // NOTE this slows things down
-      // Consider caching these defaults
       try {
         defaults = await fetchDefaultValues(type);
       } catch (error) {
         console.warn(`Failed to fetch default values for ${type}, using empty defaults:`, error);
         defaults = {};
       }
-
-      // Store default values for this node type
-      setDefaultValues(prev => ({
-        ...prev,
-        [type]: defaults
-      }));
 
       // Create node data with label and initialize all expected fields as empty strings
       let nodeData = { label: `${type} ${newNodeId}` };
@@ -713,12 +745,6 @@ const DnDFlow = () => {
 
     // Fetch default values for this node type
     const defaults = await fetchDefaultValues(selectedType);
-
-    // Store default values for this node type
-    setDefaultValues(prev => ({
-      ...prev,
-      [selectedType]: defaults
-    }));
 
     // Create node data with label and initialize all expected fields as empty strings
     let nodeData = { label: `${selectedType} ${newNodeId}` };
