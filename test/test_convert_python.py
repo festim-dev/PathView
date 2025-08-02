@@ -29,7 +29,7 @@ sample_data = {
             "type": "function",
             "data": {
                 "label": "func_block",
-                "expression": "x * 2 + 1",
+                "expression": "lambda x: x * 2 + 1",
             },
         },
         {
@@ -127,38 +127,6 @@ def test_nested_templates(data):
     except Exception as e:
         print(f"Error occurred: {e}")
         assert False
-
-
-def test_stepsource_delay_converted_to_tau():
-    "Test that the delay parameter in a stepsource node is converted to tau in the generated code."
-    sample_data = {
-        "nodes": [
-            {
-                "id": "1",
-                "type": "stepsource",
-                "data": {
-                    "label": "input_signal",
-                    "delay": "3.0",
-                    "amplitude": "2.0",
-                },
-            },
-        ],
-        "edges": [],
-        "solverParams": {
-            "Solver": "SSPRK22",
-            "dt": "0.01",
-            "dt_max": "1.0",
-            "dt_min": "1e-6",
-            "extra_params": "{}",
-            "iterations_max": "100",
-            "log": "true",
-            "simulation_duration": "duration",
-            "tolerance_fpi": "1e-6",
-        },
-        "globalVariables": [],
-    }
-    code = convert_graph_to_python(sample_data)
-    assert "tau=3.0" in code
 
 
 def test_bubbler_has_reset_times():

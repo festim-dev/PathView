@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import src
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_function_block, create_scope_block, create_stepsource, create_bubbler_block, create_connections -%}
+{% from 'block_macros.py' import create_block, create_source_block, create_integrator_block, create_scope_block, create_bubbler_block, create_connections -%}
 
 # Create global variables
 {% for var in globalVariables -%}
@@ -16,10 +16,6 @@ blocks, events = [], []
 {% for node in nodes -%}
 {%- if node["type"] == "integrator" -%}
 {{ create_integrator_block(node) }}
-{%- elif node["type"] == "stepsource" -%}
-{{ create_stepsource(node) }}
-{%- elif node["type"] == "function" -%}
-{{ create_function_block(node) }}
 {%- elif node["type"] == "scope" -%}
 {{ create_scope_block(node) }}
 {%- elif node["type"] == "bubbler" -%}
