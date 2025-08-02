@@ -97,6 +97,19 @@ def get_default_values(node_type):
         ), 400
 
 
+@app.route("/get-docs/<string:node_type>", methods=["GET"])
+def get_docs(node_type):
+    try:
+        if node_type not in map_str_to_object:
+            return jsonify({"error": f"Unknown node type: {node_type}"}), 400
+
+        block_class = map_str_to_object[node_type]
+        docstring = inspect.getdoc(block_class)
+        return jsonify({"docstring": docstring})
+    except Exception as e:
+        return jsonify({"error": f"Could not get docs for {node_type}: {str(e)}"}), 400
+
+
 # Function to save graphs
 @app.route("/save", methods=["POST"])
 def save_graph():
