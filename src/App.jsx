@@ -24,7 +24,7 @@ import IntegratorNode from './IntegratorNode';
 import AdderNode from './AdderNode';
 import ScopeNode from './ScopeNode';
 import StepSourceNode from './StepSourceNode';
-import FunctionNode from './FunctionNode';
+import {createFunctionNode} from './FunctionNode';
 import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
@@ -46,7 +46,8 @@ const nodeTypes = {
   adder: AdderNode,
   multiplier: MultiplierNode,
   scope: ScopeNode,
-  function: FunctionNode,
+  function: createFunctionNode(1, 1), // Default FunctionNode with 1 input and 1 output
+  function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
   rng: DefaultNode,
   pid: DefaultNode,
   splitter2: Splitter2Node,
