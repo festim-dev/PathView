@@ -252,3 +252,33 @@
 .documentation-content .tip .last {
   margin-bottom: 0;
 }
+
+/* Custom scrollbar styles for sidebar */
+.sidebar-scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #1e1e2f;
+}
+
+.sidebar-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 4px;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+  border: 1px solid #1e1e2f;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Smooth scrolling for the sidebar */
+.sidebar-scrollable {
+  scroll-behavior: smooth;
+}

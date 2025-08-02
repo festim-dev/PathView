@@ -927,7 +927,12 @@ export default function App() {
 
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
-        <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
+        <div style={{ 
+          width: '100%', 
+          height: '100%', 
+          paddingTop: '50px', // this is causing the whole graph to be pushed down... need to fix
+          overflow: 'hidden'
+        }}>
           <ReactFlow
             ref={ref}
             nodes={nodes}
@@ -1128,6 +1133,7 @@ export default function App() {
           </ReactFlow>
           {selectedNode && (
             <div
+              className="sidebar-scrollable"
               style={{
                 position: 'absolute',
                 right: 0,
@@ -1137,12 +1143,14 @@ export default function App() {
                 background: '#1e1e2f',
                 color: '#ffffff',
                 borderLeft: '1px solid #ccc',
-                padding: '20px',
                 boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
                 zIndex: 10,
+                overflowY: 'auto',
+                overflowX: 'hidden'
               }}
             >
-              <h3>{selectedNode.data.label}</h3>
+              <div style={{ padding: '20px' }}>
+                <h3>{selectedNode.data.label}</h3>
               {(() => {
                 // Get default values for this node type
                 const nodeDefaults = defaultValues[selectedNode.type] || {};
@@ -1279,10 +1287,12 @@ export default function App() {
                   />
                 )}
               </div>
+              </div>
             </div>
           )}
           {selectedEdge && (
             <div
+              className="sidebar-scrollable"
               style={{
                 position: 'absolute',
                 right: 0,
@@ -1292,11 +1302,13 @@ export default function App() {
                 background: '#2c2c54',
                 color: '#ffffff',
                 borderLeft: '1px solid #ccc',
-                padding: '20px',
                 boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
                 zIndex: 10,
+                overflowY: 'auto',
+                overflowX: 'hidden'
               }}
             >
+              <div style={{ padding: '20px' }}>
               <h3>Selected Edge</h3>
               <div style={{ marginBottom: '10px' }}>
                 <strong>ID:</strong> {selectedEdge.id}
@@ -1341,6 +1353,7 @@ export default function App() {
               >
                 Delete Edge
               </button>
+              </div>
             </div>
           )}
         </div>
