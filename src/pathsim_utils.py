@@ -7,6 +7,7 @@ from pathsim.blocks import (
     Scope,
     Block,
     Constant,
+    Source,
     StepSource,
     PulseSource,
     Amplifier,
@@ -40,6 +41,7 @@ NAME_TO_SOLVER = {
 }
 map_str_to_object = {
     "constant": Constant,
+    "source": Source,
     "stepsource": StepSource,
     "pulsesource": PulseSource,
     "amplifier": Amplifier,
