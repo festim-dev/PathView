@@ -44,6 +44,7 @@ const nodeTypes = {
   process_horizontal: ProcessNodeHorizontal,
   delay: DelayNode,
   constant: SourceNode,
+  source: SourceNode,
   stepsource: StepSourceNode,
   pulsesource: SourceNode,
   amplifier: AmplifierNode,
