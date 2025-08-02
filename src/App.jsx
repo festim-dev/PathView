@@ -97,6 +97,7 @@ export default function App() {
   const [globalVariables, setGlobalVariables] = useState([]);
   const [defaultValues, setDefaultValues] = useState({});
   const [nodeDocumentation, setNodeDocumentation] = useState({});
+  const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
 
   // Function to fetch default values for a node type
   const fetchDefaultValues = async (nodeType) => {
@@ -1225,32 +1226,58 @@ export default function App() {
                 borderTop: '1px solid #555',
                 paddingTop: '15px'
               }}>
-                <h4 style={{
-                  color: '#ffffff',
-                  marginBottom: '10px',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}>
-                  Class Documentation
-                </h4>
                 <div 
-                  className="documentation-content"
                   style={{
-                    backgroundColor: '#2a2a3e',
-                    border: '1px solid #555',
-                    borderRadius: '4px',
-                    padding: '12px',
-                    minHeight: '120px',
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                    fontSize: '13px',
-                    lineHeight: '1.4',
-                    color: '#e8e8e8'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    padding: '8px 0',
+                    borderRadius: '4px'
                   }}
-                  dangerouslySetInnerHTML={{
-                    __html: nodeDocumentation[selectedNode.type]?.html || 'Loading documentation...'
-                  }}
-                />
+                  onClick={() => setIsDocumentationExpanded(!isDocumentationExpanded)}
+                >
+                  <h4 style={{
+                    color: '#ffffff',
+                    margin: 0,
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}>
+                    Class Documentation
+                  </h4>
+                  <span style={{
+                    color: '#ffffff',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    transform: isDocumentationExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease',
+                    userSelect: 'none'
+                  }}>
+                    ▶
+                  </span>
+                </div>
+                
+                {isDocumentationExpanded && (
+                  <div 
+                    className="documentation-content"
+                    style={{
+                      backgroundColor: '#2a2a3e',
+                      border: '1px solid #555',
+                      borderRadius: '4px',
+                      padding: '12px',
+                      minHeight: '120px',
+                      maxHeight: '400px',
+                      overflowY: 'auto',
+                      fontSize: '13px',
+                      lineHeight: '1.4',
+                      color: '#e8e8e8',
+                      marginTop: '8px'
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: nodeDocumentation[selectedNode.type]?.html || 'Loading documentation...'
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}
