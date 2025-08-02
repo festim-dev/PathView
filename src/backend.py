@@ -80,6 +80,16 @@ def get_default_values(node_type):
                     default_values[param] = None  # Handle empty defaults
                 else:
                     default_values[param] = default_value
+                    # check if default value is serializable to JSON
+                    if not isinstance(
+                        default_value, (int, float, str, bool, list, dict)
+                    ):
+                        # Attempt to convert to JSON serializable type
+                        try:
+                            default_values[param] = json.dumps(default_value)
+                        except TypeError:
+                            # If conversion fails, set to a string 'default'
+                            default_values[param] = "default"
         return jsonify(default_values)
     except Exception as e:
         return jsonify(
