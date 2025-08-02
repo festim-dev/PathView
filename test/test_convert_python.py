@@ -29,7 +29,7 @@ sample_data = {
             "type": "function",
             "data": {
                 "label": "func_block",
-                "expression": "lambda x: x * 2 + 1",
+                "func": "lambda x: x * 2 + 1",
             },
         },
         {
@@ -63,7 +63,7 @@ sample_data = {
             "target": "4",
             "id": "e3-4",
             "sourceHandle": None,
-            "targetHandle": None,
+            "targetHandle": "target-0",
         },
         {
             "source": "3",
@@ -76,7 +76,7 @@ sample_data = {
             "source": "4",
             "target": "5",
             "id": "e4-5",
-            "sourceHandle": None,
+            "sourceHandle": "source-0",
             "targetHandle": None,
         },
     ],

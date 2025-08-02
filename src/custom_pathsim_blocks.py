@@ -94,28 +94,6 @@ class Integrator(pathsim.blocks.Integrator):
         ]
 
 
-class Function1to1(pathsim.blocks.Function):
-    """Function block with 1 input and 1 output."""
-
-    def __init__(self, expression="lambda x: 1*x"):
-        if isinstance(expression, str):
-            func = eval(expression)
-        else:
-            func = expression
-        super().__init__(func=func)
-
-
-class Function2to2(pathsim.blocks.Function):
-    """Function block with 2 inputs and 2 outputs."""
-
-    def __init__(self, expression="lambda x, y:1*x, 1*y"):
-        if isinstance(expression, str):
-            func = eval(expression)
-        else:
-            func = expression
-        super().__init__(func=func)
-
-
 # BUBBLER SYSTEM
 
 

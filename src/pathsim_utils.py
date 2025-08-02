@@ -13,7 +13,7 @@ from pathsim.blocks import (
     Amplifier,
     Adder,
     Multiplier,
-    # Function,
+    Function,
     Delay,
     RNG,
     PID,
@@ -28,8 +28,6 @@ from .custom_pathsim_blocks import (
     Bubbler,
     FestimWall,
     Integrator,
-    Function1to1,
-    Function2to2,
 )
 from flask import jsonify
 import inspect
@@ -57,8 +55,8 @@ map_str_to_object = {
     "rng": RNG,
     "pid": PID,
     "integrator": Integrator,
-    "function": Function1to1,
-    "function2to2": Function2to2,
+    "function": Function,
+    "function2to2": Function,
     "delay": Delay,
     "bubbler": Bubbler,
     "wall": FestimWall,
@@ -383,19 +381,10 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     raise ValueError(
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
-            elif isinstance(block, Function1to1):
-                # Function1to1 has only one output port
-                output_index = 0
-            elif isinstance(block, Function2to2):
-                # Function2to2 has two output ports
-                if edge["sourceHandle"] == "output-0":
-                    output_index = 0
-                elif edge["sourceHandle"] == "output-1":
-                    output_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+            elif isinstance(block, Function):
+                # Function outputs are always in order, so we can use the handle directly
+                assert edge["sourceHandle"], edge
+                output_index = int(edge["sourceHandle"].replace("source-", ""))
             else:
                 # make sure that the source block has only one output port (ie. that sourceHandle is None)
                 assert edge["sourceHandle"] is None, (
@@ -424,19 +413,9 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     raise ValueError(
                         f"Invalid target handle '{edge['targetHandle']}' for {edge}."
                     )
-            elif isinstance(target_block, Function1to1):
-                # Function1to1 has only one input port
-                input_index = 0
-            elif isinstance(target_block, Function2to2):
-                # Function2to2 has two input ports
-                if edge["targetHandle"] == "input-0":
-                    input_index = 0
-                elif edge["targetHandle"] == "input-1":
-                    input_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
-                    )
+            elif isinstance(target_block, Function):
+                # Function inputs are always in order, so we can use the handle directly
+                input_index = int(edge["targetHandle"].replace("target-", ""))
             else:
                 # make sure that the target block has only one input port (ie. that targetHandle is None)
                 assert edge["targetHandle"] is None, (
