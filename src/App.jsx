@@ -929,8 +929,8 @@ export default function App() {
       {activeTab === 'graph' && (
         <div style={{ 
           width: '100%', 
-          height: '100%', 
-          paddingTop: '50px', // this is causing the whole graph to be pushed down... need to fix
+          height: 'calc(100vh - 50px)', // Subtract the tab bar height
+          paddingTop: '50px',
           overflow: 'hidden'
         }}>
           <ReactFlow
@@ -1363,7 +1363,7 @@ export default function App() {
       {activeTab === 'solver' && (
         <div style={{
           width: '100%',
-          height: '100%',
+          height: 'calc(100vh - 50px)',
           paddingTop: '50px',
           backgroundColor: '#1e1e2f',
           overflow: 'auto',
@@ -1710,7 +1710,7 @@ export default function App() {
       {activeTab === 'globals' && (
         <div style={{
           width: '100%',
-          height: '100%',
+          height: 'calc(100vh - 50px)',
           paddingTop: '50px',
           backgroundColor: '#1e1e2f',
           overflow: 'auto',
@@ -1926,7 +1926,7 @@ export default function App() {
       {activeTab === 'results' && (
         <div style={{
           width: '100%',
-          height: '100%',
+          height: 'calc(100vh - 50px)',
           paddingTop: '50px',
           backgroundColor: '#f5f5f5',
           overflow: 'auto',
