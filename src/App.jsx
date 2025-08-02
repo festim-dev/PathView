@@ -29,6 +29,7 @@ import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
 import MultiplierNode from './MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './Splitters';
+import VialNode from './VialNode';
 import BubblerNode from './BubblerNode';
 import WallNode from './WallNode';
 
@@ -53,11 +54,11 @@ const nodeTypes = {
   pid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
+  vial: VialNode,
   wall: WallNode,
   bubbler: BubblerNode,
   white_noise: SourceNode,
   pink_noise: SourceNode,
-
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
