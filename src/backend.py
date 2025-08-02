@@ -14,26 +14,13 @@ from .pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope
 
 # Sphinx imports for docstring processing
-try:
-    from docutils.core import publish_parts
-
-    SPHINX_AVAILABLE = True
-except ImportError:
-    SPHINX_AVAILABLE = False
-    print("Warning: Sphinx not available. Docstring formatting will be basic.")
+from docutils.core import publish_parts
 
 
 def docstring_to_html(docstring):
     """Convert a Python docstring to HTML using docutils (like Sphinx does)."""
     if not docstring:
         return "<p>No documentation available.</p>"
-
-    if not SPHINX_AVAILABLE:
-        # Fallback: simple HTML escaping and line break conversion
-        import html
-
-        escaped = html.escape(docstring)
-        return f"<pre>{escaped}</pre>"
 
     try:
         # Use docutils to convert reStructuredText to HTML
@@ -159,7 +146,7 @@ def get_docs(node_type):
 
         # If no docstring, provide a basic description
         if not docstring:
-            docstring = f"No documentation available for {node_type}.\n\nThis is a {node_type} block in the pathsim library."
+            docstring = f"No documentation available for {node_type}."
 
         # Convert docstring to HTML using docutils/Sphinx-style processing
         html_content = docstring_to_html(docstring)
