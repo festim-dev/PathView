@@ -1,7 +1,6 @@
 from src.pathsim_utils import (
     create_integrator,
     auto_block_construction,
-    create_function,
     create_bubbler,
     create_scope,
 )
@@ -188,17 +187,6 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
             break
     block = auto_block_construction(node, eval_namespace={"var1": 5.5})
     assert isinstance(block, expected_class)
-
-
-def test_create_function():
-    node = {
-        "data": {"expression": "3*x**2 + b", "label": "Function"},
-        "id": "10",
-        "type": "function",
-    }
-    block = create_function(node, eval_namespace={"b": 2.5})
-    assert isinstance(block, pathsim.blocks.Function)
-    assert block.func(2) == 3 * 2**2 + 2.5
 
 
 def test_create_bubbler():

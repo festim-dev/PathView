@@ -32,25 +32,6 @@ events += events_{{ node["var_name"] }}
 {%- endmacro -%}
 
 
-
-{% macro create_function_block(node) -%}
-
-def func(x):
-    return {{ node["data"]["expression"] }}
-
-{{ node["var_name"] }} = pathsim.blocks.Function(func=func)
-
-{%- endmacro -%}
-
-{% macro create_stepsource(node) -%}
-{{ node["var_name"] }} = pathsim.blocks.StepSource(
-    amplitude={{ node["data"]["amplitude"] }},
-    tau={{ node["data"]["delay"] }},
-)
-{%- endmacro -%}
-
-
-
 {% macro create_scope_block(node) -%}
 {{ node["var_name"] }} = pathsim.blocks.Scope(
     labels={{ node["labels"] }}
