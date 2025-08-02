@@ -22,8 +22,7 @@ export function createFunctionNode(numInputs, numOutputs) {
     for (let i = 0; i < numInputs; i++) {
       const handleId = `target-${i}`;
       const topPercentage = numInputs === 1 ? 50 : ((i + 1) / (numInputs + 1)) * 100;
-      const connectionCount = data?.maxConnections?.[handleId] || 1;
-      
+
       inputHandles.push(
         <CustomHandle
           key={handleId}
@@ -31,7 +30,6 @@ export function createFunctionNode(numInputs, numOutputs) {
           type="target"
           position="left"
           style={{ ...handleStyle, top: `${topPercentage}%` }}
-          connectionCount={connectionCount}
         />
       );
       
