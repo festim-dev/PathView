@@ -21,9 +21,7 @@
 
 /* This is the code for customizing the controls icons */
 .react-flow__controls {
-  background-color: #1e1e2f !important;
   padding: 6px;             
-  min-height: 150px;         
   display: flex;            
 }
 
