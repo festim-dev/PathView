@@ -102,7 +102,7 @@ def make_edge_data(data: dict) -> list[dict]:
 
     # we need the namespace since we call make_blocks
     namespace = make_global_variables(data["globalVariables"])
-    blocks, _ = make_blocks(data["nodes"], data["edges"], eval_namespace=namespace)
+    blocks, _ = make_blocks(data["nodes"], eval_namespace=namespace)
 
     # Process each node and its sorted incoming edges to create connections
     block_to_input_index = {b: 0 for b in blocks}
