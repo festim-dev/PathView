@@ -109,18 +109,6 @@ def make_labels_for_scope(node: dict, edges: list, nodes: list) -> list[str]:
     return labels, connections_order
 
 
-def create_scope(node: dict, edges, nodes) -> Scope:
-    block = auto_block_construction(node, eval_namespace=globals())
-
-    # override labels + add connections order
-    # TODO this should be done in "make connections"
-    labels, connections_order = make_labels_for_scope(node, edges, nodes)
-    block._connections_order = connections_order
-    block.labels = labels
-
-    return block
-
-
 def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
@@ -259,15 +247,15 @@ def make_blocks(
     blocks, events = [], []
 
     for node in nodes:
-        block_type = node["type"]
+        block = auto_block_construction(node, eval_namespace)
+        if hasattr(block, "create_reset_events"):
+            events.extend(block.create_reset_events())
 
-        # TODO scope should be handled in the same way as other blocks
-        if block_type == "scope":
-            block = create_scope(node, edges, nodes)
-        else:
-            block = auto_block_construction(node, eval_namespace)
-            if hasattr(block, "create_reset_events"):
-                events.extend(block.create_reset_events())
+        if isinstance(block, Scope):
+            if block.labels == []:
+                block.labels, block._connections_order = make_labels_for_scope(
+                    node, edges, nodes
+                )
 
         block.id = node["id"]
         block.label = node["data"]["label"]

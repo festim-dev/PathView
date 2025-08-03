@@ -1,7 +1,4 @@
-from src.pathsim_utils import (
-    auto_block_construction,
-    create_scope,
-)
+from src.pathsim_utils import auto_block_construction
 from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
 
 import pathsim.blocks
@@ -64,7 +61,7 @@ NODE_TEMPLATES = {
     },
     "scope": {
         "type": "scope",
-        "data": {"label": "Scope", "sampling_rate": "", "labels": ""},
+        "data": {"label": "scope 7", "sampling_rate": "", "labels": "", "t_wait": ""},
     },
     "white_noise": {
         "type": "white_noise",
@@ -136,6 +133,7 @@ def node_factory():
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
         ("bubbler", Bubbler),
         ("integrator", Integrator),
+        ("scope", pathsim.blocks.Scope),
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
@@ -175,15 +173,3 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
             break
     block = auto_block_construction(node, eval_namespace={"var1": 5.5})
     assert isinstance(block, expected_class)
-
-
-def test_make_scope():
-    node = {
-        "id": "7",
-        "type": "scope",
-        "data": {"label": "scope 7", "sampling_rate": "", "labels": "", "t_wait": ""},
-    }
-    block = create_scope(node, edges=[], nodes=[node])
-    assert isinstance(block, pathsim.blocks.Scope)
-    assert block.labels == []
-    assert block.sampling_rate is None
