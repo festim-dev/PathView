@@ -292,7 +292,6 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     if edge["sourceHandle"]:
                         label += f" ({edge['sourceHandle']})"
                     target_block.labels.append(label)
-                input_index = block_to_input_index[target_block]
 
             connection = Connection(
                 block[output_index],

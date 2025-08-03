@@ -74,18 +74,6 @@ def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
         # Add expected arguments
         node["expected_arguments"] = signature(block_class).parameters
 
-        # if it's a scope, find labels
-        if node["type"] == "scope":
-            incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
-            incoming_edges.sort(key=lambda x: x["source"])
-            node["labels"] = []
-            for incoming_edge in incoming_edges:
-                source_node = next(
-                    (n for n in nodes if n["id"] == incoming_edge["source"])
-                )
-
-                # TODO take care of duplicated labels
-                node["labels"].append(source_node["data"]["label"])
     return nodes
 
 
@@ -128,17 +116,7 @@ def make_edge_data(data: dict) -> list[dict]:
             target_block = next((b for b in blocks if b.id == edge["target"]))
             target_node = next((n for n in data["nodes"] if n["id"] == edge["target"]))
             if isinstance(block, Process):
-                if edge["sourceHandle"] == "inv":
-                    output_index = 0
-                elif edge["sourceHandle"] == "mass_flow_rate":
-                    output_index = 1
-                    assert block.residence_time != 0, (
-                        "Residence time must be non-zero for mass flow rate output."
-                    )
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+                output_index = block.name_to_output_port[edge["sourceHandle"]]
             elif isinstance(block, Splitter):
                 # Splitter outputs are always in order, so we can use the handle directly
                 assert edge["sourceHandle"], edge
@@ -148,29 +126,9 @@ def make_edge_data(data: dict) -> list[dict]:
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
             elif isinstance(block, Bubbler):
-                if edge["sourceHandle"] == "vial1":
-                    output_index = 0
-                elif edge["sourceHandle"] == "vial2":
-                    output_index = 1
-                elif edge["sourceHandle"] == "vial3":
-                    output_index = 2
-                elif edge["sourceHandle"] == "vial4":
-                    output_index = 3
-                elif edge["sourceHandle"] == "sample_out":
-                    output_index = 4
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+                output_index = block.name_to_output_port[edge["sourceHandle"]]
             elif isinstance(block, FestimWall):
-                if edge["sourceHandle"] == "flux_0":
-                    output_index = 0
-                elif edge["sourceHandle"] == "flux_L":
-                    output_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+                output_index = block.name_to_output_port[edge["sourceHandle"]]
             elif isinstance(block, Function):
                 # Function outputs are always in order, so we can use the handle directly
                 assert edge["sourceHandle"], edge
@@ -183,26 +141,10 @@ def make_edge_data(data: dict) -> list[dict]:
                 )
                 output_index = 0
 
-            if isinstance(target_block, Scope):
-                input_index = target_block._connections_order.index(edge["id"])
-            elif isinstance(target_block, Bubbler):
-                if edge["targetHandle"] == "sample_in_soluble":
-                    input_index = 0
-                elif edge["targetHandle"] == "sample_in_insoluble":
-                    input_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
-                    )
+            if isinstance(target_block, Bubbler):
+                input_index = target_block.name_to_input_port[edge["targetHandle"]]
             elif isinstance(target_block, FestimWall):
-                if edge["targetHandle"] == "c_0":
-                    input_index = 0
-                elif edge["targetHandle"] == "c_L":
-                    input_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
-                    )
+                input_index = target_block.name_to_output_port[edge["targetHandle"]]
             elif isinstance(target_block, Function):
                 # Function inputs are always in order, so we can use the handle directly
                 input_index = int(edge["targetHandle"].replace("target-", ""))
@@ -213,6 +155,17 @@ def make_edge_data(data: dict) -> list[dict]:
                     "but connection method hasn't been implemented."
                 )
                 input_index = block_to_input_index[target_block]
+
+            # if it's a scope, find labels
+            if target_node["type"] == "scope":
+                if target_node["data"]["labels"] == "":
+                    target_node["data"]["labels"] = []
+
+                if isinstance(target_node["data"]["labels"], list):
+                    label = node["data"]["label"]
+                    if edge["sourceHandle"]:
+                        label += f" ({edge['sourceHandle']})"
+                    target_node["data"]["labels"].append(label)
 
             edge["source_var_name"] = node["var_name"]
             edge["target_var_name"] = target_node["var_name"]
