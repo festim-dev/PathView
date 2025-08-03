@@ -294,6 +294,9 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
 
     # Process each node and its sorted incoming edges to create connections
     block_to_input_index = {b: 0 for b in blocks}
+
+    scopes_without_labels = []
+
     for node in nodes:
         outgoing_edges = [edge for edge in edges if edge["source"] == node["id"]]
         outgoing_edges.sort(key=lambda x: x["target"])
@@ -311,6 +314,8 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
             # if it's a scope, add labels if not already present
             if isinstance(target_block, Scope):
                 if target_block.labels == []:
+                    scopes_without_labels.append(target_block)
+                if target_block in scopes_without_labels:
                     label = node["data"]["label"]
                     if edge["sourceHandle"]:
                         label += f" ({edge['sourceHandle']})"
