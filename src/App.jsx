@@ -1,6 +1,9 @@
+// * Imports *
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
+  useReactFlow,
   MiniMap,
   Controls,
   Background,
@@ -12,7 +15,8 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 import Plot from 'react-plotly.js';
 import { getApiEndpoint } from './config.js';
-
+import Sidebar from './Sidebar';
+import { DnDProvider, useDnD } from './DnDContext.jsx';
 import ContextMenu from './ContextMenu.jsx';
 
 // Importing node components
@@ -31,6 +35,8 @@ import MultiplierNode from './MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './Splitters';
 import BubblerNode from './BubblerNode';
 import WallNode from './WallNode';
+
+// * Declaring variables *
 
 // Add nodes as a node type for this script
 const nodeTypes = {
@@ -57,15 +63,18 @@ const nodeTypes = {
   bubbler: BubblerNode,
   white_noise: SourceNode,
   pink_noise: SourceNode,
-
 };
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
 const initialNodes = [];
 const initialEdges = [];
 
-// Main App component
-export default function App() {
+// Setting up id for Drag and Drop
+let id = 0;
+const getId = () => `dndnode_${id++}`;
+
+// For Drag and Drop functionality
+const DnDFlow = () => {
   // State management for nodes and edges: adds the initial nodes and edges to the graph and handles node selection
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -79,6 +88,25 @@ export default function App() {
   const [copyFeedback, setCopyFeedback] = useState('');
   const ref = useRef(null);
   const [csvData, setCsvData] = useState(null);
+  const reactFlowWrapper = useRef(null);
+  // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const { screenToFlowPosition } = useReactFlow();
+  const [type] = useDnD();
+
+  // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDragStart = (event, nodeType) => {
+    setType(nodeType);
+    event.dataTransfer.setData('text/plain', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
 
   // Solver parameters state
   const [solverParams, setSolverParams] = useState({
@@ -99,12 +127,22 @@ export default function App() {
   const [nodeDocumentation, setNodeDocumentation] = useState({});
   const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
 
-  // Function to fetch default values for a node type
+  // Function to fetch default values for a node type (with caching)
   const fetchDefaultValues = async (nodeType) => {
+    // Check if we already have cached values for this node type
+    if (defaultValues[nodeType]) {
+      return defaultValues[nodeType];
+    }
+
     try {
       const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
       if (response.ok) {
         const defaults = await response.json();
+        // Cache the values
+        setDefaultValues(prev => ({
+          ...prev,
+          [nodeType]: defaults
+        }));
         return defaults;
       } else {
         console.error('Failed to fetch default values');
@@ -141,6 +179,81 @@ export default function App() {
       };
     }
   };
+
+  // Function to preload all default values at startup
+  const preloadDefaultValues = async () => {
+    const availableTypes = Object.keys(nodeTypes);
+    const promises = availableTypes.map(async (nodeType) => {
+      try {
+        const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
+        if (response.ok) {
+          const defaults = await response.json();
+          return { nodeType, defaults };
+        }
+      } catch (error) {
+        console.warn(`Failed to preload defaults for ${nodeType}:`, error);
+      }
+      return { nodeType, defaults: {} };
+    });
+
+    const results = await Promise.all(promises);
+    const defaultValuesCache = {};
+    results.forEach(({ nodeType, defaults }) => {
+      defaultValuesCache[nodeType] = defaults;
+    });
+
+    setDefaultValues(defaultValuesCache);
+  };
+
+  // Preload all default values when component mounts
+  useEffect(() => {
+    preloadDefaultValues();
+  }, []);
+
+  const onDrop = useCallback(
+    async (event) => {
+      event.preventDefault();
+
+      // check if the dropped element is valid
+      if (!type) {
+        return;
+      }
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      const newNodeId = nodeCounter.toString();
+
+      // Fetch default values for this node type
+      let defaults = {};
+
+      try {
+        defaults = await fetchDefaultValues(type);
+      } catch (error) {
+        console.warn(`Failed to fetch default values for ${type}, using empty defaults:`, error);
+        defaults = {};
+      }
+
+      // Create node data with label and initialize all expected fields as empty strings
+      let nodeData = { label: `${type} ${newNodeId}` };
+
+      // Initialize all expected parameters as empty strings
+      Object.keys(defaults).forEach(key => {
+        nodeData[key] = '';
+      });
+
+      const newNode = {
+        id: newNodeId,
+        type: type,
+        position: position,
+        data: nodeData,
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+      setNodeCounter((count) => count + 1);
+    },
+    [screenToFlowPosition, type, nodeCounter, fetchDefaultValues, setDefaultValues, setNodes, setNodeCounter],
+  );
 
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
@@ -688,12 +801,12 @@ export default function App() {
     
     // Create node data with label and initialize all expected fields as empty strings
     let nodeData = { label: `${selectedType} ${newNodeId}` };
-    
+
     // Initialize all expected parameters as empty strings
     Object.keys(defaults).forEach(key => {
       nodeData[key] = '';
     });
-    
+
     const newNode = {
       id: newNodeId,
       type: selectedType,
@@ -851,15 +964,11 @@ export default function App() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedEdge, selectedNode, copiedNode, duplicateNode, setCopyFeedback]);
-
+  
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Tab Navigation */}
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         height: '50px',
         backgroundColor: '#2c2c2c',
         display: 'flex',
@@ -927,210 +1036,230 @@ export default function App() {
 
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
-        <div style={{ 
-          width: '100%', 
+        <div style={{
+          display: 'flex', flex: 1,
           height: 'calc(100vh - 50px)', // Subtract the tab bar height
           paddingTop: '50px',
-          overflow: 'hidden'
-        }}>
-          <ReactFlow
-            ref={ref}
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onEdgeClick={onEdgeClick}
-            onPaneClick={onPaneClick}
-            onNodeContextMenu={onNodeContextMenu}
-            nodeTypes={nodeTypes}
-          >
-            <Controls />
-            <MiniMap />
-            <Background variant="dots" gap={12} size={1} />
-            {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
-            {copyFeedback && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 20,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  backgroundColor: '#78A083',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: 4,
-                  zIndex: 1000,
-                  fontSize: '14px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                }}
+          overflow: 'hidden'}}>
+          {/* Sidebar */}
+          <div style={{
+            width: '250px',
+            backgroundColor: '#1e1e2f',
+            borderRight: '1px solid #ccc',
+            padding: '20px',
+            overflowY: 'auto'
+          }}>
+            <Sidebar />
+          </div>
+          
+          {/* Main Graph Area */}
+          <div className="dndflow" style={{ flex: 1, position: 'relative' }}>
+            <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
+              <ReactFlow
+                ref={ref}
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={onNodeClick}
+                onEdgeClick={onEdgeClick}
+                onPaneClick={onPaneClick}
+                onNodeContextMenu={onNodeContextMenu}
+                nodeTypes={nodeTypes}
+                onDrop={onDrop}
+                onDragStart={onDragStart}
+                onDragOver={onDragOver}
+                fitView
               >
-                {copyFeedback}
-              </div>
-            )}
-            <button
-              style={{
-                position: 'absolute',
-                left: 20,
-                top: 70,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: selectedEdge ? 'pointer' : 'not-allowed',
-              }}
-              onClick={deleteSelectedEdge}
-              disabled={!selectedEdge}
-            >
-              Delete Edge
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                left: 20,
-                top: 120,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: selectedNode ? 'pointer' : 'not-allowed',
-              }}
-              onClick={deleteSelectedNode}
-              disabled={!selectedNode}
-            >
-              Delete Node
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                left: 20,
-                top: 20,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: '#78A083',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: 'pointer',
-              }}
-              onClick={addNode}
-            >
-              Add Node
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                right: 20,
-                top: 20,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: '#78A083',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: 'pointer',
-              }}
-              onClick={saveGraph}
-            >
-              Save File
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                right: 140,
-                top: 20,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: '#78A083',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: 'pointer',
-              }}
-              onClick={loadGraph}
-            >
-              Load File
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                left: 130,
-                top: 20,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: '#78A083',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: 'pointer',
-              }}
-              onClick={resetGraph}
-            >
-              Reset Graph
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                right: 20,
-                top: 80,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: '#78A083',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: 'pointer',
-              }}
-              onClick={saveToPython}
-            >
-              Save to <br />Python
-            </button>
-            <button
-              style={{
-                position: 'absolute',
-                right: 20,
-                top: 150,
-                zIndex: 10,
-                padding: '8px 12px',
-                backgroundColor: '#78A083',
-                color: 'white',
-                border: 'none',
-                borderRadius: 5,
-                cursor: 'pointer',
-              }}
-              onClick={runPathsim}
-            >
-              Run
-            </button>
+                <Controls />
+                <MiniMap />
+                <Background variant="dots" gap={12} size={1} />
+
+                {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
+                {copyFeedback && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 20,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      backgroundColor: '#78A083',
+                      color: 'white',
+                      padding: '8px 16px',
+                      borderRadius: 4,
+                      zIndex: 1000,
+                      fontSize: '14px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    {copyFeedback}
+                  </div>
+                )}
+                <button
+                  style={{
+                    position: 'absolute',
+                    left: 20,
+                    top: 70,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: selectedEdge ? 'pointer' : 'not-allowed',
+                  }}
+                  onClick={deleteSelectedEdge}
+                  disabled={!selectedEdge}
+                >
+                  Delete Edge
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    left: 20,
+                    top: 120,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: selectedNode ? 'pointer' : 'not-allowed',
+                  }}
+                  onClick={deleteSelectedNode}
+                  disabled={!selectedNode}
+                >
+                  Delete Node
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    left: 20,
+                    top: 20,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={addNode}
+                >
+                  Add Node
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    right: 20,
+                    top: 20,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={saveGraph}
+                >
+                  Save File
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    right: 140,
+                    top: 20,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={loadGraph}
+                >
+                  Load File
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    left: 130,
+                    top: 20,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={resetGraph}
+                >
+                  Reset Graph
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    right: 20,
+                    top: 80,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={saveToPython}
+                >
+                  Save to <br />Python
+                </button>
+                <button
+                  style={{
+                    position: 'absolute',
+                    right: 20,
+                    top: 150,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={runPathsim}
+                >
+                  Run
+                </button>
 
 
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '50%',
-                right: 20,
-                backgroundColor: 'rgba(0, 0, 0, 0.31)',
-                color: 'white',
-                padding: '8px 12px',
-                borderRadius: 4,
-                fontSize: '12px',
-                zIndex: 10,
-                maxWidth: '200px',
-              }}
-            >
-              <strong>Keyboard Shortcuts:</strong><br />
-              Ctrl+C: Copy selected node<br />
-              Ctrl+V: Paste copied node<br />
-              Ctrl+D: Duplicate selected node<br />
-              Del/Backspace: Delete selection<br />
-              Right-click: Context menu
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '50%',
+                    right: 20,
+                    backgroundColor: 'rgba(0, 0, 0, 0.31)',
+                    color: 'white',
+                    padding: '8px 12px',
+                    borderRadius: 4,
+                    fontSize: '12px',
+                    zIndex: 10,
+                    maxWidth: '200px',
+                  }}
+                >
+                  <strong>Keyboard Shortcuts:</strong><br />
+                  Ctrl+C: Copy selected node<br />
+                  Ctrl+V: Paste copied node<br />
+                  Ctrl+D: Duplicate selected node<br />
+                  Del/Backspace: Delete selection<br />
+                  Right-click: Context menu
+                </div>
+              </ReactFlow>
             </div>
-          </ReactFlow>
+          </div>
           {selectedNode && (
             <div
               className="sidebar-scrollable"
@@ -1154,25 +1283,25 @@ export default function App() {
               {(() => {
                 // Get default values for this node type
                 const nodeDefaults = defaultValues[selectedNode.type] || {};
-                
+
                 // Create a list of all possible parameters (both current data and defaults)
                 const allParams = new Set([
                   ...Object.keys(selectedNode.data),
                   ...Object.keys(nodeDefaults)
                 ]);
-                
+
                 return Array.from(allParams)
                   .map(key => {
                     const currentValue = selectedNode.data[key] || '';
                     const defaultValue = nodeDefaults[key];
-                    const placeholder = defaultValue !== undefined && defaultValue !== null ? 
+                    const placeholder = defaultValue !== undefined && defaultValue !== null ?
                       String(defaultValue) : '';
-                    
+
                     return (
                       <div key={key} style={{ marginBottom: '10px' }}>
-                        <label style={{ 
-                          color: '#ffffff', 
-                          display: 'block', 
+                        <label style={{
+                          color: '#ffffff',
+                          display: 'block',
                           marginBottom: '4px',
                           fontSize: '14px'
                         }}>
@@ -1196,8 +1325,8 @@ export default function App() {
                             );
                             setSelectedNode(updatedNode);
                           }}
-                          style={{ 
-                            width: '100%', 
+                          style={{
+                            width: '100%',
                             marginTop: 4,
                             padding: '8px',
                             borderRadius: '4px',
@@ -1214,7 +1343,7 @@ export default function App() {
 
               <br />
               <button
-                style={{ 
+                style={{
                   marginTop: 10,
                   padding: '8px 16px',
                   backgroundColor: '#666',
@@ -1937,19 +2066,19 @@ export default function App() {
           }}>
             {simulationResults ? (
               <>
-              <div style={{ textAlign: 'right', padding: '0 20px 10px 20px' }}>
-                <button
-                  style={{
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={downloadCsv}
-                >
-                  Download CSV
-                </button>
+                <div style={{ textAlign: 'right', padding: '0 20px 10px 20px' }}>
+                  <button
+                    style={{
+                      backgroundColor: '#78A083',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 5,
+                      cursor: 'pointer',
+                    }}
+                    onClick={downloadCsv}
+                  >
+                    Download CSV
+                  </button>
                 </div>
                 <Plot
                   data={JSON.parse(simulationResults).data}
@@ -1977,3 +2106,14 @@ export default function App() {
     </div>
   );
 }
+
+export function App () {
+  return (
+    <ReactFlowProvider>
+      <DnDProvider>
+        <DnDFlow />
+      </DnDProvider>
+    </ReactFlowProvider>
+  );
+}
+

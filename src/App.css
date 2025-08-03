@@ -279,4 +279,64 @@
 /* Smooth scrolling for the sidebar */
 .sidebar-scrollable {
   scroll-behavior: smooth;
+/* Sidebar and drag-and-drop styles */
+.dndflow {
+  display: flex;
+  height: 100%;
+}
+
+.reactflow-wrapper {
+  flex: 1;
+  height: 100%;
+}
+
+aside {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+aside .description {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #2c2c2c;
+  border-radius: 5px;
+  color: #ffffff;
+  text-align: center;
+  font-size: 12px;
+}
+
+.dndnode {
+  height: 50px;
+  padding: 10px;
+  border: 1px solid #78A083;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  background-color: #444;
+  color: #ffffff;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.dndnode:hover {
+  background-color: #78A083;
+}
+
+.dndnode.input {
+  background-color: #3498db;
+}
+
+.dndnode.input:hover {
+  background-color: #2980b9;
+}
+
+.dndnode.output {
+  background-color: #e74c3c;
+}
+
+.dndnode.output:hover {
+  background-color: #c0392b;
 }
