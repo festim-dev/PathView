@@ -96,6 +96,8 @@ export default function App() {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
   const [defaultValues, setDefaultValues] = useState({});
+  const [nodeDocumentation, setNodeDocumentation] = useState({});
+  const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
 
   // Function to fetch default values for a node type
   const fetchDefaultValues = async (nodeType) => {
@@ -111,6 +113,32 @@ export default function App() {
     } catch (error) {
       console.error('Error fetching default values:', error);
       return {};
+    }
+  };
+
+  // Function to fetch documentation for a node type
+  const fetchNodeDocumentation = async (nodeType) => {
+    try {
+      const response = await fetch(getApiEndpoint(`/get-docs/${nodeType}`));
+      if (response.ok) {
+        const result = await response.json();
+        return {
+          html: result.html || result.docstring || 'No documentation available for this node type.',
+          text: result.docstring || 'No documentation available for this node type.'
+        };
+      } else {
+        console.error('Failed to fetch documentation');
+        return {
+          html: '<p>Failed to load documentation.</p>',
+          text: 'Failed to load documentation.'
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching documentation:', error);
+      return {
+        html: '<p>Error loading documentation.</p>',
+        text: 'Error loading documentation.'
+      };
     }
   };
 
@@ -543,7 +571,7 @@ export default function App() {
     [edges, setEdges]
   );
   // Function that when we click on a node, sets that node as the selected node
-  const onNodeClick = (event, node) => {
+  const onNodeClick = async (event, node) => {
     setSelectedNode(node);
     setSelectedEdge(null); // Clear selected edge when selecting a node
     // Reset all edge styles when selecting a node
@@ -561,6 +589,17 @@ export default function App() {
         },
       }))
     );
+
+    // Fetch default values and documentation for this node type
+    if (node.type && !defaultValues[node.type]) {
+      const defaults = await fetchDefaultValues(node.type);
+      setDefaultValues(prev => ({ ...prev, [node.type]: defaults }));
+    }
+
+    if (node.type && !nodeDocumentation[node.type]) {
+      const docs = await fetchNodeDocumentation(node.type);
+      setNodeDocumentation(prev => ({ ...prev, [node.type]: docs }));
+    }
   };
   // Function that when we click on an edge, sets that edge as the selected edge
   const onEdgeClick = (event, edge) => {
@@ -632,13 +671,19 @@ export default function App() {
     const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
     
-    // Fetch default values for this node type
+    // Fetch default values and documentation for this node type
     const defaults = await fetchDefaultValues(selectedType);
+    const docs = await fetchNodeDocumentation(selectedType);
     
-    // Store default values for this node type
+    // Store default values and documentation for this node type
     setDefaultValues(prev => ({
       ...prev,
       [selectedType]: defaults
+    }));
+    
+    setNodeDocumentation(prev => ({
+      ...prev,
+      [selectedType]: docs
     }));
     
     // Create node data with label and initialize all expected fields as empty strings
@@ -882,7 +927,12 @@ export default function App() {
 
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
-        <div style={{ width: '100%', height: '100%', paddingTop: '50px' }}>
+        <div style={{ 
+          width: '100%', 
+          height: 'calc(100vh - 50px)', // Subtract the tab bar height
+          paddingTop: '50px',
+          overflow: 'hidden'
+        }}>
           <ReactFlow
             ref={ref}
             nodes={nodes}
@@ -1083,6 +1133,7 @@ export default function App() {
           </ReactFlow>
           {selectedNode && (
             <div
+              className="sidebar-scrollable"
               style={{
                 position: 'absolute',
                 right: 0,
@@ -1092,12 +1143,14 @@ export default function App() {
                 background: '#1e1e2f',
                 color: '#ffffff',
                 borderLeft: '1px solid #ccc',
-                padding: '20px',
                 boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
                 zIndex: 10,
+                overflowY: 'auto',
+                overflowX: 'hidden'
               }}
             >
-              <h3>{selectedNode.data.label}</h3>
+              <div style={{ padding: '20px' }}>
+                <h3>{selectedNode.data.label}</h3>
               {(() => {
                 // Get default values for this node type
                 const nodeDefaults = defaultValues[selectedNode.type] || {};
@@ -1174,10 +1227,72 @@ export default function App() {
               >
                 Close
               </button>
+              
+              {/* Documentation Section */}
+              <div style={{ 
+                marginTop: '20px',
+                borderTop: '1px solid #555',
+                paddingTop: '15px'
+              }}>
+                <div 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    padding: '8px 0',
+                    borderRadius: '4px'
+                  }}
+                  onClick={() => setIsDocumentationExpanded(!isDocumentationExpanded)}
+                >
+                  <h4 style={{
+                    color: '#ffffff',
+                    margin: 0,
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}>
+                    Class Documentation
+                  </h4>
+                  <span style={{
+                    color: '#ffffff',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    transform: isDocumentationExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease',
+                    userSelect: 'none'
+                  }}>
+                    ▶
+                  </span>
+                </div>
+                
+                {isDocumentationExpanded && (
+                  <div 
+                    className="documentation-content"
+                    style={{
+                      backgroundColor: '#2a2a3e',
+                      border: '1px solid #555',
+                      borderRadius: '4px',
+                      padding: '12px',
+                      minHeight: '120px',
+                      maxHeight: '400px',
+                      overflowY: 'auto',
+                      fontSize: '13px',
+                      lineHeight: '1.4',
+                      color: '#e8e8e8',
+                      marginTop: '8px'
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: nodeDocumentation[selectedNode.type]?.html || 'Loading documentation...'
+                    }}
+                  />
+                )}
+              </div>
+              </div>
             </div>
           )}
           {selectedEdge && (
             <div
+              className="sidebar-scrollable"
               style={{
                 position: 'absolute',
                 right: 0,
@@ -1187,11 +1302,13 @@ export default function App() {
                 background: '#2c2c54',
                 color: '#ffffff',
                 borderLeft: '1px solid #ccc',
-                padding: '20px',
                 boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
                 zIndex: 10,
+                overflowY: 'auto',
+                overflowX: 'hidden'
               }}
             >
+              <div style={{ padding: '20px' }}>
               <h3>Selected Edge</h3>
               <div style={{ marginBottom: '10px' }}>
                 <strong>ID:</strong> {selectedEdge.id}
@@ -1236,6 +1353,7 @@ export default function App() {
               >
                 Delete Edge
               </button>
+              </div>
             </div>
           )}
         </div>
@@ -1245,7 +1363,7 @@ export default function App() {
       {activeTab === 'solver' && (
         <div style={{
           width: '100%',
-          height: '100%',
+          height: 'calc(100vh - 50px)',
           paddingTop: '50px',
           backgroundColor: '#1e1e2f',
           overflow: 'auto',
@@ -1592,7 +1710,7 @@ export default function App() {
       {activeTab === 'globals' && (
         <div style={{
           width: '100%',
-          height: '100%',
+          height: 'calc(100vh - 50px)',
           paddingTop: '50px',
           backgroundColor: '#1e1e2f',
           overflow: 'auto',
@@ -1808,7 +1926,7 @@ export default function App() {
       {activeTab === 'results' && (
         <div style={{
           width: '100%',
-          height: '100%',
+          height: 'calc(100vh - 50px)',
           paddingTop: '50px',
           backgroundColor: '#f5f5f5',
           overflow: 'auto',
