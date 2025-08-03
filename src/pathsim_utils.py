@@ -212,7 +212,7 @@ def get_parameters_for_block_class(block_class, node, eval_namespace):
 
 
 def make_blocks(
-    nodes: list[dict], edges: list[dict], eval_namespace: dict = None
+    nodes: list[dict], eval_namespace: dict = None
 ) -> tuple[list[Block], list[Event]]:
     blocks, events = [], []
 
@@ -365,7 +365,7 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
     )
 
     # Create blocks
-    blocks, events = make_blocks(nodes, edges, eval_namespace)
+    blocks, events = make_blocks(nodes, eval_namespace)
 
     connections_pathsim = make_connections(nodes, edges, blocks)
 
