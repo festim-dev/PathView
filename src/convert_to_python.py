@@ -13,6 +13,8 @@ from .pathsim_utils import (
     map_str_to_object,
     make_blocks,
     make_global_variables,
+    get_input_index,
+    get_output_index,
 )
 
 
@@ -115,46 +117,9 @@ def make_edge_data(data: dict) -> list[dict]:
         for edge in outgoing_edges:
             target_block = next((b for b in blocks if b.id == edge["target"]))
             target_node = next((n for n in data["nodes"] if n["id"] == edge["target"]))
-            if isinstance(block, Process):
-                output_index = block.name_to_output_port[edge["sourceHandle"]]
-            elif isinstance(block, Splitter):
-                # Splitter outputs are always in order, so we can use the handle directly
-                assert edge["sourceHandle"], edge
-                output_index = int(edge["sourceHandle"].replace("source", "")) - 1
-                if output_index >= block.n:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
-            elif isinstance(block, Bubbler):
-                output_index = block.name_to_output_port[edge["sourceHandle"]]
-            elif isinstance(block, FestimWall):
-                output_index = block.name_to_output_port[edge["sourceHandle"]]
-            elif isinstance(block, Function):
-                # Function outputs are always in order, so we can use the handle directly
-                assert edge["sourceHandle"], edge
-                output_index = int(edge["sourceHandle"].replace("source-", ""))
-            else:
-                # make sure that the source block has only one output port (ie. that sourceHandle is None)
-                assert edge["sourceHandle"] is None, (
-                    f"Source block {block.id} has multiple output ports, "
-                    "but connection method hasn't been implemented."
-                )
-                output_index = 0
 
-            if isinstance(target_block, Bubbler):
-                input_index = target_block.name_to_input_port[edge["targetHandle"]]
-            elif isinstance(target_block, FestimWall):
-                input_index = target_block.name_to_output_port[edge["targetHandle"]]
-            elif isinstance(target_block, Function):
-                # Function inputs are always in order, so we can use the handle directly
-                input_index = int(edge["targetHandle"].replace("target-", ""))
-            else:
-                # make sure that the target block has only one input port (ie. that targetHandle is None)
-                assert edge["targetHandle"] is None, (
-                    f"Target block {target_block.id} has multiple input ports, "
-                    "but connection method hasn't been implemented."
-                )
-                input_index = block_to_input_index[target_block]
+            output_index = get_output_index(block, edge)
+            input_index = get_input_index(target_block, edge, block_to_input_index)
 
             # if it's a scope, find labels
             if target_node["type"] == "scope":

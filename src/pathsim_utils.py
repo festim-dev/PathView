@@ -228,6 +228,66 @@ def make_blocks(
     return blocks, events
 
 
+def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int:
+    """
+    Get the input index for a block based on the edge data.
+
+    Args:
+        block: The block object.
+        edge: The edge dictionary containing source and target information.
+
+    Returns:
+        The input index for the block.
+    """
+    if hasattr(block, "name_to_input_port"):
+        return block.name_to_input_port[edge["targetHandle"]]
+    elif isinstance(block, Function):
+        return int(edge["targetHandle"].replace("target-", ""))
+    else:
+        # make sure that the target block has only one input port (ie. that targetHandle is None)
+        assert edge["targetHandle"] is None, (
+            f"Target block {block.id} has multiple input ports, "
+            "but connection method hasn't been implemented."
+        )
+        return block_to_input_index[block]
+
+
+# TODO here we could only pass edge and not block
+def get_output_index(block: Block, edge: dict) -> int:
+    """
+    Get the output index for a block based on the edge data.
+
+    Args:
+        block: The block object.
+        edge: The edge dictionary containing source and target information.
+
+    Returns:
+        The output index for the block.
+    """
+    if hasattr(block, "name_to_output_port"):
+        return block.name_to_output_port[edge["sourceHandle"]]
+    elif isinstance(block, Splitter):
+        # Splitter outputs are always in order, so we can use the handle directly
+        assert edge["sourceHandle"], edge
+        output_index = int(edge["sourceHandle"].replace("source", "")) - 1
+        if output_index >= block.n:
+            raise ValueError(
+                f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
+            )
+        return output_index
+    elif isinstance(block, Function):
+        # Function outputs are always in order, so we can use the handle directly
+        assert edge["sourceHandle"], edge
+        return int(edge["sourceHandle"].replace("source-", ""))
+    else:
+        # make sure that the source block has only one output port (ie. that sourceHandle is None)
+        assert edge["sourceHandle"] is None, (
+            f"Source block {block.id} has multiple output ports, "
+            "but connection method hasn't been implemented."
+        )
+        return 0
+
+
 def make_connections(nodes, edges, blocks) -> list[Connection]:
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
@@ -241,51 +301,14 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
         incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
         incoming_edges.sort(key=lambda x: x["source"])
 
-        block = find_block_by_id(node["id"], blocks=blocks)
+        source_block = find_block_by_id(node["id"], blocks=blocks)
 
         for edge in outgoing_edges:
             target_block = find_block_by_id(edge["target"], blocks=blocks)
-            if isinstance(block, Process):
-                output_index = block.name_to_output_port[edge["sourceHandle"]]
-            elif isinstance(block, Splitter):
-                # Splitter outputs are always in order, so we can use the handle directly
-                assert edge["sourceHandle"], edge
-                output_index = int(edge["sourceHandle"].replace("source", "")) - 1
-                if output_index >= block.n:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
-            elif isinstance(block, Bubbler):
-                output_index = block.name_to_output_port[edge["sourceHandle"]]
-            elif isinstance(block, FestimWall):
-                output_index = block.name_to_output_port[edge["sourceHandle"]]
-            elif isinstance(block, Function):
-                # Function outputs are always in order, so we can use the handle directly
-                assert edge["sourceHandle"], edge
-                output_index = int(edge["sourceHandle"].replace("source-", ""))
-            else:
-                # make sure that the source block has only one output port (ie. that sourceHandle is None)
-                assert edge["sourceHandle"] is None, (
-                    f"Source block {block.id} has multiple output ports, "
-                    "but connection method hasn't been implemented."
-                )
-                output_index = 0
+            output_index = get_output_index(source_block, edge)
+            input_index = get_input_index(target_block, edge, block_to_input_index)
 
-            if isinstance(target_block, Bubbler):
-                input_index = target_block.name_to_input_port[edge["targetHandle"]]
-            elif isinstance(target_block, FestimWall):
-                input_index = target_block.name_to_output_port[edge["targetHandle"]]
-            elif isinstance(target_block, Function):
-                # Function inputs are always in order, so we can use the handle directly
-                input_index = int(edge["targetHandle"].replace("target-", ""))
-            else:
-                # make sure that the target block has only one input port (ie. that targetHandle is None)
-                assert edge["targetHandle"] is None, (
-                    f"Target block {target_block.id} has multiple input ports, "
-                    "but connection method hasn't been implemented."
-                )
-                input_index = block_to_input_index[target_block]
-
+            # if it's a scope, add labels if not already present
             if isinstance(target_block, Scope):
                 if target_block.labels == []:
                     label = node["data"]["label"]
@@ -294,7 +317,7 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     target_block.labels.append(label)
 
             connection = Connection(
-                block[output_index],
+                source_block[output_index],
                 target_block[input_index],
             )
             connections_pathsim.append(connection)
