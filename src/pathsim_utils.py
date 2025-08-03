@@ -205,7 +205,12 @@ def get_parameters_for_block_class(block_class, node, eval_namespace):
                 raise ValueError(
                     f"expected parameter for {k} in {node['type']} ({node['label']})"
                 )
-            parameters[k] = value.default
+
+            # make a copy of the default value
+            if isinstance(value.default, (list, dict)):
+                parameters[k] = value.default.copy()
+            else:
+                parameters[k] = value.default
         else:
             parameters[k] = eval(user_input, eval_namespace)
     return parameters

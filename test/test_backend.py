@@ -1,4 +1,4 @@
-from src.pathsim_utils import auto_block_construction
+from src.pathsim_utils import auto_block_construction, make_connections
 from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
 
 import pathsim.blocks
@@ -173,3 +173,19 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
             break
     block = auto_block_construction(node, eval_namespace={"var1": 5.5})
     assert isinstance(block, expected_class)
+
+
+def test_two_scopes_no_labels(node_factory):
+    """Test that two scopes with no labels are handled correctly."""
+    scope1 = node_factory("scope", id="scope1")
+    scope2 = node_factory("scope", id="scope2")
+
+    # Create blocks
+    block1 = auto_block_construction(scope1)
+    block2 = auto_block_construction(scope2)
+
+    assert block1.labels == []
+    assert block2.labels == []
+
+    block1.labels.append("Scope 1 Data")
+    assert block2.labels == []
