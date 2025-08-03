@@ -79,35 +79,6 @@ def find_block_by_id(block_id: str, blocks) -> Block:
     return None
 
 
-def create_integrator(
-    node: dict, eval_namespace: dict = None
-) -> tuple[Block, list[Schedule]]:
-    if eval_namespace is None:
-        eval_namespace = globals()
-
-    parameters = get_parameters_for_block_class(
-        Integrator, node, eval_namespace=eval_namespace
-    )
-
-    block = Integrator(**parameters)
-    # add events to reset integrator if needed
-    events = block.create_reset_events()
-    return block, events
-
-
-def create_bubbler(node: dict) -> Bubbler:
-    """
-    Create a Bubbler block based on the node data.
-    """
-    # Extract parameters from node data
-    parameters = get_parameters_for_block_class(Bubbler, node, eval_namespace=globals())
-    block = Bubbler(**parameters)
-
-    events = block.create_reset_events()
-
-    return block, events
-
-
 def make_labels_for_scope(node: dict, edges: list, nodes: list) -> list[str]:
     # Find all incoming edges to this node and sort by source id for consistent ordering
     incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
@@ -290,28 +261,13 @@ def make_blocks(
     for node in nodes:
         block_type = node["type"]
 
-        # Manual construction for some block types
-        if block_type == "integrator":
-            block, event_int = create_integrator(node, eval_namespace)
-            events.extend(event_int)
-        elif block_type == "scope":
+        # TODO scope should be handled in the same way as other blocks
+        if block_type == "scope":
             block = create_scope(node, edges, nodes)
-        elif block_type == "splitter2":
-            block = Splitter2(
-                f1=eval(node["data"]["f1"], eval_namespace),
-                f2=eval(node["data"]["f2"], eval_namespace),
-            )
-        elif block_type == "splitter3":
-            block = Splitter3(
-                f1=eval(node["data"]["f1"], eval_namespace),
-                f2=eval(node["data"]["f2"], eval_namespace),
-                f3=eval(node["data"]["f3"], eval_namespace),
-            )
-        elif block_type == "bubbler":
-            block, events_bubbler = create_bubbler(node)
-            events.extend(events_bubbler)
-        else:  # try automated construction
+        else:
             block = auto_block_construction(node, eval_namespace)
+            if hasattr(block, "create_reset_events"):
+                events.extend(block.create_reset_events())
 
         block.id = node["id"]
         block.label = node["data"]["label"]
@@ -338,17 +294,7 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
         for edge in outgoing_edges:
             target_block = find_block_by_id(edge["target"], blocks=blocks)
             if isinstance(block, Process):
-                if edge["sourceHandle"] == "inv":
-                    output_index = 0
-                elif edge["sourceHandle"] == "mass_flow_rate":
-                    output_index = 1
-                    assert block.residence_time != 0, (
-                        "Residence time must be non-zero for mass flow rate output."
-                    )
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+                output_index = block.name_to_output_port[edge["sourceHandle"]]
             elif isinstance(block, Splitter):
                 # Splitter outputs are always in order, so we can use the handle directly
                 assert edge["sourceHandle"], edge
@@ -358,29 +304,9 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                         f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
                     )
             elif isinstance(block, Bubbler):
-                if edge["sourceHandle"] == "vial1":
-                    output_index = 0
-                elif edge["sourceHandle"] == "vial2":
-                    output_index = 1
-                elif edge["sourceHandle"] == "vial3":
-                    output_index = 2
-                elif edge["sourceHandle"] == "vial4":
-                    output_index = 3
-                elif edge["sourceHandle"] == "sample_out":
-                    output_index = 4
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+                output_index = block.name_to_output_port[edge["sourceHandle"]]
             elif isinstance(block, FestimWall):
-                if edge["sourceHandle"] == "flux_0":
-                    output_index = 0
-                elif edge["sourceHandle"] == "flux_L":
-                    output_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
-                    )
+                output_index = block.name_to_output_port[edge["sourceHandle"]]
             elif isinstance(block, Function):
                 # Function outputs are always in order, so we can use the handle directly
                 assert edge["sourceHandle"], edge
@@ -396,23 +322,9 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
             if isinstance(target_block, Scope):
                 input_index = target_block._connections_order.index(edge["id"])
             elif isinstance(target_block, Bubbler):
-                if edge["targetHandle"] == "sample_in_soluble":
-                    input_index = 0
-                elif edge["targetHandle"] == "sample_in_insoluble":
-                    input_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
-                    )
+                input_index = target_block.name_to_input_port[edge["targetHandle"]]
             elif isinstance(target_block, FestimWall):
-                if edge["targetHandle"] == "c_0":
-                    input_index = 0
-                elif edge["targetHandle"] == "c_L":
-                    input_index = 1
-                else:
-                    raise ValueError(
-                        f"Invalid target handle '{edge['targetHandle']}' for {edge}."
-                    )
+                input_index = target_block.name_to_output_port[edge["targetHandle"]]
             elif isinstance(target_block, Function):
                 # Function inputs are always in order, so we can use the handle directly
                 input_index = int(edge["targetHandle"].replace("target-", ""))

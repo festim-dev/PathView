@@ -12,7 +12,6 @@ from .custom_pathsim_blocks import (
 from .pathsim_utils import (
     map_str_to_object,
     make_blocks,
-    make_connections,
     make_global_variables,
 )
 

@@ -1,7 +1,5 @@
 from src.pathsim_utils import (
-    create_integrator,
     auto_block_construction,
-    create_bubbler,
     create_scope,
 )
 from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
@@ -122,20 +120,6 @@ def node_factory():
     return _create_node
 
 
-def test_create_integrator():
-    node = {
-        "data": {"initial_value": "", "label": "IV vial 1", "reset_times": ""},
-        "id": "9",
-        "type": "integrator",
-    }
-    integrator, events = create_integrator(node)
-
-    assert isinstance(integrator, Integrator)
-    assert integrator.initial_value == 0
-    for event in events:
-        assert isinstance(event, pathsim.blocks.Schedule)
-
-
 @pytest.mark.parametrize(
     "block_type,expected_class",
     [
@@ -173,6 +157,10 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("process", Process),
         ("white_noise", pathsim.blocks.noise.WhiteNoise),
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
+        ("bubbler", Bubbler),
+        ("integrator", Integrator),
+        ("splitter2", Splitter2),
+        ("splitter3", Splitter3),
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):
@@ -187,25 +175,6 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
             break
     block = auto_block_construction(node, eval_namespace={"var1": 5.5})
     assert isinstance(block, expected_class)
-
-
-def test_create_bubbler():
-    node = {
-        "id": "6",
-        "type": "bubbler",
-        "position": {"x": 627, "y": 357},
-        "data": {
-            "label": "bubbler 6",
-            "conversion_efficiency": "",
-            "replacement_times": "[1, 2, 3]",
-            "vial_efficiency": "",
-        },
-        "measured": {"width": 230, "height": 160},
-        "selected": False,
-        "dragging": False,
-    }
-    block, events = create_bubbler(node)
-    assert isinstance(block, Bubbler)
 
 
 def test_make_scope():
