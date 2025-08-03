@@ -279,6 +279,7 @@
 /* Smooth scrolling for the sidebar */
 .sidebar-scrollable {
   scroll-behavior: smooth;
+}
 /* Sidebar and drag-and-drop styles */
 .dndflow {
   display: flex;
