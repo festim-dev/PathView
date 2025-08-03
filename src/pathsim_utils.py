@@ -79,36 +79,6 @@ def find_block_by_id(block_id: str, blocks) -> Block:
     return None
 
 
-def make_labels_for_scope(node: dict, edges: list, nodes: list) -> list[str]:
-    # Find all incoming edges to this node and sort by source id for consistent ordering
-    incoming_edges = [edge for edge in edges if edge["target"] == node["id"]]
-    incoming_edges.sort(key=lambda x: x["source"])
-
-    # create labels for the scope based on incoming edges
-    labels = []
-    duplicate_labels = []
-    connections_order = []  # will be used later to make connections
-    for edge in incoming_edges:
-        source_node = find_node_by_id(edge["source"], nodes=nodes)
-        label = source_node["data"]["label"]
-        connections_order.append(edge["id"])
-
-        # If the label already exists, try to append the source handle to it (if it exists)
-        if label in labels or label in duplicate_labels:
-            duplicate_labels.append(label)
-            if edge["sourceHandle"]:
-                new_label = label + f" ({edge['sourceHandle']})"
-                label = new_label
-        labels.append(label)
-
-    for i, (edge, label) in enumerate(zip(incoming_edges, labels)):
-        if label in duplicate_labels:
-            if edge["sourceHandle"]:
-                labels[i] += f" ({edge['sourceHandle']})"
-
-    return labels, connections_order
-
-
 def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
@@ -251,12 +221,6 @@ def make_blocks(
         if hasattr(block, "create_reset_events"):
             events.extend(block.create_reset_events())
 
-        if isinstance(block, Scope):
-            if block.labels == []:
-                block.labels, block._connections_order = make_labels_for_scope(
-                    node, edges, nodes
-                )
-
         block.id = node["id"]
         block.label = node["data"]["label"]
         blocks.append(block)
@@ -307,9 +271,7 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                 )
                 output_index = 0
 
-            if isinstance(target_block, Scope):
-                input_index = target_block._connections_order.index(edge["id"])
-            elif isinstance(target_block, Bubbler):
+            if isinstance(target_block, Bubbler):
                 input_index = target_block.name_to_input_port[edge["targetHandle"]]
             elif isinstance(target_block, FestimWall):
                 input_index = target_block.name_to_output_port[edge["targetHandle"]]
@@ -322,6 +284,14 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     f"Target block {target_block.id} has multiple input ports, "
                     "but connection method hasn't been implemented."
                 )
+                input_index = block_to_input_index[target_block]
+
+            if isinstance(target_block, Scope):
+                if target_block.labels == []:
+                    label = node["data"]["label"]
+                    if edge["sourceHandle"]:
+                        label += f" ({edge['sourceHandle']})"
+                    target_block.labels.append(label)
                 input_index = block_to_input_index[target_block]
 
             connection = Connection(
