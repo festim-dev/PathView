@@ -134,6 +134,8 @@ def node_factory():
         ("splitter3", Splitter3),
         ("white_noise", pathsim.blocks.noise.WhiteNoise),
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
+        ("bubbler", Bubbler),
+        ("integrator", Integrator),
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
@@ -159,8 +161,6 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
         ("bubbler", Bubbler),
         ("integrator", Integrator),
-        ("splitter2", Splitter2),
-        ("splitter3", Splitter3),
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):
