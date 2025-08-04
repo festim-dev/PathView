@@ -28,7 +28,7 @@ RUN pip install gunicorn
 
 # Copy backend source code
 COPY src/ ./src/
-COPY *.py ./
+# COPY *.py ./
 
 # Copy built frontend from previous stage
 COPY --from=frontend-build /app/dist ./dist
