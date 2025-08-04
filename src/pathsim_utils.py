@@ -21,6 +21,7 @@ from pathsim.blocks import (
     Differentiator,
     Schedule,
 )
+import pathsim.blocks
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
 from .custom_pathsim_blocks import (
     Process,
@@ -43,6 +44,14 @@ map_str_to_object = {
     "constant": Constant,
     "source": Source,
     "stepsource": StepSource,
+    "trianglewavesource": pathsim.blocks.sources.TriangleWaveSource,
+    "sinusoidalsource": pathsim.blocks.sources.SinusoidalSource,
+    "gaussianpulsesource": pathsim.blocks.sources.GaussianPulseSource,
+    "sinusoidalphasenoisesource": pathsim.blocks.sources.SinusoidalPhaseNoiseSource,
+    "chirpphasenoisesource": pathsim.blocks.sources.ChirpPhaseNoiseSource,
+    "chirpsource": pathsim.blocks.sources.ChirpSource,
+    "clocksource": pathsim.blocks.sources.ClockSource,
+    "squarewavesource": pathsim.blocks.sources.SquareWaveSource,
     "pulsesource": PulseSource,
     "amplifier": Amplifier,
     "amplifier_reverse": Amplifier,
@@ -56,6 +65,7 @@ map_str_to_object = {
     "process_horizontal": Process,
     "rng": RNG,
     "pid": PID,
+    "antiwinduppid": pathsim.blocks.AntiWindupPID,
     "integrator": Integrator,
     "differentiator": Differentiator,
     "function": Function,
@@ -66,6 +76,14 @@ map_str_to_object = {
     "white_noise": WhiteNoise,
     "pink_noise": PinkNoise,
     "spectrum": Spectrum,
+    "samplehold": pathsim.blocks.SampleHold,
+    "comparator": pathsim.blocks.Comparator,
+    "allpassfilter": pathsim.blocks.AllpassFilter,
+    "butterworthlowpass": pathsim.blocks.ButterworthLowpassFilter,
+    "butterworthhighpass": pathsim.blocks.ButterworthHighpassFilter,
+    "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
+    "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
+    "fir": pathsim.blocks.FIR,
 }
 
 

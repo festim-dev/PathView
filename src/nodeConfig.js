@@ -22,7 +22,15 @@ export const nodeTypes = {
   constant: SourceNode,
   source: SourceNode,
   stepsource: StepSourceNode,
+  trianglewavesource: SourceNode,
+  sinusoidalsource: SourceNode,
+  gaussianpulsesource: SourceNode,
+  sinusoidalphasenoisesource: SourceNode,
+  chirpphasenoisesource: SourceNode,
+  chirpsource: SourceNode,
   pulsesource: SourceNode,
+  clocksource: SourceNode,
+  squarewavesource: SourceNode,
   amplifier: AmplifierNode,
   amplifier_reverse: AmplifierNodeReverse,
   integrator: IntegratorNode,
@@ -33,6 +41,7 @@ export const nodeTypes = {
   function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
   rng: SourceNode,
   pid: DefaultNode,
+  antiwinduppid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
   wall: WallNode,
@@ -40,13 +49,21 @@ export const nodeTypes = {
   white_noise: SourceNode,
   pink_noise: SourceNode,
   spectrum: ScopeNode,
-  differentiator: DefaultNode
+  differentiator: DefaultNode,
+  samplehold: DefaultNode,
+  comparator: DefaultNode,
+  allpassfilter: DefaultNode,
+  butterworthlowpass: DefaultNode,
+  butterworthhighpass: DefaultNode,
+  butterworthbandpass: DefaultNode,
+  butterworthbandstop: DefaultNode,
+  fir: DefaultNode
 };
 
 // Node categories for better organization
 export const nodeCategories = {
   'Sources': {
-    nodes: ['constant', 'stepsource', 'source', 'pulsesource', 'rng', 'white_noise', 'pink_noise'],
+    nodes: ['constant', 'stepsource', 'source', 'pulsesource', 'trianglewavesource', 'sinusoidalsource', 'gaussianpulsesource', 'sinusoidalphasenoisesource', 'chirpphasenoisesource', 'chirpsource', 'clocksource', 'squarewavesource', 'rng', 'white_noise', 'pink_noise'],
     description: 'Signal and data source nodes'
   },
   'Processing': {
@@ -58,12 +75,20 @@ export const nodeCategories = {
     description: 'Mathematical operation nodes'
   },
   'Control': {
-    nodes: ['pid'],
+    nodes: ['pid', 'antiwinduppid'],
     description: 'Control system nodes'
+  },
+  'Filters': {
+    nodes: ['allpassfilter', 'butterworthlowpass', 'butterworthhighpass', 'butterworthbandpass', 'butterworthbandstop', 'fir'],
+    description: 'Filter and flow control nodes'
   },
   'Fuel Cycle': {
     nodes: ['process', 'process_horizontal', 'bubbler', 'wall'],
     description: 'Fuel cycle specific nodes'
+  },
+  'Others': {
+    nodes: ['samplehold', 'comparator'],
+    description: 'Miscellaneous nodes'
   },
   'Output': {
     nodes: ['scope', 'spectrum'],

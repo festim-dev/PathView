@@ -391,6 +391,16 @@ aside .description {
   background-color: #3a2a1a !important;
 }
 
+.dndnode.filters {
+  border-left: 4px solid #20c997 !important;
+  background-color: #1a3a2f !important;
+}
+
+.dndnode.others {
+  border-left: 4px solid #ffc107 !important;
+  background-color: #3a3a1a !important;
+}
+
 .dndnode.input {
   border-left: 4px solid #28a745 !important;
   background-color: #1a2f1a !important;
