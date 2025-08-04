@@ -78,7 +78,7 @@ def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
 def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
-    global_namespace = {}
+    global_namespace = globals()
 
     for var in global_vars:
         var_name = var.get("name", "").strip()
@@ -105,7 +105,7 @@ def make_global_variables(global_vars):
 
         try:
             # Execute in global namespace for backwards compatibility
-            exec(f"{var_name} = {var_value}", globals())
+            exec(f"{var_name} = {var_value}", global_namespace)
             # Also store in local namespace for eval calls
             global_namespace[var_name] = eval(var_value)
         except Exception as e:
