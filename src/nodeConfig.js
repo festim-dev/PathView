@@ -39,6 +39,7 @@ export const nodeTypes = {
   bubbler: BubblerNode,
   white_noise: SourceNode,
   pink_noise: SourceNode,
+  spectrum: ScopeNode,
 };
 
 // Node categories for better organization
@@ -64,7 +65,7 @@ export const nodeCategories = {
     description: 'Fuel cycle specific nodes'
   },
   'Output': {
-    nodes: ['scope'],
+    nodes: ['scope', 'spectrum'],
     description: 'Output and visualization nodes'
   }
 };
@@ -94,7 +95,8 @@ export const getNodeDisplayName = (nodeType) => {
     'pid': 'PID Controller',
     'bubbler': 'Bubbler',
     'wall': 'Wall',
-    'scope': 'Scope'
+    'scope': 'Scope',
+    'spectrum': 'Spectrum',
   };
   
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);

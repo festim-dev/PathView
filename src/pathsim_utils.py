@@ -17,6 +17,7 @@ from pathsim.blocks import (
     Delay,
     RNG,
     PID,
+    Spectrum,
     Schedule,
 )
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
@@ -62,6 +63,7 @@ map_str_to_object = {
     "wall": FestimWall,
     "white_noise": WhiteNoise,
     "pink_noise": PinkNoise,
+    "spectrum": Spectrum,
 }
 
 
