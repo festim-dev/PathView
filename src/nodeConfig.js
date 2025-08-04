@@ -22,7 +22,15 @@ export const nodeTypes = {
   constant: SourceNode,
   source: SourceNode,
   stepsource: StepSourceNode,
+  trianglewavesource: SourceNode,
+  sinusoidalsource: SourceNode,
+  gaussianpulsesource: SourceNode,
+  sinusoidalphasenoisesource: SourceNode,
+  chirpphasenoisesource: SourceNode,
+  chirpsource: SourceNode,
   pulsesource: SourceNode,
+  clocksource: SourceNode,
+  squarewavesource: SourceNode,
   amplifier: AmplifierNode,
   amplifier_reverse: AmplifierNodeReverse,
   integrator: IntegratorNode,
@@ -46,7 +54,7 @@ export const nodeTypes = {
 // Node categories for better organization
 export const nodeCategories = {
   'Sources': {
-    nodes: ['constant', 'stepsource', 'source', 'pulsesource', 'rng', 'white_noise', 'pink_noise'],
+    nodes: ['constant', 'stepsource', 'source', 'pulsesource', 'trianglewavesource', 'sinusoidalsource', 'gaussianpulsesource', 'sinusoidalphasenoisesource', 'chirpphasenoisesource', 'chirpsource', 'clocksource', 'squarewavesource', 'rng', 'white_noise', 'pink_noise'],
     description: 'Signal and data source nodes'
   },
   'Processing': {
