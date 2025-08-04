@@ -65,18 +65,12 @@ map_str_to_object = {
 }
 
 
-def find_node_by_id(node_id: str, nodes: list) -> dict:
-    for node in nodes:
-        if node["id"] == node_id:
-            return node
-    return None
+def find_node_by_id(node_id: str, nodes: list[dict]) -> dict:
+    return next((node for node in nodes if node["id"] == node_id), None)
 
 
-def find_block_by_id(block_id: str, blocks) -> Block:
-    for block in blocks:
-        if hasattr(block, "id") and block.id == block_id:
-            return block
-    return None
+def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
+    return next((block for block in blocks if block.id == block_id), None)
 
 
 def make_global_variables(global_vars):

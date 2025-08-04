@@ -2,19 +2,14 @@ from jinja2 import Environment, FileSystemLoader
 import os
 from inspect import signature
 
-from pathsim.blocks import Scope, Function
-from .custom_pathsim_blocks import (
-    Process,
-    Splitter,
-    Bubbler,
-    FestimWall,
-)
 from .pathsim_utils import (
     map_str_to_object,
     make_blocks,
     make_global_variables,
     get_input_index,
     get_output_index,
+    find_block_by_id,
+    find_node_by_id,
 )
 
 
@@ -112,11 +107,11 @@ def make_edge_data(data: dict) -> list[dict]:
         ]
         outgoing_edges.sort(key=lambda x: x["target"])
 
-        block = next((b for b in blocks if b.id == node["id"]))
+        block = find_block_by_id(node["id"], blocks)
 
         for edge in outgoing_edges:
-            target_block = next((b for b in blocks if b.id == edge["target"]))
-            target_node = next((n for n in data["nodes"] if n["id"] == edge["target"]))
+            target_block = find_block_by_id(edge["target"], blocks)
+            target_node = find_node_by_id(edge["target"], data["nodes"])
 
             output_index = get_output_index(block, edge)
             input_index = get_input_index(target_block, edge, block_to_input_index)
