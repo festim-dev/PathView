@@ -79,6 +79,7 @@ const DnDFlow = () => {
 
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
+  const [events, setEvents] = useState([]);
   const [defaultValues, setDefaultValues] = useState({});
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [tempLabel, setTempLabel] = useState('');
@@ -220,7 +221,8 @@ const DnDFlow = () => {
       edges,
       nodeCounter,
       solverParams,
-      globalVariables
+      globalVariables,
+      events
     };
 
     // Check if File System Access API is supported
@@ -300,7 +302,7 @@ const DnDFlow = () => {
           }
 
           // Load the graph data
-          const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
+          const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables, events: loadedEvents } = graphData;
           setNodes(loadedNodes || []);
           setEdges(loadedEdges || []);
           setSelectedNode(null);
@@ -317,6 +319,7 @@ const DnDFlow = () => {
             extra_params: '{}'
           });
           setGlobalVariables(loadedGlobalVariables ?? []);
+          setEvents(loadedEvents ?? []);
 
           alert('Graph loaded successfully!');
         } catch (error) {
@@ -351,7 +354,7 @@ const DnDFlow = () => {
               return;
             }
 
-            const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables } = graphData;
+            const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables, events: loadedEvents } = graphData;
             setNodes(loadedNodes || []);
             setEdges(loadedEdges || []);
             setSelectedNode(null);
@@ -368,6 +371,7 @@ const DnDFlow = () => {
               extra_params: '{}'
             });
             setGlobalVariables(loadedGlobalVariables ?? []);
+            setEvents(loadedEvents ?? []);
 
             alert('Graph loaded successfully!');
           } catch (error) {
@@ -464,7 +468,8 @@ const DnDFlow = () => {
         edges,
         nodeCounter,
         solverParams,
-        globalVariables
+        globalVariables,
+        events
       };
 
       const response = await fetch(getApiEndpoint('/convert-to-python'), {
@@ -534,7 +539,8 @@ const DnDFlow = () => {
         nodes,
         edges,
         solverParams,
-        globalVariables
+        globalVariables,
+        events
       };
 
       const response = await fetch(getApiEndpoint('/run-pathsim'), {
@@ -1288,7 +1294,7 @@ const DnDFlow = () => {
       )}
 
       {/* Events tab */}
-      {activeTab === 'events' && <EventsTab />}
+      {activeTab === 'events' && <EventsTab events={events} setEvents={setEvents} />}
 
       {/* Solver Parameters Tab */}
       {activeTab === 'solver' && (
