@@ -32,13 +32,6 @@ events += events_{{ node["var_name"] }}
 {%- endmacro -%}
 
 
-{% macro create_scope_block(node) -%}
-{{ node["var_name"] }} = pathsim.blocks.Scope(
-    labels={{ node["data"]["labels"] }}
-)
-
-{%- endmacro -%}
-
 {% macro create_connections(edges) -%}
 connections = [
     {% for edge in edges -%}
