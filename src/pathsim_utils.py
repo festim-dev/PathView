@@ -315,7 +315,7 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
             input_index = get_input_index(target_block, edge, block_to_input_index)
 
             # if it's a scope, add labels if not already present
-            if isinstance(target_block, Scope):
+            if isinstance(target_block, (Scope, Spectrum)):
                 if target_block.labels == []:
                     scopes_without_labels.append(target_block)
                 if target_block in scopes_without_labels:
