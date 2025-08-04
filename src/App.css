@@ -341,3 +341,88 @@ aside .description {
 .dndnode.output:hover {
   background-color: #c0392b;
 }
+
+/* Ensure draggable node text is always visible */
+.dndnode {
+  color: #212529 !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  line-height: 1.4 !important;
+}
+
+/* Override any inherited styles that might hide text */
+.dndnode * {
+  color: inherit !important;
+}
+
+/* Improve readability */
+.dndnode:hover {
+  color: #212529 !important;
+}
+
+.dndnode:active {
+  color: #212529 !important;
+}
+
+/* Ensure category descriptions are readable */
+.sidebar-description {
+  color: #6c757d !important;
+  font-size: 11px !important;
+  margin-bottom: 8px !important;
+  font-style: italic !important;
+}
+
+/* Sidebar node category styles */
+.dndnode.math {
+  border-left: 4px solid #17a2b8 !important;
+  background-color: #e8f4f8 !important;
+}
+
+.dndnode.control {
+  border-left: 4px solid #6f42c1 !important;
+  background-color: #f0edf7 !important;
+}
+
+.dndnode.fuel-cycle {
+  border-left: 4px solid #fd7e14 !important;
+  background-color: #fef2e6 !important;
+}
+
+.dndnode.input {
+  border-left: 4px solid #28a745 !important;
+  background-color: #e8f5e8 !important;
+}
+
+.dndnode.output {
+  border-left: 4px solid #dc3545 !important;
+  background-color: #f8e6e6 !important;
+}
+
+.dndnode.processing {
+  border-left: 4px solid #007bff !important;
+  background-color: #e3f2fd !important;
+}
+
+/* Hover effects for category headers */
+.category-header:hover {
+  background-color: #dee2e6 !important;
+}
+
+/* Scrollbar styling for sidebar */
+aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

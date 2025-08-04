@@ -1,5 +1,5 @@
 // * Imports *
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -9,7 +9,6 @@ import {
   Background,
   useNodesState,
   useEdgesState,
-  addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './App.css';
@@ -19,59 +18,14 @@ import Sidebar from './Sidebar';
 import { DnDProvider, useDnD } from './DnDContext.jsx';
 import ContextMenu from './ContextMenu.jsx';
 
-// Importing node components
-import { ProcessNode, ProcessNodeHorizontal } from './ProcessNode';
-import DelayNode from './DelayNode';
-import SourceNode from './ConstantNode';
-import { AmplifierNode, AmplifierNodeReverse } from './AmplifierNode';
-import IntegratorNode from './IntegratorNode';
-import AdderNode from './AdderNode';
-import ScopeNode from './ScopeNode';
-import StepSourceNode from './StepSourceNode';
-import {createFunctionNode} from './FunctionNode';
-import DefaultNode from './DefaultNode';
 import { makeEdge } from './CustomEdge';
-import MultiplierNode from './MultiplierNode';
-import { Splitter2Node, Splitter3Node } from './Splitters';
-import BubblerNode from './BubblerNode';
-import WallNode from './WallNode';
+import { nodeTypes } from './nodeConfig.js';
 
 // * Declaring variables *
-
-// Add nodes as a node type for this script
-const nodeTypes = {
-  process: ProcessNode,
-  process_horizontal: ProcessNodeHorizontal,
-  delay: DelayNode,
-  constant: SourceNode,
-  source: SourceNode,
-  stepsource: StepSourceNode,
-  pulsesource: SourceNode,
-  amplifier: AmplifierNode,
-  amplifier_reverse: AmplifierNodeReverse,
-  integrator: IntegratorNode,
-  adder: AdderNode,
-  multiplier: MultiplierNode,
-  scope: ScopeNode,
-  function: createFunctionNode(1, 1), // Default FunctionNode with 1 input and 1 output
-  function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
-  rng: DefaultNode,
-  pid: DefaultNode,
-  splitter2: Splitter2Node,
-  splitter3: Splitter3Node,
-  wall: WallNode,
-  bubbler: BubblerNode,
-  white_noise: SourceNode,
-  pink_noise: SourceNode,
-};
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
 const initialNodes = [];
 const initialEdges = [];
-
-// Setting up id for Drag and Drop
-let id = 0;
-const getId = () => `dndnode_${id++}`;
 
 // For Drag and Drop functionality
 const DnDFlow = () => {
@@ -1043,10 +997,8 @@ const DnDFlow = () => {
           {/* Sidebar */}
           <div style={{
             width: '250px',
-            backgroundColor: '#1e1e2f',
-            borderRight: '1px solid #ccc',
-            padding: '20px',
-            overflowY: 'auto'
+            height: '100%',
+            borderRight: '1px solid #ccc'
           }}>
             <Sidebar />
           </div>
