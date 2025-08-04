@@ -32,6 +32,8 @@ export default () => {
       'Output': 'dndnode output',
       'Processing': 'dndnode processing',
       'Math': 'dndnode math',
+      'Others': 'dndnode others',
+      'Filters': 'dndnode filters',
       'Control': 'dndnode control',
       'Fuel Cycle': 'dndnode fuel-cycle'
     };
