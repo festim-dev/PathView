@@ -1,4 +1,20 @@
-import { useState } from 'react';
+import { isValidPythonIdentifier } from './utils.js';
+
+const makeVarName = (node) => {
+  // Create a base variable name from the node label
+  const baseVarName = node.data.label.replace(/\s+/g, '_').toLowerCase();
+
+  // Make the variable name unique by appending a number
+  let varName = baseVarName;
+  varName = `${baseVarName}_${node.id}`;
+
+  if (!isValidPythonIdentifier(varName)) {
+    // add var_ prefix if it doesn't start with a letter or underscore
+    varName = `var_${varName}`;
+}
+
+  return varName;
+}
 
 const NodeSidebar = ({
   selectedNode,
@@ -124,6 +140,15 @@ const NodeSidebar = ({
           borderBottom: '1px solid #343556',
           paddingBottom: '8px'
         }}>ID: {selectedNode.id}</h4>
+        <h4 style={{ 
+          margin: '12px 0 8px 0',
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#a8b3cf',
+          letterSpacing: '0.5px',
+          borderBottom: '1px solid #343556',
+          paddingBottom: '8px'
+        }}>varname: {makeVarName(selectedNode)}</h4>
 
         {(() => {
           // Get default values for this node type
