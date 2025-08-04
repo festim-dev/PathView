@@ -1860,6 +1860,7 @@ const DnDFlow = () => {
         </div>
       )}
 
+      {/* Results Tab */}
       {activeTab === 'results' && (
         <div style={{
           width: '100%',
