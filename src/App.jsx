@@ -78,6 +78,8 @@ const DnDFlow = () => {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
   const [defaultValues, setDefaultValues] = useState({});
+  const [isEditingLabel, setIsEditingLabel] = useState(false);
+  const [tempLabel, setTempLabel] = useState('');
   const [nodeDocumentation, setNodeDocumentation] = useState({});
   const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
 
@@ -1230,15 +1232,106 @@ const DnDFlow = () => {
               }}
             >
               <div style={{ padding: '20px' }}>
-                <h3>{selectedNode.data.label}</h3>
+                {isEditingLabel ? (
+                  <input
+                    type="text"
+                    value={tempLabel}
+                    onChange={(e) => setTempLabel(e.target.value)}
+                    onBlur={() => {
+                      // Update the node label
+                      const updatedNode = {
+                        ...selectedNode,
+                        data: { ...selectedNode.data, label: tempLabel },
+                      };
+                      setNodes((nds) =>
+                        nds.map((node) =>
+                          node.id === selectedNode.id ? updatedNode : node
+                        )
+                      );
+                      setSelectedNode(updatedNode);
+                      setIsEditingLabel(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.target.blur(); // This will trigger onBlur
+                      }
+                      if (e.key === 'Escape') {
+                        setTempLabel(selectedNode.data.label); // Reset to original
+                        setIsEditingLabel(false);
+                      }
+                    }}
+                    autoFocus
+                    style={{
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                      color: '#ffffff',
+                      backgroundColor: '#2a2a3e',
+                      border: '2px solid #007bff',
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      width: '100%',
+                      marginBottom: '16px',
+                      outline: 'none'
+                    }}
+                  />
+                ) : (
+                  <h3
+                    onClick={() => {
+                      setTempLabel(selectedNode.data.label);
+                      setIsEditingLabel(true);
+                    }}
+                    style={{
+                      cursor: 'pointer',
+                      margin: '0 0 16px 0',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      transition: 'background-color 0.2s ease',
+                      backgroundColor: 'transparent',
+                      border: '2px solid transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#2a2a3e';
+                      e.target.style.borderColor = '#444';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.borderColor = 'transparent';
+                    }}
+                    title="Click to edit label"
+                  >
+                    {selectedNode.data.label}
+                  </h3>
+                )}
+                <h4 style={{ 
+                  margin: '12px 0 8px 0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#a8b3cf',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  borderBottom: '1px solid #343556',
+                  paddingBottom: '8px'
+                }}>TYPE: {selectedNode.type}</h4>
+                <h4 style={{ 
+                  margin: '12px 0 8px 0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#a8b3cf',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  borderBottom: '1px solid #343556',
+                  paddingBottom: '8px'
+                }}>ID: {selectedNode.id}</h4>
+
               {(() => {
                 // Get default values for this node type
                 const nodeDefaults = defaultValues[selectedNode.type] || {};
 
                 // Create a list of all possible parameters (both current data and defaults)
+                // Exclude 'label' since it's now editable directly in the title
                 const allParams = new Set([
-                  ...Object.keys(selectedNode.data),
-                  ...Object.keys(nodeDefaults)
+                  ...Object.keys(selectedNode.data).filter(key => key !== 'label'),
+                  ...Object.keys(nodeDefaults).filter(key => key !== 'label')
                 ]);
 
                 return Array.from(allParams)
