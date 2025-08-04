@@ -43,14 +43,14 @@ export default () => {
       padding: '16px',
       height: '100%',
       overflowY: 'auto',
-      backgroundColor: '#f8f9fa',
-      borderRight: '1px solid #dee2e6',
+      backgroundColor: '#1e1e2f',
+      borderRight: '1px solid #555',
       boxSizing: 'border-box'
     }}>
       <div className="description" style={{
         marginBottom: '16px',
         fontSize: '14px',
-        color: '#6c757d',
+        color: '#cccccc',
         textAlign: 'center'
       }}>
         Drag nodes to the canvas to add them to your graph
@@ -65,7 +65,7 @@ export default () => {
               justifyContent: 'space-between',
               cursor: 'pointer',
               padding: '8px 12px',
-              backgroundColor: '#e9ecef',
+              backgroundColor: '#2c2c54',
               borderRadius: '4px',
               marginBottom: '8px',
               userSelect: 'none'
@@ -76,7 +76,7 @@ export default () => {
               margin: 0,
               fontSize: '14px',
               fontWeight: 'bold',
-              color: '#495057'
+              color: '#ffffff'
             }}>
               {categoryName}
             </h4>
@@ -84,7 +84,7 @@ export default () => {
               fontSize: '12px',
               transform: expandedCategories[categoryName] ? 'rotate(90deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s ease',
-              color: '#6c757d'
+              color: '#cccccc'
             }}>
               ▶
             </span>
@@ -104,14 +104,11 @@ export default () => {
                   style={{
                     margin: '4px 0',
                     padding: '8px 12px',
-                    border: '1px solid #dee2e6',
                     borderRadius: '4px',
                     cursor: 'grab',
                     fontSize: '13px',
                     transition: 'all 0.2s ease',
-                    display: 'block',
-                    color: '#212529',
-                    fontWeight: '500'
+                    display: 'block'
                   }}
                   onMouseEnter={(e) => {
                     const currentBg = window.getComputedStyle(e.target).backgroundColor;
@@ -120,13 +117,13 @@ export default () => {
                     e.target.style.borderColor = '#78A083';
                     e.target.style.borderLeftColor = currentBorder;
                     e.target.style.transform = 'translateX(4px)';
-                    e.target.style.color = '#212529';
-                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                    e.target.style.color = '#ffffff';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.5)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.borderColor = '#dee2e6';
+                    e.target.style.borderColor = '#555';
                     e.target.style.transform = 'translateX(0px)';
-                    e.target.style.color = '#212529';
+                    e.target.style.color = '#ffffff';
                     e.target.style.boxShadow = 'none';
                   }}
                   onDragStart={(e) => {

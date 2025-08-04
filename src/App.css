@@ -344,10 +344,12 @@ aside .description {
 
 /* Ensure draggable node text is always visible */
 .dndnode {
-  color: #212529 !important;
+  color: #ffffff !important;
   font-weight: 500 !important;
   text-align: left !important;
   line-height: 1.4 !important;
+  background-color: #2a2a3e !important;
+  border: 1px solid #555 !important;
 }
 
 /* Override any inherited styles that might hide text */
@@ -357,16 +359,17 @@ aside .description {
 
 /* Improve readability */
 .dndnode:hover {
-  color: #212529 !important;
+  color: #ffffff !important;
+  background-color: #3a3a4e !important;
 }
 
 .dndnode:active {
-  color: #212529 !important;
+  color: #ffffff !important;
 }
 
 /* Ensure category descriptions are readable */
 .sidebar-description {
-  color: #6c757d !important;
+  color: #aaaaaa !important;
   font-size: 11px !important;
   margin-bottom: 8px !important;
   font-style: italic !important;
@@ -375,37 +378,37 @@ aside .description {
 /* Sidebar node category styles */
 .dndnode.math {
   border-left: 4px solid #17a2b8 !important;
-  background-color: #e8f4f8 !important;
+  background-color: #1a2a3a !important;
 }
 
 .dndnode.control {
   border-left: 4px solid #6f42c1 !important;
-  background-color: #f0edf7 !important;
+  background-color: #2a1f3d !important;
 }
 
 .dndnode.fuel-cycle {
   border-left: 4px solid #fd7e14 !important;
-  background-color: #fef2e6 !important;
+  background-color: #3a2a1a !important;
 }
 
 .dndnode.input {
   border-left: 4px solid #28a745 !important;
-  background-color: #e8f5e8 !important;
+  background-color: #1a2f1a !important;
 }
 
 .dndnode.output {
   border-left: 4px solid #dc3545 !important;
-  background-color: #f8e6e6 !important;
+  background-color: #3a1a1a !important;
 }
 
 .dndnode.processing {
   border-left: 4px solid #007bff !important;
-  background-color: #e3f2fd !important;
+  background-color: #1a1a3a !important;
 }
 
 /* Hover effects for category headers */
 .category-header:hover {
-  background-color: #dee2e6 !important;
+  background-color: #3c3c64 !important;
 }
 
 /* Scrollbar styling for sidebar */
@@ -414,15 +417,15 @@ aside::-webkit-scrollbar {
 }
 
 aside::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #2c2c54;
   border-radius: 3px;
 }
 
 aside::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #555;
   border-radius: 3px;
 }
 
 aside::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #666;
 }
