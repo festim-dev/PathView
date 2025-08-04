@@ -15,9 +15,10 @@ import './App.css';
 import Plot from 'react-plotly.js';
 import { getApiEndpoint } from './config.js';
 import Sidebar from './Sidebar';
+import NodeSidebar from './NodeSidebar';
 import { DnDProvider, useDnD } from './DnDContext.jsx';
 import ContextMenu from './ContextMenu.jsx';
-
+import { isValidPythonIdentifier } from './utils.js';
 import { makeEdge } from './CustomEdge';
 import { nodeTypes } from './nodeConfig.js';
 
@@ -78,6 +79,8 @@ const DnDFlow = () => {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
   const [defaultValues, setDefaultValues] = useState({});
+  const [isEditingLabel, setIsEditingLabel] = useState(false);
+  const [tempLabel, setTempLabel] = useState('');
   const [nodeDocumentation, setNodeDocumentation] = useState({});
   const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
 
@@ -556,30 +559,6 @@ const DnDFlow = () => {
       console.error('Error:', error);
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
-  };
-
-  // Functions for managing global variables
-  const isValidPythonIdentifier = (name) => {
-    // Check if name is empty
-    if (!name) return false;
-
-    // Python identifier rules:
-    // - Must start with letter or underscore
-    // - Can contain letters, digits, underscores
-    // - Cannot be a Python keyword
-    const pythonKeywords = [
-      'False', 'None', 'True', 'and', 'as', 'assert', 'break', 'class', 'continue',
-      'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global',
-      'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass',
-      'raise', 'return', 'try', 'while', 'with', 'yield'
-    ];
-
-    // Check if it's a keyword
-    if (pythonKeywords.includes(name)) return false;
-
-    // Check pattern: must start with letter or underscore, followed by letters, digits, or underscores
-    const pattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-    return pattern.test(name);
   };
 
   const addGlobalVariable = () => {
@@ -1211,165 +1190,19 @@ const DnDFlow = () => {
               </ReactFlow>
             </div>
           </div>
-          {selectedNode && (
-            <div
-              className="sidebar-scrollable"
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 50,
-                height: 'calc(100vh - 50px)',
-                width: '300px',
-                background: '#1e1e2f',
-                color: '#ffffff',
-                borderLeft: '1px solid #ccc',
-                boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
-                zIndex: 10,
-                overflowY: 'auto',
-                overflowX: 'hidden'
-              }}
-            >
-              <div style={{ padding: '20px' }}>
-                <h3>{selectedNode.data.label}</h3>
-              {(() => {
-                // Get default values for this node type
-                const nodeDefaults = defaultValues[selectedNode.type] || {};
-
-                // Create a list of all possible parameters (both current data and defaults)
-                const allParams = new Set([
-                  ...Object.keys(selectedNode.data),
-                  ...Object.keys(nodeDefaults)
-                ]);
-
-                return Array.from(allParams)
-                  .map(key => {
-                    const currentValue = selectedNode.data[key] || '';
-                    const defaultValue = nodeDefaults[key];
-                    const placeholder = defaultValue !== undefined && defaultValue !== null ?
-                      String(defaultValue) : '';
-
-                    return (
-                      <div key={key} style={{ marginBottom: '10px' }}>
-                        <label style={{
-                          color: '#ffffff',
-                          display: 'block',
-                          marginBottom: '4px',
-                          fontSize: '14px'
-                        }}>
-                          {key}:
-                        </label>
-                        <input
-                          type="text"
-                          value={currentValue}
-                          placeholder={placeholder}
-                          onChange={(e) => {
-                            const newValue = e.target.value;
-                            const updatedNode = {
-                              ...selectedNode,
-                              data: { ...selectedNode.data, [key]: newValue },
-                            };
-
-                            setNodes((nds) =>
-                              nds.map((node) =>
-                                node.id === selectedNode.id ? updatedNode : node
-                              )
-                            );
-                            setSelectedNode(updatedNode);
-                          }}
-                          style={{
-                            width: '100%',
-                            marginTop: 4,
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #555',
-                            backgroundColor: '#2a2a3e',
-                            color: '#ffffff',
-                            fontSize: '14px'
-                          }}
-                        />
-                      </div>
-                    );
-                  });
-              })()}
-
-              <br />
-              <button
-                style={{
-                  marginTop: 10,
-                  padding: '8px 16px',
-                  backgroundColor: '#666',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => setSelectedNode(null)}
-              >
-                Close
-              </button>
-              
-              {/* Documentation Section */}
-              <div style={{ 
-                marginTop: '20px',
-                borderTop: '1px solid #555',
-                paddingTop: '15px'
-              }}>
-                <div 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    padding: '8px 0',
-                    borderRadius: '4px'
-                  }}
-                  onClick={() => setIsDocumentationExpanded(!isDocumentationExpanded)}
-                >
-                  <h4 style={{
-                    color: '#ffffff',
-                    margin: 0,
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}>
-                    Class Documentation
-                  </h4>
-                  <span style={{
-                    color: '#ffffff',
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    transform: isDocumentationExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s ease',
-                    userSelect: 'none'
-                  }}>
-                    ▶
-                  </span>
-                </div>
-                
-                {isDocumentationExpanded && (
-                  <div 
-                    className="documentation-content"
-                    style={{
-                      backgroundColor: '#2a2a3e',
-                      border: '1px solid #555',
-                      borderRadius: '4px',
-                      padding: '12px',
-                      minHeight: '120px',
-                      maxHeight: '400px',
-                      overflowY: 'auto',
-                      fontSize: '13px',
-                      lineHeight: '1.4',
-                      color: '#e8e8e8',
-                      marginTop: '8px'
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: nodeDocumentation[selectedNode.type]?.html || 'Loading documentation...'
-                    }}
-                  />
-                )}
-              </div>
-              </div>
-            </div>
-          )}
+          <NodeSidebar
+            selectedNode={selectedNode}
+            defaultValues={defaultValues}
+            setNodes={setNodes}
+            setSelectedNode={setSelectedNode}
+            isEditingLabel={isEditingLabel}
+            setIsEditingLabel={setIsEditingLabel}
+            tempLabel={tempLabel}
+            setTempLabel={setTempLabel}
+            nodeDocumentation={nodeDocumentation}
+            isDocumentationExpanded={isDocumentationExpanded}
+            setIsDocumentationExpanded={setIsDocumentationExpanded}
+          />
           {selectedEdge && (
             <div
               className="sidebar-scrollable"
@@ -2003,6 +1836,7 @@ const DnDFlow = () => {
         </div>
       )}
 
+      {/* Results Tab */}
       {activeTab === 'results' && (
         <div style={{
           width: '100%',

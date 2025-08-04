@@ -29,7 +29,36 @@ def convert_graph_to_python(graph_data: dict) -> str:
     return template.render(context)
 
 
-def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
+def make_var_name(node: dict) -> str:
+    """
+    Create a variable name from the node label, ensuring it is a valid Python identifier.
+    If the label contains invalid characters, they are replaced with underscores.
+    If the variable name is not unique, a number is appended to make it unique.
+
+    This is supposed to match the logic in NodeSidebar.jsx makeVarName function.
+    """
+    # Make a variable name from the label
+    invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
+    base_var_name = node["data"]["label"].lower().replace(" ", "_")
+    for char in invalid_chars:
+        base_var_name = base_var_name.replace(char, "")
+
+    # Make the variable name unique by appending a number if needed
+    var_name = base_var_name
+    var_name = f"{base_var_name}_{node['id']}"
+
+    # Ensure the base variable name is a valid identifier
+    if not var_name.isidentifier():
+        var_name = f"var_{var_name}"
+        if not var_name.isidentifier():
+            raise ValueError(
+                f"Variable name must be a valid identifier. {node['data']['label']} to {var_name}"
+            )
+
+    return var_name
+
+
+def process_node_data(nodes: list[dict]) -> list[dict]:
     """
     Given a list of node and edge data as dictionaries, process the nodes to create
     variable names, class names, and expected arguments for each node.
@@ -38,30 +67,9 @@ def process_node_data(nodes: list[dict], edges: list[dict]) -> list[dict]:
         The processed node data with variable names, class names, and expected arguments.
     """
     nodes = nodes.copy()
-    used_var_names = set()
 
     for node in nodes:
-        # Make a variable name from the label
-        invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
-        base_var_name = node["data"]["label"].lower().replace(" ", "_")
-        for char in invalid_chars:
-            base_var_name = base_var_name.replace(char, "")
-
-        # Ensure the base variable name is a valid identifier
-        if not base_var_name.isidentifier():
-            raise ValueError(
-                f"Variable name must be a valid identifier. {node['data']['label']} to {base_var_name}"
-            )
-
-        # Make the variable name unique by appending a number if needed
-        var_name = base_var_name
-        counter = 1
-        while var_name in used_var_names:
-            var_name = f"{base_var_name}_{counter}"
-            counter += 1
-
-        node["var_name"] = var_name
-        used_var_names.add(var_name)
+        node["var_name"] = make_var_name(node)
 
         # Add pathsim class name
         block_class = map_str_to_object.get(node["type"])
@@ -148,7 +156,7 @@ def process_graph_data_from_dict(data: dict) -> dict:
     data = data.copy()
 
     # Process nodes to create variable names and class names
-    data["nodes"] = process_node_data(data["nodes"], data["edges"])
+    data["nodes"] = process_node_data(data["nodes"])
 
     # Process to add source/target variable names to edges + ports
     data["edges"] = make_edge_data(data)
