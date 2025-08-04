@@ -18,6 +18,7 @@ import Sidebar from './Sidebar';
 import NodeSidebar from './NodeSidebar';
 import { DnDProvider, useDnD } from './DnDContext.jsx';
 import ContextMenu from './ContextMenu.jsx';
+import EventsTab from './EventsTab.jsx';
 import { isValidPythonIdentifier } from './utils.js';
 import { makeEdge } from './CustomEdge';
 import { nodeTypes } from './nodeConfig.js';
@@ -927,6 +928,20 @@ const DnDFlow = () => {
           style={{
             padding: '10px 20px',
             margin: '5px',
+            backgroundColor: activeTab === 'events' ? '#78A083' : '#444',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+          onClick={() => setActiveTab('events')}
+        >
+          Events
+        </button>
+        <button
+          style={{
+            padding: '10px 20px',
+            margin: '5px',
             backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
             color: 'white',
             border: 'none',
@@ -1271,6 +1286,9 @@ const DnDFlow = () => {
           )}
         </div>
       )}
+
+      {/* Events tab */}
+      {activeTab === 'events' && <EventsTab />}
 
       {/* Solver Parameters Tab */}
       {activeTab === 'solver' && (
