@@ -5,6 +5,8 @@ import numpy as np
 
 
 class Process(ODE):
+    name_to_output_port = {"inv": 0, "mass_flow_rate": 1}
+
     def __init__(self, residence_time=0, initial_value=0, source_term=0):
         alpha = -1 / residence_time if residence_time != 0 else 0
         super().__init__(
@@ -21,8 +23,12 @@ class Process(ODE):
             mass_rate = 0
         else:
             mass_rate = x / self.residence_time
-        # first output is the state, second is the rate of change (mass rate)
-        self.outputs.update_from_array([x, mass_rate])
+        # first output is the inv, second is the mass_flow_rate
+        outputs = [None, None]
+        outputs[self.name_to_output_port["inv"]] = x
+        outputs[self.name_to_output_port["mass_flow_rate"]] = mass_rate
+        # update the outputs
+        self.outputs.update_from_array(outputs)
 
 
 class Splitter(Block):
@@ -41,6 +47,8 @@ class Splitter(Block):
 
 
 class Splitter2(Splitter):
+    name_to_output_port = {"source1": 0, "source2": 1}
+
     def __init__(self, f1, f2):
         """
         Splitter with two outputs, fractions are f1 and f2.
@@ -49,6 +57,8 @@ class Splitter2(Splitter):
 
 
 class Splitter3(Splitter):
+    name_to_output_port = {"source1": 0, "source2": 1, "source3": 2}
+
     def __init__(self, f1, f2, f3):
         """
         Splitter with three outputs, fractions are f1, f2 and f3.
@@ -105,6 +115,18 @@ class Bubbler(Subsystem):
     n_soluble_vials: float
     n_insoluble_vials: float
 
+    name_to_input_port = {
+        "sample_in_soluble": 0,
+        "sample_in_insoluble": 1,
+    }
+    name_to_output_port = {
+        "vial1": 0,
+        "vial2": 1,
+        "vial3": 2,
+        "vial4": 3,
+        "sample_out": 4,
+    }
+
     def __init__(
         self,
         conversion_efficiency=0.9,
@@ -160,24 +182,28 @@ class Bubbler(Subsystem):
             interface,
         ]
         connections = [
-            Connection(interface[0], col_eff1),
+            Connection(
+                interface[self.name_to_input_port["sample_in_soluble"]], col_eff1
+            ),
             Connection(col_eff1[0], vial_1),
             Connection(col_eff1[1], col_eff2),
             Connection(col_eff2[0], vial_2),
             Connection(col_eff2[1], conversion_eff),
             Connection(conversion_eff[0], add1[0]),
             Connection(conversion_eff[1], add2[0]),
-            Connection(interface[1], add1[1]),
+            Connection(
+                interface[self.name_to_input_port["sample_in_insoluble"]], add1[1]
+            ),
             Connection(add1, col_eff3),
             Connection(col_eff3[0], vial_3),
             Connection(col_eff3[1], col_eff4),
             Connection(col_eff4[0], vial_4),
             Connection(col_eff4[1], add2[1]),
-            Connection(vial_1, interface[0]),
-            Connection(vial_2, interface[1]),
-            Connection(vial_3, interface[2]),
-            Connection(vial_4, interface[3]),
-            Connection(add2, interface[4]),
+            Connection(vial_1, interface[self.name_to_output_port["vial1"]]),
+            Connection(vial_2, interface[self.name_to_output_port["vial2"]]),
+            Connection(vial_3, interface[self.name_to_output_port["vial3"]]),
+            Connection(vial_4, interface[self.name_to_output_port["vial4"]]),
+            Connection(add2, interface[self.name_to_output_port["sample_out"]]),
         ]
         super().__init__(blocks, connections)
 
@@ -232,6 +258,9 @@ class Bubbler(Subsystem):
 
 
 class FestimWall(Block):
+    name_to_output_port = {"flux_0": 0, "flux_L": 1}
+    name_to_input_port = {"c_0": 0, "c_L": 1}
+
     def __init__(
         self, thickness, temperature, D_0, E_D, surface_area=1, n_vertices=100
     ):
@@ -312,7 +341,9 @@ class FestimWall(Block):
         #     return 0.0
 
         # block inputs
-        c_0, c_L = self.inputs.to_array()
+        inputs = self.inputs.to_array()
+        c_0 = inputs[self.name_to_input_port["c_0"]]
+        c_L = inputs[self.name_to_input_port["c_L"]]
 
         if t == 0.0:
             flux_0, flux_L = 0, 0
@@ -323,4 +354,7 @@ class FestimWall(Block):
 
         flux_0 *= self.surface_area
         flux_L *= self.surface_area
-        return self.outputs.update_from_array([flux_0, flux_L])
+        outputs = [None, None]
+        outputs[self.name_to_output_port["flux_0"]] = flux_0
+        outputs[self.name_to_output_port["flux_L"]] = flux_L
+        return self.outputs.update_from_array(outputs)
