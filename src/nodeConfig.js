@@ -41,6 +41,7 @@ export const nodeTypes = {
   function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
   rng: SourceNode,
   pid: DefaultNode,
+  antiwinduppid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
   wall: WallNode,
@@ -66,7 +67,7 @@ export const nodeCategories = {
     description: 'Mathematical operation nodes'
   },
   'Control': {
-    nodes: ['pid'],
+    nodes: ['pid', 'antiwinduppid'],
     description: 'Control system nodes'
   },
   'Fuel Cycle': {

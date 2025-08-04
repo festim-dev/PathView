@@ -65,6 +65,7 @@ map_str_to_object = {
     "process_horizontal": Process,
     "rng": RNG,
     "pid": PID,
+    "antiwinduppid": pathsim.blocks.AntiWindupPID,
     "integrator": Integrator,
     "differentiator": Differentiator,
     "function": Function,
