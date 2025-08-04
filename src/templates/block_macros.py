@@ -34,7 +34,7 @@ events += events_{{ node["var_name"] }}
 
 {% macro create_scope_block(node) -%}
 {{ node["var_name"] }} = pathsim.blocks.Scope(
-    labels={{ node["labels"] }}
+    labels={{ node["data"]["labels"] }}
 )
 
 {%- endmacro -%}

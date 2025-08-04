@@ -17,6 +17,12 @@ def test_example(filename):
     """
     Test the example simulation defined in the given filename.
     """
+    if "festim" in filename.stem.lower():
+        try:
+            import festim as F
+        except ImportError:
+            pytest.skip("Festim examples are not yet supported in this test suite.")
+
     with open(filename, "r") as f:
         graph_data = json.load(f)
 

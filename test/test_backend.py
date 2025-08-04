@@ -1,9 +1,4 @@
-from src.pathsim_utils import (
-    create_integrator,
-    auto_block_construction,
-    create_bubbler,
-    create_scope,
-)
+from src.pathsim_utils import auto_block_construction, make_connections
 from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
 
 import pathsim.blocks
@@ -66,7 +61,7 @@ NODE_TEMPLATES = {
     },
     "scope": {
         "type": "scope",
-        "data": {"label": "Scope", "sampling_rate": "", "labels": ""},
+        "data": {"label": "scope 7", "sampling_rate": "", "labels": "", "t_wait": ""},
     },
     "white_noise": {
         "type": "white_noise",
@@ -122,20 +117,6 @@ def node_factory():
     return _create_node
 
 
-def test_create_integrator():
-    node = {
-        "data": {"initial_value": "", "label": "IV vial 1", "reset_times": ""},
-        "id": "9",
-        "type": "integrator",
-    }
-    integrator, events = create_integrator(node)
-
-    assert isinstance(integrator, Integrator)
-    assert integrator.initial_value == 0
-    for event in events:
-        assert isinstance(event, pathsim.blocks.Schedule)
-
-
 @pytest.mark.parametrize(
     "block_type,expected_class",
     [
@@ -150,6 +131,9 @@ def test_create_integrator():
         ("splitter3", Splitter3),
         ("white_noise", pathsim.blocks.noise.WhiteNoise),
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
+        ("bubbler", Bubbler),
+        ("integrator", Integrator),
+        ("scope", pathsim.blocks.Scope),
     ],
 )
 def test_auto_block_construction(node_factory, block_type, expected_class):
@@ -173,6 +157,8 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("process", Process),
         ("white_noise", pathsim.blocks.noise.WhiteNoise),
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
+        ("bubbler", Bubbler),
+        ("integrator", Integrator),
     ],
 )
 def test_auto_block_construction_with_var(node_factory, block_type, expected_class):
@@ -189,32 +175,17 @@ def test_auto_block_construction_with_var(node_factory, block_type, expected_cla
     assert isinstance(block, expected_class)
 
 
-def test_create_bubbler():
-    node = {
-        "id": "6",
-        "type": "bubbler",
-        "position": {"x": 627, "y": 357},
-        "data": {
-            "label": "bubbler 6",
-            "conversion_efficiency": "",
-            "replacement_times": "[1, 2, 3]",
-            "vial_efficiency": "",
-        },
-        "measured": {"width": 230, "height": 160},
-        "selected": False,
-        "dragging": False,
-    }
-    block, events = create_bubbler(node)
-    assert isinstance(block, Bubbler)
+def test_two_scopes_no_labels(node_factory):
+    """Test that two scopes with no labels are handled correctly."""
+    scope1 = node_factory("scope", id="scope1")
+    scope2 = node_factory("scope", id="scope2")
 
+    # Create blocks
+    block1 = auto_block_construction(scope1)
+    block2 = auto_block_construction(scope2)
 
-def test_make_scope():
-    node = {
-        "id": "7",
-        "type": "scope",
-        "data": {"label": "scope 7", "sampling_rate": "", "labels": "", "t_wait": ""},
-    }
-    block = create_scope(node, edges=[], nodes=[node])
-    assert isinstance(block, pathsim.blocks.Scope)
-    assert block.labels == []
-    assert block.sampling_rate is None
+    assert block1.labels == []
+    assert block2.labels == []
+
+    block1.labels.append("Scope 1 Data")
+    assert block2.labels == []
