@@ -22,6 +22,7 @@ from pathsim.blocks import (
     Schedule,
 )
 import pathsim.blocks
+import pathsim.events
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
 from .custom_pathsim_blocks import (
     Process,
@@ -84,6 +85,11 @@ map_str_to_object = {
     "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
     "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
     "fir": pathsim.blocks.FIR,
+}
+
+map_str_to_event = {
+    "ZeroCrossingDown": pathsim.events.ZeroCrossingDown,
+    "ZeroCrossingUp": pathsim.events.ZeroCrossingUp,
 }
 
 
@@ -352,6 +358,64 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
     return connections_pathsim
 
 
+def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Event]:
+    """
+    Create a list of Event objects from the provided event data.
+
+    Args:
+        events_data: A list of dictionaries containing event information.
+        eval_namespace: A namespace for evaluating expressions. Defaults to None.
+
+    Returns:
+        A list of Event objects.
+    """
+    if eval_namespace is None:
+        eval_namespace = globals()
+
+    events = []
+    for event_data in events_data:
+        event_type = event_data.get("type")
+        event_class = map_str_to_event.get(event_type)
+
+        if not event_class:
+            raise ValueError(f"Unknown event type: {event_type}")
+
+        # Create a local namespace for executing the event functions
+        event_namespace = eval_namespace.copy()
+
+        # Execute func_evt code if provided
+        func_evt_code = event_data.get("func_evt", "")
+        if func_evt_code:
+            try:
+                exec(func_evt_code, event_namespace)
+                if "func_evt" not in event_namespace:
+                    raise ValueError("func_evt function not found after execution")
+            except Exception as e:
+                raise ValueError(f"Error executing func_evt code: {str(e)}")
+        else:
+            raise ValueError("func_evt code is required but not provided")
+
+        # Execute func_act code if provided
+        func_act_code = event_data.get("func_act", "")
+        if func_act_code:
+            try:
+                exec(func_act_code, event_namespace)
+                if "func_act" not in event_namespace:
+                    raise ValueError("func_act function not found after execution")
+            except Exception as e:
+                raise ValueError(f"Error executing func_act code: {str(e)}")
+        else:
+            raise ValueError("func_act code is required but not provided")
+
+        event = event_class(
+            func_evt=event_namespace["func_evt"],
+            func_act=event_namespace["func_act"],
+            tolerance=eval(event_data.get("tolerance"), event_namespace),
+        )
+        events.append(event)
+    return events
+
+
 def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
     scope_default = Scope(
         labels=[node["data"]["label"] for node in nodes],
@@ -372,6 +436,35 @@ def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
             input_index += 1
 
     return scope_default, connections_pathsim
+
+
+def make_var_name(node: dict) -> str:
+    """
+    Create a variable name from the node label, ensuring it is a valid Python identifier.
+    If the label contains invalid characters, they are replaced with underscores.
+    If the variable name is not unique, a number is appended to make it unique.
+
+    This is supposed to match the logic in NodeSidebar.jsx makeVarName function.
+    """
+    # Make a variable name from the label
+    invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
+    base_var_name = node["data"]["label"].lower().replace(" ", "_")
+    for char in invalid_chars:
+        base_var_name = base_var_name.replace(char, "")
+
+    # Make the variable name unique by appending a number if needed
+    var_name = base_var_name
+    var_name = f"{base_var_name}_{node['id']}"
+
+    # Ensure the base variable name is a valid identifier
+    if not var_name.isidentifier():
+        var_name = f"var_{var_name}"
+        if not var_name.isidentifier():
+            raise ValueError(
+                f"Variable name must be a valid identifier. {node['data']['label']} to {var_name}"
+            )
+
+    return var_name
 
 
 def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
@@ -401,6 +494,12 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
         scope_default, connections_scope_def = make_default_scope(nodes, blocks)
         blocks.append(scope_default)
         connections_pathsim.extend(connections_scope_def)
+
+    # Create additional events
+    for node in nodes:
+        var_name = make_var_name(node)
+        eval_namespace[var_name] = find_block_by_id(node["id"], blocks)
+    events += make_events(graph_data.get("events", []), eval_namespace)
 
     # Create the simulation
     simulation = Simulation(

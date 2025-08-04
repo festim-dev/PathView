@@ -10,6 +10,7 @@ from .pathsim_utils import (
     get_output_index,
     find_block_by_id,
     find_node_by_id,
+    make_var_name,
 )
 
 
@@ -27,35 +28,6 @@ def convert_graph_to_python(graph_data: dict) -> str:
 
     # Render the template
     return template.render(context)
-
-
-def make_var_name(node: dict) -> str:
-    """
-    Create a variable name from the node label, ensuring it is a valid Python identifier.
-    If the label contains invalid characters, they are replaced with underscores.
-    If the variable name is not unique, a number is appended to make it unique.
-
-    This is supposed to match the logic in NodeSidebar.jsx makeVarName function.
-    """
-    # Make a variable name from the label
-    invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
-    base_var_name = node["data"]["label"].lower().replace(" ", "_")
-    for char in invalid_chars:
-        base_var_name = base_var_name.replace(char, "")
-
-    # Make the variable name unique by appending a number if needed
-    var_name = base_var_name
-    var_name = f"{base_var_name}_{node['id']}"
-
-    # Ensure the base variable name is a valid identifier
-    if not var_name.isidentifier():
-        var_name = f"var_{var_name}"
-        if not var_name.isidentifier():
-            raise ValueError(
-                f"Variable name must be a valid identifier. {node['data']['label']} to {var_name}"
-            )
-
-    return var_name
 
 
 def process_node_data(nodes: list[dict]) -> list[dict]:
