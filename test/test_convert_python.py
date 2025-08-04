@@ -106,6 +106,7 @@ sample_data = {
         "test_files/custom_nodes.json",
         "test_files/same_label.json",
         "test_files/bubbler.json",
+        "test_files/spectrum.json",
     ],
 )
 def test_nested_templates(data):

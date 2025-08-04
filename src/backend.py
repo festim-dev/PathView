@@ -8,10 +8,11 @@ from plotly.subplots import make_subplots
 import plotly
 import json as plotly_json
 import inspect
+import numpy as np
 
 from .convert_to_python import convert_graph_to_python
 from .pathsim_utils import make_pathsim_model, map_str_to_object
-from pathsim.blocks import Scope
+from pathsim.blocks import Scope, Spectrum
 
 # Sphinx imports for docstring processing
 from docutils.core import publish_parts
@@ -254,46 +255,54 @@ def run_pathsim():
 
         # Generate the plot
         scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
+        spectra = [
+            block for block in my_simulation.blocks if isinstance(block, Spectrum)
+        ]
 
+        # FIXME right now only the scopes are converted to CSV
+        # extra work is needed since spectra and scopes don't share the same x axis
         csv_payload = make_csv_payload(scopes)
 
-        if len(scopes) == 1:
-            # Single subplot case
-            fig = go.Figure()
-            scope = scopes[0]
+        fig = make_subplots(
+            rows=len(scopes) + len(spectra),
+            cols=1,
+            shared_xaxes=False,
+            subplot_titles=[scope.label for scope in scopes]
+            + [spec.label for spec in spectra],
+            vertical_spacing=0.2,
+        )
+
+        # make scope plots
+        for i, scope in enumerate(scopes):
             time, data = scope.read()
 
             for p, d in enumerate(data):
                 lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-                fig.add_trace(go.Scatter(x=time, y=d, mode="lines", name=lb))
+                if isinstance(scope, Spectrum):
+                    d = abs(d)
+                fig.add_trace(
+                    go.Scatter(x=time, y=d, mode="lines", name=lb), row=i + 1, col=1
+                )
 
-            fig.update_layout(
-                title=scope.label,
-                xaxis_title="Time",
-                yaxis_title="Value",
-                hovermode="x unified",
-            )
-        else:
-            # Multiple subplots case
-            fig = make_subplots(
-                rows=len(scopes),
-                cols=1,
-                shared_xaxes=True,
-                subplot_titles=[scope.label for scope in scopes],
-                vertical_spacing=0.1,
-            )
-
-            for i, scope in enumerate(scopes):
-                time, data = scope.read()
-
-                for p, d in enumerate(data):
-                    lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-                    fig.add_trace(
-                        go.Scatter(x=time, y=d, mode="lines", name=lb), row=i + 1, col=1
-                    )
-
-            fig.update_layout(height=400 * len(scopes), hovermode="x unified")
             fig.update_xaxes(title_text="Time", row=len(scopes), col=1)
+
+        # make spectrum plots
+        for i, spec in enumerate(spectra):
+            time, data = spec.read()
+
+            for p, d in enumerate(data):
+                lb = spec.labels[p] if p < len(spec.labels) else f"port {p}"
+                d = abs(d)
+                fig.add_trace(
+                    go.Scatter(x=time, y=d, mode="lines", name=lb),
+                    row=len(scopes) + i + 1,
+                    col=1,
+                )
+            fig.update_xaxes(title_text="Frequency", row=len(scopes) + i + 1, col=1)
+
+        fig.update_layout(
+            height=400 * (len(scopes) + len(spectra)), hovermode="x unified"
+        )
 
         # Convert plot to JSON
         plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

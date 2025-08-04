@@ -39,6 +39,7 @@ export const nodeTypes = {
   bubbler: BubblerNode,
   white_noise: SourceNode,
   pink_noise: SourceNode,
+  spectrum: ScopeNode,
   differentiator: DefaultNode
 };
 
@@ -65,7 +66,7 @@ export const nodeCategories = {
     description: 'Fuel cycle specific nodes'
   },
   'Output': {
-    nodes: ['scope'],
+    nodes: ['scope', 'spectrum'],
     description: 'Output and visualization nodes'
   }
 };
@@ -96,6 +97,7 @@ export const getNodeDisplayName = (nodeType) => {
     'bubbler': 'Bubbler',
     'wall': 'Wall',
     'scope': 'Scope',
+    'spectrum': 'Spectrum',
     'differentiator': 'Differentiator',
   };
   

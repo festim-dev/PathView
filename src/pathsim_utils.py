@@ -17,6 +17,7 @@ from pathsim.blocks import (
     Delay,
     RNG,
     PID,
+    Spectrum,
     Differentiator,
     Schedule,
 )
@@ -64,6 +65,7 @@ map_str_to_object = {
     "wall": FestimWall,
     "white_noise": WhiteNoise,
     "pink_noise": PinkNoise,
+    "spectrum": Spectrum,
 }
 
 
@@ -78,7 +80,7 @@ def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
 def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
-    global_namespace = {}
+    global_namespace = globals()
 
     for var in global_vars:
         var_name = var.get("name", "").strip()
@@ -105,7 +107,7 @@ def make_global_variables(global_vars):
 
         try:
             # Execute in global namespace for backwards compatibility
-            exec(f"{var_name} = {var_value}", globals())
+            exec(f"{var_name} = {var_value}", global_namespace)
             # Also store in local namespace for eval calls
             global_namespace[var_name] = eval(var_value)
         except Exception as e:
@@ -313,7 +315,7 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
             input_index = get_input_index(target_block, edge, block_to_input_index)
 
             # if it's a scope, add labels if not already present
-            if isinstance(target_block, Scope):
+            if isinstance(target_block, (Scope, Spectrum)):
                 if target_block.labels == []:
                     scopes_without_labels.append(target_block)
                 if target_block in scopes_without_labels:
