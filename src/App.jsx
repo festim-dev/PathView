@@ -1039,7 +1039,6 @@ const DnDFlow = () => {
         <div style={{
           display: 'flex', flex: 1,
           height: 'calc(100vh - 50px)', // Subtract the tab bar height
-          paddingTop: '50px',
           overflow: 'hidden'}}>
           {/* Sidebar */}
           <div style={{
