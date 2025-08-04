@@ -49,7 +49,15 @@ export const nodeTypes = {
   white_noise: SourceNode,
   pink_noise: SourceNode,
   spectrum: ScopeNode,
-  differentiator: DefaultNode
+  differentiator: DefaultNode,
+  samplehold: DefaultNode,
+  comparator: DefaultNode,
+  allpassfilter: DefaultNode,
+  butterworthlowpass: DefaultNode,
+  butterworthhighpass: DefaultNode,
+  butterworthbandpass: DefaultNode,
+  butterworthbandstop: DefaultNode,
+  fir: DefaultNode
 };
 
 // Node categories for better organization
@@ -70,9 +78,17 @@ export const nodeCategories = {
     nodes: ['pid', 'antiwinduppid'],
     description: 'Control system nodes'
   },
+  'Filters': {
+    nodes: ['allpassfilter', 'butterworthlowpass', 'butterworthhighpass', 'butterworthbandpass', 'butterworthbandstop', 'fir'],
+    description: 'Filter and flow control nodes'
+  },
   'Fuel Cycle': {
     nodes: ['process', 'process_horizontal', 'bubbler', 'wall'],
     description: 'Fuel cycle specific nodes'
+  },
+  'Others': {
+    nodes: ['samplehold', 'comparator'],
+    description: 'Miscellaneous nodes'
   },
   'Output': {
     nodes: ['scope', 'spectrum'],

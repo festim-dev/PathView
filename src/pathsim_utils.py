@@ -76,6 +76,14 @@ map_str_to_object = {
     "white_noise": WhiteNoise,
     "pink_noise": PinkNoise,
     "spectrum": Spectrum,
+    "samplehold": pathsim.blocks.SampleHold,
+    "comparator": pathsim.blocks.Comparator,
+    "allpassfilter": pathsim.blocks.AllpassFilter,
+    "butterworthlowpass": pathsim.blocks.ButterworthLowpassFilter,
+    "butterworthhighpass": pathsim.blocks.ButterworthHighpassFilter,
+    "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
+    "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
+    "fir": pathsim.blocks.FIR,
 }
 
 
