@@ -31,7 +31,7 @@ export const nodeTypes = {
   scope: ScopeNode,
   function: createFunctionNode(1, 1), // Default FunctionNode with 1 input and 1 output
   function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
-  rng: DefaultNode,
+  rng: SourceNode,
   pid: DefaultNode,
   splitter2: Splitter2Node,
   splitter3: Splitter3Node,
@@ -44,7 +44,7 @@ export const nodeTypes = {
 // Node categories for better organization
 export const nodeCategories = {
   'Sources': {
-    nodes: ['constant', 'source', 'stepsource', 'pulsesource', 'white_noise', 'pink_noise'],
+    nodes: ['constant', 'stepsource', 'source', 'pulsesource', 'rng', 'white_noise', 'pink_noise'],
     description: 'Signal and data source nodes'
   },
   'Processing': {
@@ -56,7 +56,7 @@ export const nodeCategories = {
     description: 'Mathematical operation nodes'
   },
   'Control': {
-    nodes: ['rng', 'pid'],
+    nodes: ['pid'],
     description: 'Control system nodes'
   },
   'Fuel Cycle': {
@@ -72,10 +72,10 @@ export const nodeCategories = {
 // Utility function to get display name for a node type
 export const getNodeDisplayName = (nodeType) => {
   const displayNames = {
-    'constant': 'Constant Source',
     'source': 'Source',
-    'stepsource': 'Step Source',
-    'pulsesource': 'Pulse Source',
+    'constant': 'Constant',
+    'stepsource': 'Step',
+    'pulsesource': 'Pulse',
     'white_noise': 'White Noise',
     'pink_noise': 'Pink Noise',
     'process': 'Process',
