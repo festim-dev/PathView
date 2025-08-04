@@ -49,7 +49,7 @@ class Splitter(Block):
 class Splitter2(Splitter):
     name_to_output_port = {"source1": 0, "source2": 1}
 
-    def __init__(self, f1, f2):
+    def __init__(self, f1=0.5, f2=0.5):
         """
         Splitter with two outputs, fractions are f1 and f2.
         """
@@ -59,7 +59,7 @@ class Splitter2(Splitter):
 class Splitter3(Splitter):
     name_to_output_port = {"source1": 0, "source2": 1, "source3": 2}
 
-    def __init__(self, f1, f2, f3):
+    def __init__(self, f1=1 / 3, f2=1 / 3, f3=1 / 3):
         """
         Splitter with three outputs, fractions are f1, f2 and f3.
         """

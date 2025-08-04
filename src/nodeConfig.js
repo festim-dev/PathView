@@ -39,6 +39,7 @@ export const nodeTypes = {
   bubbler: BubblerNode,
   white_noise: SourceNode,
   pink_noise: SourceNode,
+  differentiator: DefaultNode
 };
 
 // Node categories for better organization
@@ -48,7 +49,7 @@ export const nodeCategories = {
     description: 'Signal and data source nodes'
   },
   'Processing': {
-    nodes: ['delay', 'amplifier', 'amplifier_reverse', 'integrator', 'function', 'function2to2'],
+    nodes: ['delay', 'amplifier', 'amplifier_reverse', 'integrator', 'differentiator', 'function', 'function2to2'],
     description: 'Signal processing and transformation nodes'
   },
   'Math': {
@@ -94,7 +95,8 @@ export const getNodeDisplayName = (nodeType) => {
     'pid': 'PID Controller',
     'bubbler': 'Bubbler',
     'wall': 'Wall',
-    'scope': 'Scope'
+    'scope': 'Scope',
+    'differentiator': 'Differentiator',
   };
   
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);

@@ -17,6 +17,7 @@ from pathsim.blocks import (
     Delay,
     RNG,
     PID,
+    Differentiator,
     Schedule,
 )
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
@@ -55,6 +56,7 @@ map_str_to_object = {
     "rng": RNG,
     "pid": PID,
     "integrator": Integrator,
+    "differentiator": Differentiator,
     "function": Function,
     "function2to2": Function,
     "delay": Delay,
