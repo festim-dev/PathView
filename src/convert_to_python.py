@@ -4,6 +4,7 @@ from inspect import signature
 
 from .pathsim_utils import (
     map_str_to_object,
+    map_str_to_event,
     make_blocks,
     make_global_variables,
     get_input_index,
@@ -116,6 +117,44 @@ def make_edge_data(data: dict) -> list[dict]:
     return data["edges"]
 
 
+def make_events_data(data: dict) -> list[dict]:
+    """
+    Process events data from the graph data.
+
+    This function extracts event definitions from the graph data and prepares them
+    for use in the simulation.
+
+    Args:
+        data: The graph data containing "events".
+
+    Returns:
+        A list of processed events.
+    """
+    for event in data["events"]:
+        # Add pathsim class name
+        event_class = map_str_to_event.get(event["type"])
+        event["class_name"] = event_class.__name__
+        event["module_name"] = event_class.__module__
+
+        # Add expected arguments
+        event["expected_arguments"] = signature(event_class).parameters
+
+        if "func_evt" in event:
+            # replace the name of the function by something unique
+            func_evt = event["func_evt"]
+            func_evt = func_evt.replace("def func_evt", f"def {event['name']}_func_evt")
+            event["func_evt"] = f"{event['name']}_func_evt"
+            event["func_evt_desc"] = func_evt
+        if "func_act" in event:
+            # replace the name of the function by something unique
+            func_act = event["func_act"]
+            func_act = func_act.replace("def func_act", f"def {event['name']}_func_act")
+            event["func_act"] = f"{event['name']}_func_act"
+            event["func_act_desc"] = func_act
+
+    return data["events"]
+
+
 def process_graph_data_from_dict(data: dict) -> dict:
     """
     Process graph data from a dictionary.
@@ -132,5 +171,7 @@ def process_graph_data_from_dict(data: dict) -> dict:
 
     # Process to add source/target variable names to edges + ports
     data["edges"] = make_edge_data(data)
+
+    data["events"] = make_events_data(data)
 
     return data
