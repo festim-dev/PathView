@@ -73,7 +73,6 @@ const EventsTab = ({ events, setEvents }) => {
   const addEvent = () => {
     if (currentEvent.name) {
       // Validate required fields based on event type
-      const typeDefaults = eventDefaults[currentEvent.type] || {};
       
       // For Schedule, func_act is required
       if (currentEvent.type === 'Schedule' && !currentEvent.func_act) {
