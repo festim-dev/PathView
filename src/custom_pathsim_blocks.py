@@ -255,6 +255,7 @@ class Bubbler(Subsystem):
 
 
 # FESTIM wall
+from pathsim.utils.register import Register
 
 
 class FestimWall(Block):
@@ -269,6 +270,9 @@ class FestimWall(Block):
             import festim as F
         except ImportError:
             raise ImportError("festim is needed for FestimWall node.")
+
+        self.inputs = Register(size=2)
+        self.outputs = Register(size=2)
 
         self.thickness = thickness
         self.temperature = temperature
@@ -344,6 +348,7 @@ class FestimWall(Block):
         inputs = self.inputs.to_array()
         c_0 = inputs[self.name_to_input_port["c_0"]]
         c_L = inputs[self.name_to_input_port["c_L"]]
+        # print(c_0, c_L)
 
         if t == 0.0:
             flux_0, flux_L = 0, 0

@@ -36,6 +36,9 @@ from .custom_pathsim_blocks import (
 from flask import jsonify
 import inspect
 
+# Shared eval_namespace - will be set by backend
+shared_eval_namespace = {}
+
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
     "SSPRK33": pathsim.solvers.SSPRK33,
@@ -107,7 +110,10 @@ def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
 def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
-    global_namespace = globals()
+    global_namespace = globals().copy()
+
+    # Include shared variables from the code editor
+    global_namespace.update(shared_eval_namespace)
 
     for var in global_vars:
         var_name = var.get("name", "").strip()
@@ -136,7 +142,7 @@ def make_global_variables(global_vars):
             # Execute in global namespace for backwards compatibility
             exec(f"{var_name} = {var_value}", global_namespace)
             # Also store in local namespace for eval calls
-            global_namespace[var_name] = eval(var_value)
+            global_namespace[var_name] = eval(var_value, global_namespace)
         except Exception as e:
             raise ValueError(f"Error setting global variable '{var_name}': {str(e)}")
 
@@ -200,7 +206,8 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
         The constructed block object.
     """
     if eval_namespace is None:
-        eval_namespace = globals()
+        eval_namespace = globals().copy()
+        eval_namespace.update(shared_eval_namespace)
 
     if node["type"] not in map_str_to_object:
         raise ValueError(f"Unknown block type: {node['type']}")
