@@ -535,6 +535,14 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
     eval_namespace = globals().copy()
     eval_namespace.update(global_namespace)
 
+    # Execute python code first to define any variables that blocks might need
+    python_code = graph_data.get("pythonCode", "")
+    if python_code:
+        try:
+            exec(python_code, eval_namespace)
+        except Exception as e:
+            return jsonify({"error": f"Error executing Python code: {str(e)}"}), 400
+
     solver_prms, extra_params, duration = make_solver_params(
         solver_prms, eval_namespace
     )
@@ -555,17 +563,6 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
     for node in nodes:
         var_name = make_var_name(node)
         eval_namespace[var_name] = find_block_by_id(node["id"], blocks)
-
-    # Execute python code
-    # NOTE Rem: we execute it after creating blocks so that user code can reference blocks by their var names
-    # ideally we would execute this just after `make_global_variables` so that global variables can be defined in the code editor
-    # but I couldn't get it to work, it must be a namespace issue
-    python_code = graph_data.get("pythonCode", "")
-    if python_code:
-        try:
-            exec(python_code, eval_namespace)
-        except Exception as e:
-            return jsonify({"error": f"Error executing Python code: {str(e)}"}), 400
 
     events += make_events(graph_data.get("events", []), eval_namespace)
 
