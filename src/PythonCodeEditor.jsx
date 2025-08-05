@@ -3,17 +3,15 @@ import { CodeiumEditor } from "@codeium/react-code-editor";
 import { getApiEndpoint } from './config.js';
 
 const PythonCodeEditor = ({ 
-  initialCode = "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n",
+  code = "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n",
   onCodeChange,
   onExecute,
   height = "400px"
 }) => {
-  const [code, setCode] = useState(initialCode);
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionResult, setExecutionResult] = useState(null);
 
   const handleCodeChange = useCallback((newCode) => {
-    setCode(newCode);
     if (onCodeChange) {
       onCodeChange(newCode);
     }

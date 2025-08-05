@@ -1,12 +1,10 @@
-import React from 'react';
 import { isValidPythonIdentifier } from './utils.js';
 
 
-import { CodeiumEditor } from "@codeium/react-code-editor";
 import PythonCodeEditor from './PythonCodeEditor';
 import './PythonCodeEditor.css';
 
-export const IdeWithAutocomplete = () => {
+export const IdeWithAutocomplete = ({ pythonCode, setPythonCode }) => {
   const handleCodeExecution = (result) => {
     if (result.success) {
       console.log('Code executed successfully:', result);
@@ -19,6 +17,8 @@ export const IdeWithAutocomplete = () => {
   return (
     <div>
       <PythonCodeEditor 
+        code={pythonCode}
+        onCodeChange={setPythonCode}
         onExecute={handleCodeExecution}
         height="500px"
       />
@@ -29,7 +29,9 @@ export const IdeWithAutocomplete = () => {
 const GlobalVariablesTab = ({ 
   globalVariables, 
   setGlobalVariables, 
-  setActiveTab 
+  setActiveTab,
+  pythonCode,
+  setPythonCode
 }) => {
 
   const addGlobalVariable = () => {
@@ -288,7 +290,10 @@ const GlobalVariablesTab = ({
             <p style={{ color: '#bbbbbb', marginBottom: '20px', textAlign: 'center' }}>
               Define Python variables and functions here. They will be available in your event functions and throughout the simulation.
             </p>
-            <IdeWithAutocomplete />
+            <IdeWithAutocomplete 
+              pythonCode={pythonCode}
+              setPythonCode={setPythonCode}
+            />
           </div>
         </div>
       </div>

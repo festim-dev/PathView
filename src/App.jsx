@@ -81,6 +81,10 @@ const DnDFlow = () => {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
   const [events, setEvents] = useState([]);
+  
+  // Python code editor state
+  const [pythonCode, setPythonCode] = useState("# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
+  
   const [defaultValues, setDefaultValues] = useState({});
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [tempLabel, setTempLabel] = useState('');
@@ -223,7 +227,8 @@ const DnDFlow = () => {
       nodeCounter,
       solverParams,
       globalVariables,
-      events
+      events,
+      pythonCode
     };
 
     // Check if File System Access API is supported
@@ -303,7 +308,15 @@ const DnDFlow = () => {
           }
 
           // Load the graph data
-          const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables, events: loadedEvents } = graphData;
+          const { 
+            nodes: loadedNodes, 
+            edges: loadedEdges, 
+            nodeCounter: loadedNodeCounter, 
+            solverParams: loadedSolverParams, 
+            globalVariables: loadedGlobalVariables, 
+            events: loadedEvents,
+            pythonCode: loadedPythonCode
+          } = graphData;
           setNodes(loadedNodes || []);
           setEdges(loadedEdges || []);
           setSelectedNode(null);
@@ -321,6 +334,7 @@ const DnDFlow = () => {
           });
           setGlobalVariables(loadedGlobalVariables ?? []);
           setEvents(loadedEvents ?? []);
+          setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
 
           alert('Graph loaded successfully!');
         } catch (error) {
@@ -355,7 +369,15 @@ const DnDFlow = () => {
               return;
             }
 
-            const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables, events: loadedEvents } = graphData;
+            const { 
+              nodes: loadedNodes, 
+              edges: loadedEdges, 
+              nodeCounter: loadedNodeCounter, 
+              solverParams: loadedSolverParams, 
+              globalVariables: loadedGlobalVariables, 
+              events: loadedEvents,
+              pythonCode: loadedPythonCode
+            } = graphData;
             setNodes(loadedNodes || []);
             setEdges(loadedEdges || []);
             setSelectedNode(null);
@@ -373,6 +395,7 @@ const DnDFlow = () => {
             });
             setGlobalVariables(loadedGlobalVariables ?? []);
             setEvents(loadedEvents ?? []);
+            setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
 
             alert('Graph loaded successfully!');
           } catch (error) {
@@ -1620,6 +1643,8 @@ const DnDFlow = () => {
           globalVariables={globalVariables}
           setGlobalVariables={setGlobalVariables}
           setActiveTab={setActiveTab}
+          pythonCode={pythonCode}
+          setPythonCode={setPythonCode}
         />
       )}
 
