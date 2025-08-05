@@ -43,6 +43,7 @@ sample_data = {
             },
         },
     ],
+    "events": [],
     "edges": [
         {
             "source": "1",
@@ -146,6 +147,7 @@ def test_bubbler_has_reset_times():
             },
         ],
         "edges": [],
+        "events": [],
         "solverParams": {
             "Solver": "SSPRK22",
             "dt": "0.01",

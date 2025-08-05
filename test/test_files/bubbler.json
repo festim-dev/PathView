@@ -57,6 +57,7 @@
       "dragging": false
     }
   ],
+  "events": [],
   "edges": [
     {
       "id": "e2-1-to_sample_in_soluble",
