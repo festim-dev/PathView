@@ -104,22 +104,25 @@ const EventsTab = ({ events, setEvents }) => {
     <div style={{
       width: '100%',
       height: 'calc(100vh - 50px)',
-      paddingTop: '50px',
+      paddingTop: '0px',
       backgroundColor: '#1e1e2f',
       overflow: 'auto',
     }}>
       <div style={{
-        padding: '40px',
+        padding: '10px',
         maxWidth: '1200px',
         margin: '0 auto',
       }}>
-        <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
+        <h1 style={{ color: '#ffffff', marginBottom: '20px', textAlign: 'center' }}>
           Events
         </h1>
 
         {/* Add New Event Form */}
         <div style={{
           backgroundColor: '#2a2a3f',
+          width: '100%',
+          maxWidth: '400px',
+          margin: '0 auto',
           borderRadius: '8px',
           padding: '24px',
           marginBottom: '30px',
@@ -127,8 +130,8 @@ const EventsTab = ({ events, setEvents }) => {
         }}>
           <h2 style={{ color: '#ffffff', marginBottom: '20px' }}>Add New Event</h2>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-            <div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ width: '100%', maxWidth: '400px' }}>
               <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
                 Event Name:
               </label>
@@ -138,32 +141,32 @@ const EventsTab = ({ events, setEvents }) => {
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="e.g., E1, shutdown_event"
                 style={{
-                  width: '100%',
+                  width: '80%',
                   padding: '10px',
                   backgroundColor: '#1e1e2f',
                   border: '1px solid #555',
                   borderRadius: '4px',
                   color: '#ffffff',
-                  fontSize: '14px'
+                  fontSize: '14px',
                 }}
               />
             </div>
 
-            <div>
-              <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
+            <div style={{ width: '100%', maxWidth: '400px' }}>
+              <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px'}}>
                 Event Type:
               </label>
               <select
                 value={currentEvent.type}
                 onChange={(e) => handleTypeChange(e.target.value)}
                 style={{
-                  width: '100%',
+                  width: '85%',
                   padding: '10px',
                   backgroundColor: '#1e1e2f',
                   border: '1px solid #555',
                   borderRadius: '4px',
                   color: '#ffffff',
-                  fontSize: '14px'
+                  fontSize: '14px',
                 }}
               >
                 {eventTypes.map(type => (
@@ -174,93 +177,97 @@ const EventsTab = ({ events, setEvents }) => {
           </div>
 
           {/* Dynamic parameter fields based on event type */}
-          {(() => {
-            const typeDefaults = eventDefaults[currentEvent.type] || {};
-            const allParams = new Set([
-              ...Object.keys(currentEvent).filter(key => key !== 'name' && key !== 'type'),
-              ...Object.keys(typeDefaults)
-            ]);
+          <div style={{ gap: '20px', marginTop: '20px' }}>
+            {(() => {
+              const typeDefaults = eventDefaults[currentEvent.type] || {};
+              const allParams = new Set([
+                ...Object.keys(currentEvent).filter(key => key !== 'name' && key !== 'type'),
+                ...Object.keys(typeDefaults)
+              ]);
 
-            return Array.from(allParams).map(key => {
-              const currentValue = currentEvent[key] || '';
-              const defaultValue = typeDefaults[key];
-              const placeholder = defaultValue !== undefined && defaultValue !== null ?
-                String(defaultValue) : '';
-              
-              // Check if this is a function parameter (contains 'func' in the name)
-              const isFunctionParam = key.toLowerCase().includes('func');
+              return Array.from(allParams).map(key => {
+                const currentValue = currentEvent[key] || '';
+                const defaultValue = typeDefaults[key];
+                const placeholder = defaultValue !== undefined && defaultValue !== null ?
+                  String(defaultValue) : '';
+                
+                // Check if this is a function parameter (contains 'func' in the name)
+                const isFunctionParam = key.toLowerCase().includes('func');
 
-              return (
-                <div key={key} style={{ marginBottom: '20px' }}>
-                  <label style={{ 
-                    color: '#ffffff', 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500'
-                  }}>
-                    {key}:
-                  </label>
-                  {isFunctionParam ? (
-                    <textarea
-                      value={currentValue}
-                      onChange={(e) => handleInputChange(key, e.target.value)}
-                      placeholder={placeholder || `eg. def ${key}(t):\n    # Your code here\n    return result`}
-                      style={{
-                        width: '100%',
-                        minHeight: '120px',
-                        padding: '10px',
-                        backgroundColor: '#1e1e2f',
-                        border: '1px solid #555',
-                        borderRadius: '4px',
-                        color: '#ffffff',
-                        fontSize: '12px',
-                        fontFamily: 'monospace',
-                        resize: 'vertical'
-                      }}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={currentValue}
-                      onChange={(e) => handleInputChange(key, e.target.value)}
-                      placeholder={placeholder}
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        backgroundColor: '#1e1e2f',
-                        border: '1px solid #555',
-                        borderRadius: '4px',
-                        color: '#ffffff',
-                        fontSize: '14px'
-                      }}
-                    />
-                  )}
-                </div>
-              );
-            });
-          })()}
+                return (
+                  <div key={key} style={{ width: '100%', maxWidth: isFunctionParam ? '600px' : '400px' }}>
+                    <label style={{ 
+                      color: '#ffffff', 
+                      display: 'block', 
+                      marginBottom: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                    }}>
+                      {key}:
+                    </label>
+                    {isFunctionParam ? (
+                      <textarea
+                        value={currentValue}
+                        onChange={(e) => handleInputChange(key, e.target.value)}
+                        placeholder={placeholder || `eg. def ${key}(t):\n    # Your code here\n    return result`}
+                        style={{
+                          width: '80%',
+                          minHeight: '100px',
+                          padding: '10px',
+                          backgroundColor: '#1e1e2f',
+                          border: '1px solid #555',
+                          borderRadius: '4px',
+                          color: '#ffffff',
+                          fontSize: '12px',
+                          fontFamily: 'monospace',
+                          resize: 'vertical'
+                        }}
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={currentValue}
+                        onChange={(e) => handleInputChange(key, e.target.value)}
+                        placeholder={placeholder}
+                        style={{
+                          width: '50%',
+                          padding: '10px',
+                          backgroundColor: '#1e1e2f',
+                          border: '1px solid #555',
+                          borderRadius: '4px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
 
-          <button
-            onClick={addEvent}
-            style={{
-              backgroundColor: '#78A083',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '12px 24px',
-              fontSize: '14px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
-          >
-            Add Event
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+            <button
+              onClick={addEvent}
+              style={{
+                backgroundColor: '#78A083',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '12px 24px',
+                fontSize: '14px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
+            >
+              Add Event
+            </button>
+          </div>
         </div>
 
         {/* Events List */}
-        <div>
-          <h2 style={{ color: '#ffffff', marginBottom: '20px' }}>Defined Events ({events.length})</h2>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h2 style={{ color: '#ffffff', marginBottom: '20px', textAlign: 'center' }}>Defined Events ({events.length})</h2>
           
           {events.length === 0 ? (
             <div style={{
