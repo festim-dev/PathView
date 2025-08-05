@@ -1,6 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import { CodeiumEditor } from "@codeium/react-code-editor";
+import { useState, useCallback } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { getApiEndpoint } from './config.js';
+
 
 const PythonCodeEditor = ({ 
   code = "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n",
@@ -49,7 +51,7 @@ const PythonCodeEditor = ({
   return (
     <div className="python-code-editor">
       <div className="editor-header">
-        <h3>Python Code Editor</h3>
+        {/* <h3>Python Code Editor</h3> */}
         <button 
           onClick={executeCode}
           disabled={isExecuting}
@@ -60,25 +62,7 @@ const PythonCodeEditor = ({
       </div>
       
       <div className="editor-container" style={{ height }}>
-        <CodeiumEditor
-          language="python"
-          theme="vs-dark"
-          value={code}
-          onChange={handleCodeChange}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            wordWrap: 'on',
-            automaticLayout: true,
-            scrollBeyondLastLine: false,
-            renderLineHighlight: 'line',
-            selectOnLineNumbers: true,
-            roundedSelection: false,
-            readOnly: false,
-            cursorStyle: 'line',
-            automaticIndent: 'full',
-          }}
-        />
+        <CodeMirror value={code} onChange={handleCodeChange}  theme={vscodeDark} options={{ fontSize: 24 }}/>
       </div>
 
       {executionResult && (
