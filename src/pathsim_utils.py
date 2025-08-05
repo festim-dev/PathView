@@ -205,9 +205,6 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     Returns:
         The constructed block object.
     """
-    if eval_namespace is None:
-        eval_namespace = globals().copy()
-        eval_namespace.update(shared_eval_namespace)
 
     if node["type"] not in map_str_to_object:
         raise ValueError(f"Unknown block type: {node['type']}")
