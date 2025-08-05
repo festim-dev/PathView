@@ -28,7 +28,7 @@ blocks.append({{ node["var_name"] }})
 # Create events
 {% for event in events -%}
 {{ create_event(event) }}
-events.append({{ event["var_name"] }})
+events.append({{ event["name"] }})
 {% endfor %}
 
 # Create connections
