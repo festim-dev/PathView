@@ -41,6 +41,9 @@ const EventsTab = ({ events, setEvents }) => {
       ...eventDefaults[initialEventType]
     };
   });
+  
+  // State to track if we're editing an existing event
+  const [editingEventId, setEditingEventId] = useState(null);
 
   const eventTypes = [
     'Condition',
@@ -96,6 +99,46 @@ const EventsTab = ({ events, setEvents }) => {
     }
   };
 
+  const editEvent = (event) => {
+    setCurrentEvent({ ...event });
+    setEditingEventId(event.id);
+  };
+
+  const saveEditedEvent = () => {
+    if (currentEvent.name) {
+      
+      // For Schedule, func_act is required
+      if (currentEvent.type === 'Schedule' && !currentEvent.func_act) {
+        alert('func_act is required for Schedule events');
+        return;
+      }
+      
+      // For other event types, both func_evt and func_act are typically required
+      if (currentEvent.type !== 'Schedule' && (!currentEvent.func_evt || !currentEvent.func_act)) {
+        alert('Both func_evt and func_act are required for this event type');
+        return;
+      }
+
+      setEvents(prev => prev.map(event => 
+        event.id === editingEventId ? { ...currentEvent } : event
+      ));
+      
+      // Reset form and exit edit mode
+      cancelEdit();
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingEventId(null);
+    // Reset to defaults for current type
+    const resetDefaults = eventDefaults[currentEvent.type] || {};
+    setCurrentEvent({
+      name: '',
+      type: currentEvent.type,
+      ...resetDefaults
+    });
+  };
+
   const deleteEvent = (id) => {
     setEvents(prev => prev.filter(event => event.id !== id));
   };
@@ -128,7 +171,9 @@ const EventsTab = ({ events, setEvents }) => {
           marginBottom: '30px',
           border: '1px solid #444'
         }}>
-          <h2 style={{ color: '#ffffff', marginBottom: '20px' }}>Add New Event</h2>
+          <h2 style={{ color: '#ffffff', marginBottom: '20px' }}>
+            {editingEventId ? 'Edit Event' : 'Add New Event'}
+          </h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ width: '100%', maxWidth: '400px' }}>
@@ -181,7 +226,8 @@ const EventsTab = ({ events, setEvents }) => {
             {(() => {
               const typeDefaults = eventDefaults[currentEvent.type] || {};
               const allParams = new Set([
-                ...Object.keys(currentEvent).filter(key => key !== 'name' && key !== 'type'),
+                // don't include 'name', 'type', since included above + 'id' cannot be edited
+                ...Object.keys(currentEvent).filter(key => key !== 'name' && key !== 'type' && key !== 'id'),
                 ...Object.keys(typeDefaults)
               ]);
 
@@ -246,22 +292,57 @@ const EventsTab = ({ events, setEvents }) => {
             })()}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <button
-              onClick={addEvent}
-              style={{
-                backgroundColor: '#78A083',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '12px 24px',
-                fontSize: '14px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              Add Event
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '20px' }}>
+            {editingEventId ? (
+              <>
+                <button
+                  onClick={saveEditedEvent}
+                  style={{
+                    backgroundColor: '#78A083',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '12px 24px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  style={{
+                    backgroundColor: '#6c757d',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '12px 24px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={addEvent}
+                style={{
+                  backgroundColor: '#78A083',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                Add Event
+              </button>
+            )}
           </div>
         </div>
 
@@ -289,27 +370,57 @@ const EventsTab = ({ events, setEvents }) => {
                     backgroundColor: '#2a2a3f',
                     borderRadius: '8px',
                     padding: '20px',
-                    border: '1px solid #444'
+                    border: editingEventId === event.id ? '2px solid #007bff' : '1px solid #444',
+                    boxShadow: editingEventId === event.id ? '0 0 10px rgba(0, 123, 255, 0.3)' : 'none'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ color: '#ffffff', margin: 0 }}>
-                      {event.name} ({event.type})
-                    </h3>
-                    <button
-                      onClick={() => deleteEvent(event.id)}
-                      style={{
-                        backgroundColor: '#dc3545',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '6px 12px',
-                        fontSize: '12px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Delete
-                    </button>
+                    <div>
+                      <h3 style={{ color: '#ffffff', margin: 0 }}>
+                        {event.name} ({event.type})
+                      </h3>
+                      {editingEventId === event.id && (
+                        <span style={{ 
+                          color: '#007bff', 
+                          fontSize: '12px', 
+                          fontStyle: 'italic',
+                          marginTop: '4px',
+                          display: 'block'
+                        }}>
+                          Currently editing this event
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => editEvent(event)}
+                        style={{
+                          backgroundColor: '#007bff',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteEvent(event.id)}
+                        style={{
+                          backgroundColor: '#dc3545',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
 
                   {/* Display parameters dynamically */}
