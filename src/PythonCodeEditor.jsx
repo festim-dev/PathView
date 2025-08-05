@@ -58,7 +58,7 @@ const PythonCodeEditor = ({
           disabled={isExecuting}
           className="execute-btn"
         >
-          {isExecuting ? 'Executing...' : 'Execute Code'}
+          {isExecuting ? 'Executing...' : 'Test Code'}
         </button>
       </div>
       

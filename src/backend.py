@@ -392,9 +392,6 @@ def execute_python():
                             )
                             eval_namespace[var_name] = value
 
-            # Sync with pathsim_utils shared_eval_namespace
-            pathsim_utils.shared_eval_namespace.update(eval_namespace)
-
             return jsonify(
                 {
                     "success": True,
@@ -446,7 +443,6 @@ def clear_eval_namespace():
     global eval_namespace
     try:
         eval_namespace.clear()
-        pathsim_utils.shared_eval_namespace.clear()
         return jsonify(
             {"success": True, "message": "Eval namespace cleared successfully."}
         )
