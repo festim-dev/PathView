@@ -18,7 +18,8 @@
     "react-dom": "^18.2.0",
     "react-plotly.js": "^2.6.0",
     "@uiw/react-codemirror": "^4.24.2",
-    "@uiw/codemirror-theme-vscode": "^4.24.2"
+    "@uiw/codemirror-theme-vscode": "^4.24.2",
+    "@codemirror/lang-python": "^6.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
