@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-const EventsTab = ({ events, setEvents }) => {
-  const [currentEvent, setCurrentEvent] = useState({
-    name: '',
-    type: 'ZeroCrossingDown',
+// Define default parameters for each event type
+const eventDefaults = {
+  'Schedule': {
+    t_start: '0',
+    t_end: 'None',
+    t_period: '1',
+    func_act: '',
+    tolerance: '1e-16'
+  },
+  'ZeroCrossingDown': {
     func_evt: '',
     func_act: '',
     tolerance: '1e-8'
+  },
+  'ZeroCrossingUp': {
+    func_evt: '',
+    func_act: '',
+    tolerance: '1e-8'
+  },
+  'ZeroCrossing': {
+    func_evt: '',
+    func_act: '',
+    tolerance: '1e-8'
+  },
+  'Condition': {
+    func_evt: '',
+    func_act: '',
+    tolerance: '1e-8'
+  }
+};
+
+const EventsTab = ({ events, setEvents }) => {
+  // Initialize with defaults for the initial event type
+  const initialEventType = 'ZeroCrossingDown';
+  const [currentEvent, setCurrentEvent] = useState(() => {
+    return {
+      name: '',
+      type: initialEventType,
+      ...eventDefaults[initialEventType]
+    };
   });
 
   const eventTypes = [
@@ -24,15 +57,41 @@ const EventsTab = ({ events, setEvents }) => {
     }));
   };
 
+  const handleTypeChange = (newType) => {
+    // When type changes, reset the event to defaults for that type
+    const defaults = eventDefaults[newType] || {};
+    setCurrentEvent({
+      name: currentEvent.name, // Keep the name
+      type: newType,
+      ...defaults
+    });
+  };
+
   const addEvent = () => {
-    if (currentEvent.name && currentEvent.func_evt && currentEvent.func_act) {
+    if (currentEvent.name) {
+      // Validate required fields based on event type
+      const typeDefaults = eventDefaults[currentEvent.type] || {};
+      
+      // For Schedule, func_act is required
+      if (currentEvent.type === 'Schedule' && !currentEvent.func_act) {
+        alert('func_act is required for Schedule events');
+        return;
+      }
+      
+      // For other event types, both func_evt and func_act are typically required
+      if (currentEvent.type !== 'Schedule' && (!currentEvent.func_evt || !currentEvent.func_act)) {
+        alert('Both func_evt and func_act are required for this event type');
+        return;
+      }
+
       setEvents(prev => [...prev, { ...currentEvent, id: Date.now() }]);
+      
+      // Reset to defaults for current type
+      const resetDefaults = eventDefaults[currentEvent.type] || {};
       setCurrentEvent({
         name: '',
-        type: 'ZeroCrossingDown',
-        func_evt: '',
-        func_act: '',
-        tolerance: '1e-8'
+        type: currentEvent.type,
+        ...resetDefaults
       });
     }
   };
@@ -96,7 +155,7 @@ const EventsTab = ({ events, setEvents }) => {
               </label>
               <select
                 value={currentEvent.type}
-                onChange={(e) => handleInputChange('type', e.target.value)}
+                onChange={(e) => handleTypeChange(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -114,77 +173,73 @@ const EventsTab = ({ events, setEvents }) => {
             </div>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
-              Tolerance:
-            </label>
-            <input
-              type="text"
-              value={currentEvent.tolerance}
-              onChange={(e) => handleInputChange('tolerance', e.target.value)}
-              placeholder="e.g., 1e-8"
-              style={{
-                width: '200px',
-                padding: '10px',
-                backgroundColor: '#1e1e2f',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                color: '#ffffff',
-                fontSize: '14px'
-              }}
-            />
-          </div>
+          {/* Dynamic parameter fields based on event type */}
+          {(() => {
+            const typeDefaults = eventDefaults[currentEvent.type] || {};
+            const allParams = new Set([
+              ...Object.keys(currentEvent).filter(key => key !== 'name' && key !== 'type'),
+              ...Object.keys(typeDefaults)
+            ]);
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-            <div>
-              <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
-                Event Function (func_evt):
-              </label>
-              <textarea
-                value={currentEvent.func_evt}
-                onChange={(e) => handleInputChange('func_evt', e.target.value)}
-                placeholder={`eg. def func_evt_down(t):
-    *_, x = storage()
-    return x`}
-                style={{
-                  width: '100%',
-                  height: '120px',
-                  padding: '10px',
-                  backgroundColor: '#1e1e2f',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  color: '#ffffff',
-                  fontSize: '12px',
-                  fontFamily: 'monospace',
-                  resize: 'vertical'
-                }}
-              />
-            </div>
+            return Array.from(allParams).map(key => {
+              const currentValue = currentEvent[key] || '';
+              const defaultValue = typeDefaults[key];
+              const placeholder = defaultValue !== undefined && defaultValue !== null ?
+                String(defaultValue) : '';
+              
+              // Check if this is a function parameter (contains 'func' in the name)
+              const isFunctionParam = key.toLowerCase().includes('func');
 
-            <div>
-              <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
-                Action Function (func_act):
-              </label>
-              <textarea
-                value={currentEvent.func_act}
-                onChange={(e) => handleInputChange('func_act', e.target.value)}
-                placeholder={`eg. def func_act_down(t):
-    fusion_reaction_rate.off()`}
-                style={{
-                  width: '100%',
-                  height: '120px',
-                  padding: '10px',
-                  backgroundColor: '#1e1e2f',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  color: '#ffffff',
-                  fontSize: '12px',
-                  fontFamily: 'monospace',
-                  resize: 'vertical'
-                }}
-              />
-            </div>
-          </div>
+              return (
+                <div key={key} style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    color: '#ffffff', 
+                    display: 'block', 
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    {key}:
+                  </label>
+                  {isFunctionParam ? (
+                    <textarea
+                      value={currentValue}
+                      onChange={(e) => handleInputChange(key, e.target.value)}
+                      placeholder={placeholder || `eg. def ${key}(t):\n    # Your code here\n    return result`}
+                      style={{
+                        width: '100%',
+                        minHeight: '120px',
+                        padding: '10px',
+                        backgroundColor: '#1e1e2f',
+                        border: '1px solid #555',
+                        borderRadius: '4px',
+                        color: '#ffffff',
+                        fontSize: '12px',
+                        fontFamily: 'monospace',
+                        resize: 'vertical'
+                      }}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={currentValue}
+                      onChange={(e) => handleInputChange(key, e.target.value)}
+                      placeholder={placeholder}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#1e1e2f',
+                        border: '1px solid #555',
+                        borderRadius: '4px',
+                        color: '#ffffff',
+                        fontSize: '14px'
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            });
+          })()}
 
           <button
             onClick={addEvent}
@@ -250,46 +305,56 @@ const EventsTab = ({ events, setEvents }) => {
                     </button>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    <div>
-                      <h4 style={{ color: '#ccc', margin: '0 0 8px 0', fontSize: '14px' }}>Event Function:</h4>
-                      <pre style={{
-                        backgroundColor: '#1e1e2f',
-                        padding: '12px',
-                        borderRadius: '4px',
-                        color: '#ffffff',
-                        fontSize: '12px',
-                        fontFamily: 'monospace',
-                        margin: 0,
-                        overflow: 'auto',
-                        border: '1px solid #555'
-                      }}>
-                        {event.func_evt}
-                      </pre>
-                    </div>
-
-                    <div>
-                      <h4 style={{ color: '#ccc', margin: '0 0 8px 0', fontSize: '14px' }}>Action Function:</h4>
-                      <pre style={{
-                        backgroundColor: '#1e1e2f',
-                        padding: '12px',
-                        borderRadius: '4px',
-                        color: '#ffffff',
-                        fontSize: '12px',
-                        fontFamily: 'monospace',
-                        margin: 0,
-                        overflow: 'auto',
-                        border: '1px solid #555'
-                      }}>
-                        {event.func_act}
-                      </pre>
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: '12px' }}>
-                    <span style={{ color: '#ccc', fontSize: '14px' }}>
-                      Tolerance: <code style={{ color: '#78A083' }}>{event.tolerance}</code>
-                    </span>
+                  {/* Display parameters dynamically */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                    {Object.entries(event)
+                      .filter(([key]) => key !== 'id' && key !== 'name' && key !== 'type')
+                      .map(([key, value]) => {
+                        const isFunctionParam = key.toLowerCase().includes('func');
+                        
+                        return (
+                          <div key={key}>
+                            <h4 style={{ 
+                              color: '#ccc', 
+                              margin: '0 0 8px 0', 
+                              fontSize: '14px',
+                              textTransform: 'capitalize'
+                            }}>
+                              {key.replace(/_/g, ' ')}:
+                            </h4>
+                            {isFunctionParam ? (
+                              <pre style={{
+                                backgroundColor: '#1e1e2f',
+                                padding: '12px',
+                                borderRadius: '4px',
+                                color: '#ffffff',
+                                fontSize: '12px',
+                                fontFamily: 'monospace',
+                                margin: 0,
+                                overflow: 'auto',
+                                border: '1px solid #555',
+                                whiteSpace: 'pre-wrap'
+                              }}>
+                                {value || '(not defined)'}
+                              </pre>
+                            ) : (
+                              <code style={{
+                                backgroundColor: '#1e1e2f',
+                                padding: '8px 12px',
+                                borderRadius: '4px',
+                                color: '#78A083',
+                                fontSize: '14px',
+                                fontFamily: 'monospace',
+                                border: '1px solid #555',
+                                display: 'block'
+                              }}>
+                                {value || '(not set)'}
+                              </code>
+                            )}
+                          </div>
+                        );
+                      })
+                    }
                   </div>
                 </div>
               ))}

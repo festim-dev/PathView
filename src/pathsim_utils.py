@@ -90,6 +90,9 @@ map_str_to_object = {
 map_str_to_event = {
     "ZeroCrossingDown": pathsim.events.ZeroCrossingDown,
     "ZeroCrossingUp": pathsim.events.ZeroCrossingUp,
+    "ZeroCrossing": pathsim.events.ZeroCrossing,
+    "Schedule": pathsim.events.Schedule,
+    "Condition": pathsim.events.Condition,
 }
 
 
@@ -209,6 +212,78 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     )
 
     return block_class(**parameters)
+
+
+def auto_event_construction(event_data: dict, eval_namespace: dict = None) -> Event:
+    """
+    Automatically constructs an event object from an event data dictionary.
+
+    Args:
+        event_data: The event data dictionary containing event information.
+        eval_namespace: A namespace for evaluating expressions. Defaults to None.
+
+    Raises:
+        ValueError: If the event type is unknown or if there are issues with evaluation.
+
+    Returns:
+        The constructed event object.
+    """
+
+    if event_data["type"] not in map_str_to_event:
+        raise ValueError(f"Unknown event type: {event_data['type']}")
+
+    event_class = map_str_to_event[event_data["type"]]
+
+    parameters = get_parameters_for_event_class(
+        event_class, event_data, eval_namespace=eval_namespace
+    )
+
+    return event_class(**parameters)
+
+
+def get_parameters_for_event_class(
+    event_class: type, event_data: dict, eval_namespace: dict = None
+):
+    parameters_for_class = inspect.signature(event_class.__init__).parameters
+
+    # Create a local namespace for executing the event functions
+    # we make a copy so that event functions aren't overwritten
+    event_namespace = eval_namespace.copy()
+
+    parameters = {}
+    for k, value in parameters_for_class.items():
+        if k == "self":
+            continue
+
+        user_input = event_data[k]
+        if user_input == "":
+            if value.default is inspect._empty:
+                raise ValueError(
+                    f"expected parameter for {k} in {event_data['type']} ({event_data['name']})"
+                )
+
+            # make a copy of the default value
+            if isinstance(value.default, (list, dict)):
+                parameters[k] = value.default.copy()
+            else:
+                parameters[k] = value.default
+        else:
+            if k in ["func_evt", "func_act"]:
+                # Execute func code if provided
+                func_code = event_data[k]
+                if func_code:
+                    try:
+                        exec(func_code, event_namespace)
+                        if k not in event_namespace:
+                            raise ValueError(f"{k} function not found after execution")
+                    except Exception as e:
+                        raise ValueError(f"Error executing {k} code: {str(e)}")
+                else:
+                    raise ValueError(f"{k} code is required but not provided")
+                parameters[k] = event_namespace[k]
+            else:
+                parameters[k] = eval(user_input, event_namespace)
+    return parameters
 
 
 def get_parameters_for_block_class(block_class, node, eval_namespace):
@@ -380,38 +455,7 @@ def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Ev
         if not event_class:
             raise ValueError(f"Unknown event type: {event_type}")
 
-        # Create a local namespace for executing the event functions
-        event_namespace = eval_namespace.copy()
-
-        # Execute func_evt code if provided
-        func_evt_code = event_data.get("func_evt", "")
-        if func_evt_code:
-            try:
-                exec(func_evt_code, event_namespace)
-                if "func_evt" not in event_namespace:
-                    raise ValueError("func_evt function not found after execution")
-            except Exception as e:
-                raise ValueError(f"Error executing func_evt code: {str(e)}")
-        else:
-            raise ValueError("func_evt code is required but not provided")
-
-        # Execute func_act code if provided
-        func_act_code = event_data.get("func_act", "")
-        if func_act_code:
-            try:
-                exec(func_act_code, event_namespace)
-                if "func_act" not in event_namespace:
-                    raise ValueError("func_act function not found after execution")
-            except Exception as e:
-                raise ValueError(f"Error executing func_act code: {str(e)}")
-        else:
-            raise ValueError("func_act code is required but not provided")
-
-        event = event_class(
-            func_evt=event_namespace["func_evt"],
-            func_act=event_namespace["func_act"],
-            tolerance=eval(event_data.get("tolerance"), event_namespace),
-        )
+        event = auto_event_construction(event_data, eval_namespace)
         events.append(event)
     return events
 
