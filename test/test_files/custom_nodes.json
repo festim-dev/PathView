@@ -60,6 +60,7 @@
       "dragging": false
     }
   ],
+  "events": [],
   "edges": [],
   "nodeCounter": 3,
   "solverParams": {

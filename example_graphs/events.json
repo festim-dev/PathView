@@ -4,32 +4,34 @@
       "id": "0",
       "type": "constant",
       "position": {
-        "x": 200,
-        "y": 200
+        "x": 443.74999237060547,
+        "y": 132.24999809265137
       },
       "data": {
-        "label": "constant 0",
-        "value": "1"
+        "label": "source",
+        "value": ""
       },
       "measured": {
         "width": 205,
         "height": 53
-      }
+      },
+      "selected": true
     },
     {
       "id": "1",
-      "type": "delay",
+      "type": "integrator",
       "position": {
-        "x": 454,
-        "y": 280
+        "x": 688.7499923706055,
+        "y": 251.24999809265137
       },
       "data": {
-        "label": "delay 1",
-        "tau": "2"
+        "label": "integrator",
+        "initial_value": "",
+        "reset_times": ""
       },
       "measured": {
-        "width": 96,
-        "height": 76
+        "width": 200,
+        "height": 48
       },
       "selected": false,
       "dragging": false
@@ -38,8 +40,8 @@
       "id": "2",
       "type": "scope",
       "position": {
-        "x": 657,
-        "y": 220
+        "x": 1022.2499923706055,
+        "y": 252.24999809265137
       },
       "data": {
         "label": "scope 2",
@@ -50,17 +52,33 @@
       "measured": {
         "width": 120,
         "height": 140
-      },
-      "selected": false,
-      "dragging": false
+      }
     }
   ],
-  "events": [],
   "edges": [
     {
       "id": "e0-1",
       "source": "0",
       "target": "1",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e0-2",
+      "source": "0",
+      "target": "2",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -108,5 +126,15 @@
     "simulation_duration": "50.0",
     "extra_params": "{}"
   },
-  "globalVariables": []
+  "globalVariables": [],
+  "events": [
+    {
+      "name": "my_event",
+      "type": "ZeroCrossingDown",
+      "func_evt": "def func_evt(t):\n    *_, x = integrator_1()\n    return 10 - x",
+      "func_act": "def func_act(t):\n    source_0.off()",
+      "tolerance": "1e-8",
+      "id": 1754342253698
+    }
+  ]
 }

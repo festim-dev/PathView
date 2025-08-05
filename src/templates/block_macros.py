@@ -39,3 +39,21 @@ connections = [
     {% endfor -%}
 ]
 {%- endmacro -%}
+
+{% macro create_event(event) -%}
+{% if "func_evt" in event %}
+{{ event["func_evt_desc"] }}
+{% endif %}
+
+{% if "func_act" in event %}
+{{ event["func_act_desc"] }}
+{% endif %}
+
+{{ event["name"] }} = {{ event["module_name"] }}.{{ event["class_name"] }}(
+    {%- for arg in event["expected_arguments"] %}
+    {%- if event.get(arg) -%}
+    {{ arg }}={{ event.get(arg) }}{% if not loop.last %}, {% endif %}
+    {%- endif -%}
+    {%- endfor %}
+)
+{%- endmacro -%}

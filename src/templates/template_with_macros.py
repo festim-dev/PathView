@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import src
 {# Import macros #}
-{% from 'block_macros.py' import create_block, create_integrator_block, create_bubbler_block, create_connections -%}
+{% from 'block_macros.py' import create_block, create_integrator_block, create_bubbler_block, create_connections, create_event -%}
 
 # Create global variables
 {% for var in globalVariables -%}
@@ -23,6 +23,12 @@ blocks, events = [], []
 {%- endif %}
 blocks.append({{ node["var_name"] }})
 
+{% endfor %}
+
+# Create events
+{% for event in events -%}
+{{ create_event(event) }}
+events.append({{ event["name"] }})
 {% endfor %}
 
 # Create connections

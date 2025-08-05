@@ -22,6 +22,7 @@ from pathsim.blocks import (
     Schedule,
 )
 import pathsim.blocks
+import pathsim.events
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
 from .custom_pathsim_blocks import (
     Process,
@@ -84,6 +85,14 @@ map_str_to_object = {
     "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
     "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
     "fir": pathsim.blocks.FIR,
+}
+
+map_str_to_event = {
+    "ZeroCrossingDown": pathsim.events.ZeroCrossingDown,
+    "ZeroCrossingUp": pathsim.events.ZeroCrossingUp,
+    "ZeroCrossing": pathsim.events.ZeroCrossing,
+    "Schedule": pathsim.events.Schedule,
+    "Condition": pathsim.events.Condition,
 }
 
 
@@ -203,6 +212,78 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     )
 
     return block_class(**parameters)
+
+
+def auto_event_construction(event_data: dict, eval_namespace: dict = None) -> Event:
+    """
+    Automatically constructs an event object from an event data dictionary.
+
+    Args:
+        event_data: The event data dictionary containing event information.
+        eval_namespace: A namespace for evaluating expressions. Defaults to None.
+
+    Raises:
+        ValueError: If the event type is unknown or if there are issues with evaluation.
+
+    Returns:
+        The constructed event object.
+    """
+
+    if event_data["type"] not in map_str_to_event:
+        raise ValueError(f"Unknown event type: {event_data['type']}")
+
+    event_class = map_str_to_event[event_data["type"]]
+
+    parameters = get_parameters_for_event_class(
+        event_class, event_data, eval_namespace=eval_namespace
+    )
+
+    return event_class(**parameters)
+
+
+def get_parameters_for_event_class(
+    event_class: type, event_data: dict, eval_namespace: dict = None
+):
+    parameters_for_class = inspect.signature(event_class.__init__).parameters
+
+    # Create a local namespace for executing the event functions
+    # we make a copy so that event functions aren't overwritten
+    event_namespace = eval_namespace.copy()
+
+    parameters = {}
+    for k, value in parameters_for_class.items():
+        if k == "self":
+            continue
+
+        user_input = event_data[k]
+        if user_input == "":
+            if value.default is inspect._empty:
+                raise ValueError(
+                    f"expected parameter for {k} in {event_data['type']} ({event_data['name']})"
+                )
+
+            # make a copy of the default value
+            if isinstance(value.default, (list, dict)):
+                parameters[k] = value.default.copy()
+            else:
+                parameters[k] = value.default
+        else:
+            if k in ["func_evt", "func_act"]:
+                # Execute func code if provided
+                func_code = event_data[k]
+                if func_code:
+                    try:
+                        exec(func_code, event_namespace)
+                        if k not in event_namespace:
+                            raise ValueError(f"{k} function not found after execution")
+                    except Exception as e:
+                        raise ValueError(f"Error executing {k} code: {str(e)}")
+                else:
+                    raise ValueError(f"{k} code is required but not provided")
+                parameters[k] = event_namespace[k]
+            else:
+                parameters[k] = eval(user_input, event_namespace)
+    return parameters
 
 
 def get_parameters_for_block_class(block_class, node, eval_namespace):
@@ -352,6 +433,33 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
     return connections_pathsim
 
 
+def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Event]:
+    """
+    Create a list of Event objects from the provided event data.
+
+    Args:
+        events_data: A list of dictionaries containing event information.
+        eval_namespace: A namespace for evaluating expressions. Defaults to None.
+
+    Returns:
+        A list of Event objects.
+    """
+    if eval_namespace is None:
+        eval_namespace = globals()
+
+    events = []
+    for event_data in events_data:
+        event_type = event_data.get("type")
+        event_class = map_str_to_event.get(event_type)
+
+        if not event_class:
+            raise ValueError(f"Unknown event type: {event_type}")
+
+        event = auto_event_construction(event_data, eval_namespace)
+        events.append(event)
+    return events
+
+
 def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
     scope_default = Scope(
         labels=[node["data"]["label"] for node in nodes],
@@ -372,6 +480,35 @@ def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
             input_index += 1
 
     return scope_default, connections_pathsim
+
+
+def make_var_name(node: dict) -> str:
+    """
+    Create a variable name from the node label, ensuring it is a valid Python identifier.
+    If the label contains invalid characters, they are replaced with underscores.
+    If the variable name is not unique, a number is appended to make it unique.
+
+    This is supposed to match the logic in NodeSidebar.jsx makeVarName function.
+    """
+    # Make a variable name from the label
+    invalid_chars = set("!@#$%^&*()+=[]{}|;:'\",.-<>?/\\`~")
+    base_var_name = node["data"]["label"].lower().replace(" ", "_")
+    for char in invalid_chars:
+        base_var_name = base_var_name.replace(char, "")
+
+    # Make the variable name unique by appending a number if needed
+    var_name = base_var_name
+    var_name = f"{base_var_name}_{node['id']}"
+
+    # Ensure the base variable name is a valid identifier
+    if not var_name.isidentifier():
+        var_name = f"var_{var_name}"
+        if not var_name.isidentifier():
+            raise ValueError(
+                f"Variable name must be a valid identifier. {node['data']['label']} to {var_name}"
+            )
+
+    return var_name
 
 
 def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
@@ -401,6 +538,12 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
         scope_default, connections_scope_def = make_default_scope(nodes, blocks)
         blocks.append(scope_default)
         connections_pathsim.extend(connections_scope_def)
+
+    # Create additional events
+    for node in nodes:
+        var_name = make_var_name(node)
+        eval_namespace[var_name] = find_block_by_id(node["id"], blocks)
+    events += make_events(graph_data.get("events", []), eval_namespace)
 
     # Create the simulation
     simulation = Simulation(
