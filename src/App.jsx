@@ -564,7 +564,8 @@ const DnDFlow = () => {
         edges,
         solverParams,
         globalVariables,
-        events
+        events,
+        pythonCode
       };
 
       const response = await fetch(getApiEndpoint('/run-pathsim'), {
