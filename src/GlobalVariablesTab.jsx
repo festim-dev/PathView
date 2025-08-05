@@ -1,6 +1,31 @@
 import React from 'react';
 import { isValidPythonIdentifier } from './utils.js';
 
+
+import { CodeiumEditor } from "@codeium/react-code-editor";
+import PythonCodeEditor from './PythonCodeEditor';
+import './PythonCodeEditor.css';
+
+export const IdeWithAutocomplete = () => {
+  const handleCodeExecution = (result) => {
+    if (result.success) {
+      console.log('Code executed successfully:', result);
+      // You can add notifications here if needed
+    } else {
+      console.error('Code execution failed:', result.error);
+    }
+  };
+
+  return (
+    <div>
+      <PythonCodeEditor 
+        onExecute={handleCodeExecution}
+        height="500px"
+      />
+    </div>
+  );
+};
+
 const GlobalVariablesTab = ({ 
   globalVariables, 
   setGlobalVariables, 
@@ -248,6 +273,23 @@ const GlobalVariablesTab = ({
             <li>Variables can be referenced in node parameters using their exact names</li>
             <li>Variables are saved and loaded with your graph files</li>
           </ul>
+        </div>
+        {/* Python Code Editor Section */}
+        <div style={{ maxWidth: '1000px', margin: '30px auto 0' }}>
+          <h2 style={{ color: '#ffffff', marginBottom: '20px', textAlign: 'center' }}>
+            Python Code Editor
+          </h2>
+          <div style={{
+            backgroundColor: '#2a2a3f',
+            borderRadius: '8px',
+            padding: '20px',
+            border: '1px solid #444'
+          }}>
+            <p style={{ color: '#bbbbbb', marginBottom: '20px', textAlign: 'center' }}>
+              Define Python variables and functions here. They will be available in your event functions and throughout the simulation.
+            </p>
+            <IdeWithAutocomplete />
+          </div>
         </div>
       </div>
     </div>
