@@ -275,16 +275,23 @@ def get_parameters_for_event_class(
             if k in ["func_evt", "func_act"]:
                 # Execute func code if provided
                 func_code = event_data[k]
-                if func_code:
-                    try:
-                        exec(func_code, event_namespace)
-                        if k not in event_namespace:
-                            raise ValueError(f"{k} function not found after execution")
-                    except Exception as e:
-                        raise ValueError(f"Error executing {k} code: {str(e)}")
-                else:
+                if not func_code:
                     raise ValueError(f"{k} code is required but not provided")
+
+                if func_code in event_namespace:
+                    parameters[k] = event_namespace[func_code]
+                    # parameters[f"{k}_identifier"] = func_code
+                    continue
+
+                try:
+                    exec(func_code, event_namespace)
+                    if k not in event_namespace:
+                        raise ValueError(f"{k} function not found after execution")
+                except Exception as e:
+                    raise ValueError(f"Error executing {k} code: {str(e)}")
+
                 parameters[k] = event_namespace[k]
+                # parameters[f"{k}_identifier"] = k
             else:
                 parameters[k] = eval(user_input, event_namespace)
     return parameters
