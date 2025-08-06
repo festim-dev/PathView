@@ -46,5 +46,8 @@ Issues = "https://github.com/yourusername/fuel-cycle-sim/issues"
 packages = ["fuel_cycle_sim"]
 package-dir = {"fuel_cycle_sim" = "src/python"}
 
+[tool.setuptools_scm]
+write_to = "src/python/_version.py"
+
 [tool.setuptools.package-data]
 fuel_cycle_sim = ["templates/*"]
