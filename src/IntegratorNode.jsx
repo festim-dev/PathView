@@ -1,7 +1,11 @@
-import React from 'react';
-import { Handle } from '@xyflow/react';
+import { Handle, useNodeConnections } from '@xyflow/react';
+
 
 export default function IntegratorNode({ data }) {
+  const connections = useNodeConnections({
+    handleType: "target",
+  });
+
   return (
     <div
       style={{
@@ -17,7 +21,7 @@ export default function IntegratorNode({ data }) {
     >
       <div style={{ marginBottom: 4 }}>{data.label}</div>
 
-      <Handle type="target" position="left" style={{ background: '#555' }} />
+      <Handle type="target" position="left" style={{ background: '#555' }} isConnectable={connections.length < 1}/>
       <Handle type="source" position="right" style={{ background: '#555' }} />
     </div>
   );
