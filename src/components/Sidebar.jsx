@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDnD } from './DnDContext';
-import { nodeCategories, getNodeDisplayName } from './nodeConfig.js';
+import { nodeCategories, getNodeDisplayName } from '../nodeConfig.js';
  
 export default () => {
   const [_, setType] = useDnD();

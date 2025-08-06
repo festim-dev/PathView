@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { python } from '@codemirror/lang-python';
-import { getApiEndpoint } from './config.js';
+import { getApiEndpoint } from '../config.js';
 
 
 const PythonCodeEditor = ({ 

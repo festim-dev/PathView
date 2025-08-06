@@ -14,14 +14,13 @@ import '@xyflow/react/dist/style.css';
 import './styles/App.css';
 import Plot from 'react-plotly.js';
 import { getApiEndpoint } from './config.js';
-import Sidebar from './Sidebar';
-import NodeSidebar from './NodeSidebar';
-import { DnDProvider, useDnD } from './DnDContext.jsx';
-import ContextMenu from './ContextMenu.jsx';
-import EventsTab from './EventsTab.jsx';
-import GlobalVariablesTab from './GlobalVariablesTab.jsx';
-import { isValidPythonIdentifier } from './utils.js';
-import { makeEdge } from './CustomEdge';
+import Sidebar from './components/Sidebar';
+import NodeSidebar from './components/NodeSidebar';
+import { DnDProvider, useDnD } from './components/DnDContext.jsx';
+import ContextMenu from './components/ContextMenu.jsx';
+import EventsTab from './components/EventsTab.jsx';
+import GlobalVariablesTab from './components/GlobalVariablesTab.jsx';
+import { makeEdge } from './components/CustomEdge';
 import { nodeTypes } from './nodeConfig.js';
 
 // * Declaring variables *
