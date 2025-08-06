@@ -4,10 +4,12 @@ Fuel Cycle Simulation Package
 A Python package for fuel cycle simulation with pathsim integration.
 """
 
-# change this to automated versioning if needed
-__version__ = "0.1.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+from importlib import metadata
+
+try:
+    __version__ = metadata.version("fuel_cycle_sim")
+except Exception:
+    __version__ = "unknown"
 
 # Import main functions for easy access
 from .pathsim_utils import make_pathsim_model, map_str_to_object
