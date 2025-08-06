@@ -1,18 +1,18 @@
 // Node type definitions and categorization
-import { ProcessNode, ProcessNodeHorizontal } from './ProcessNode';
-import DelayNode from './DelayNode';
-import SourceNode from './ConstantNode';
-import { AmplifierNode, AmplifierNodeReverse } from './AmplifierNode';
-import IntegratorNode from './IntegratorNode';
-import AdderNode from './AdderNode';
-import ScopeNode from './ScopeNode';
-import StepSourceNode from './StepSourceNode';
-import {createFunctionNode} from './FunctionNode';
-import DefaultNode from './DefaultNode';
-import MultiplierNode from './MultiplierNode';
-import { Splitter2Node, Splitter3Node } from './Splitters';
-import BubblerNode from './BubblerNode';
-import WallNode from './WallNode';
+import { ProcessNode, ProcessNodeHorizontal } from './nodes/ProcessNode';
+import DelayNode from './nodes/DelayNode';
+import SourceNode from './nodes/ConstantNode';
+import { AmplifierNode, AmplifierNodeReverse } from './nodes/AmplifierNode';
+import IntegratorNode from './nodes/IntegratorNode';
+import AdderNode from './nodes/AdderNode';
+import ScopeNode from './nodes/ScopeNode';
+import StepSourceNode from './nodes/StepSourceNode';
+import {createFunctionNode} from './nodes/FunctionNode';
+import DefaultNode from './nodes/DefaultNode';
+import MultiplierNode from './nodes/MultiplierNode';
+import { Splitter2Node, Splitter3Node } from './nodes/Splitters';
+import BubblerNode from './nodes/BubblerNode';
+import WallNode from './nodes/WallNode';
 
 // Node types mapping
 export const nodeTypes = {
