@@ -2,7 +2,7 @@ import { isValidPythonIdentifier } from './utils.js';
 
 
 import PythonCodeEditor from './PythonCodeEditor';
-import './PythonCodeEditor.css';
+import './styles/PythonCodeEditor.css';
 
 export const IdeWithAutocomplete = ({ pythonCode, setPythonCode }) => {
   const handleCodeExecution = (result) => {

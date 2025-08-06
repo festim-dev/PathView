@@ -11,7 +11,7 @@ import {
   useEdgesState,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import './App.css';
+import './styles/App.css';
 import Plot from 'react-plotly.js';
 import { getApiEndpoint } from './config.js';
 import Sidebar from './Sidebar';
