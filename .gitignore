@@ -35,4 +35,4 @@ __pycache__
 .Python
 *.egg
 *.egg-info
-
+*_version.py
