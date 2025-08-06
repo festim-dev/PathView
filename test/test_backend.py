@@ -1,5 +1,11 @@
-from src.pathsim_utils import auto_block_construction, make_connections
-from src.custom_pathsim_blocks import Process, Splitter2, Splitter3, Bubbler, Integrator
+from fuel_cycle_sim.pathsim_utils import auto_block_construction, make_connections
+from fuel_cycle_sim.custom_pathsim_blocks import (
+    Process,
+    Splitter2,
+    Splitter3,
+    Bubbler,
+    Integrator,
+)
 
 import pathsim.blocks
 

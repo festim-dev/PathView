@@ -1,0 +1,14 @@
+# Core package dependencies
+pathsim>=0.7.0
+matplotlib>=3.7.0
+numpy>=1.24.0
+plotly>=6.0
+
+# Web application dependencies (not needed for core package)
+Flask>=3.1.1
+flask-cors>=6.0.1
+
+# Development dependencies
+pytest
+sphinx>=4.0.0
+docutils>=0.17.0

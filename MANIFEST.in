@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include PACKAGE_README.md
+include pyproject.toml
+recursive-include src/python *.py
+recursive-include src/python/templates *
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude .DS_Store

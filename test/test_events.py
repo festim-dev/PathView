@@ -1,5 +1,5 @@
 import pytest
-from src.pathsim_utils import make_events
+from fuel_cycle_sim.pathsim_utils import make_events
 
 
 events_data = [
