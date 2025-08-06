@@ -36,8 +36,6 @@ from .custom_pathsim_blocks import (
 from flask import jsonify
 import inspect
 
-# Shared eval_namespace - will be set by backend
-shared_eval_namespace = {}
 
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
@@ -111,9 +109,6 @@ def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
     global_namespace = globals().copy()
-
-    # Include shared variables from the code editor
-    global_namespace.update(shared_eval_namespace)
 
     for var in global_vars:
         var_name = var.get("name", "").strip()

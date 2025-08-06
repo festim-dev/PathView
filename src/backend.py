@@ -15,9 +15,6 @@ from .convert_to_python import convert_graph_to_python
 from .pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope, Spectrum
 
-# Import pathsim_utils to share eval_namespace
-from . import pathsim_utils
-
 # Sphinx imports for docstring processing
 from docutils.core import publish_parts
 
@@ -324,14 +321,9 @@ def run_pathsim():
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
-# Global namespace for user-defined variables and functions
-eval_namespace = {}
-
-
 @app.route("/execute-python", methods=["POST"])
 def execute_python():
-    """Execute Python code and update the global eval_namespace with any new variables/functions."""
-    global eval_namespace
+    """Execute Python code and returns variables/functions."""
 
     try:
         data = request.json
@@ -341,15 +333,12 @@ def execute_python():
             return jsonify({"success": False, "error": "No code provided"}), 400
 
         # Create a temporary namespace that includes current eval_namespace
-        temp_namespace = eval_namespace.copy()
-        temp_namespace.update(globals())
+        temp_namespace = {}
+        # temp_namespace.update(globals())
 
         # Capture stdout and stderr
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
-
-        # Track variables before execution
-        vars_before = set(temp_namespace.keys())
 
         try:
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
@@ -363,20 +352,18 @@ def execute_python():
                 return jsonify({"success": False, "error": error_output}), 400
 
             # Find new variables and functions
-            vars_after = set(temp_namespace.keys())
-            new_vars = vars_after - vars_before
+            vars = set(temp_namespace.keys())
+            # new_vars = vars_after - vars_before
 
             # Filter out built-ins and modules, keep user-defined items
             user_variables = {}
             user_functions = []
 
-            for var_name in new_vars:
+            for var_name in vars:
                 if not var_name.startswith("__"):
                     value = temp_namespace[var_name]
                     if callable(value) and hasattr(value, "__name__"):
                         user_functions.append(var_name)
-                        # Add function to eval_namespace
-                        eval_namespace[var_name] = value
                     else:
                         # Try to serialize the value for display
                         try:
@@ -384,16 +371,10 @@ def execute_python():
                                 user_variables[var_name] = value
                             else:
                                 user_variables[var_name] = str(value)
-                            # Add variable to eval_namespace
-                            eval_namespace[var_name] = value
                         except Exception:
                             user_variables[var_name] = (
                                 f"<{type(value).__name__} object>"
                             )
-                            eval_namespace[var_name] = value
-
-            # Sync with pathsim_utils shared_eval_namespace
-            pathsim_utils.shared_eval_namespace.update(eval_namespace)
 
             return jsonify(
                 {
@@ -412,48 +393,6 @@ def execute_python():
 
     except Exception as e:
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
-
-
-@app.route("/get-eval-namespace", methods=["GET"])
-def get_eval_namespace():
-    """Get the current eval_namespace for debugging/inspection."""
-    try:
-        # Create a serializable version of the namespace
-        serializable_namespace = {}
-
-        for key, value in eval_namespace.items():
-            if callable(value):
-                serializable_namespace[key] = f"<function {key}>"
-            else:
-                try:
-                    if isinstance(value, (int, float, str, bool, list, dict)):
-                        serializable_namespace[key] = value
-                    else:
-                        serializable_namespace[key] = str(value)
-                except Exception:
-                    serializable_namespace[key] = f"<{type(value).__name__} object>"
-
-        return jsonify({"success": True, "namespace": serializable_namespace})
-    except Exception as e:
-        return jsonify(
-            {"success": False, "error": f"Error retrieving namespace: {str(e)}"}
-        ), 500
-
-
-@app.route("/clear-eval-namespace", methods=["POST"])
-def clear_eval_namespace():
-    """Clear the eval_namespace."""
-    global eval_namespace
-    try:
-        eval_namespace.clear()
-        pathsim_utils.shared_eval_namespace.clear()
-        return jsonify(
-            {"success": True, "message": "Eval namespace cleared successfully."}
-        )
-    except Exception as e:
-        return jsonify(
-            {"success": False, "error": f"Error clearing namespace: {str(e)}"}
-        ), 500
 
 
 # Catch-all route for React Router (SPA routing)

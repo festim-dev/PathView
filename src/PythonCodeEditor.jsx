@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
+import { python } from '@codemirror/lang-python';
 import { getApiEndpoint } from './config.js';
 
 
@@ -57,12 +58,12 @@ const PythonCodeEditor = ({
           disabled={isExecuting}
           className="execute-btn"
         >
-          {isExecuting ? 'Executing...' : 'Execute Code'}
+          {isExecuting ? 'Executing...' : 'Test Code'}
         </button>
       </div>
       
       <div className="editor-container" style={{ height }}>
-        <CodeMirror value={code} onChange={handleCodeChange}  theme={vscodeDark} options={{ fontSize: 24 }}/>
+        <CodeMirror value={code} onChange={handleCodeChange} extensions={[python({ python: true })]} theme={vscodeDark} options={{ fontSize: 24 }}/>
       </div>
 
       {executionResult && (
