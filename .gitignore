@@ -27,3 +27,12 @@ venv/
 
 docs/_build
 
+# python 
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info
+
