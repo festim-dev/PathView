@@ -14,7 +14,7 @@ from .convert_to_python import convert_graph_to_python
 
 # Define what gets exported when someone does "from python import *"
 __all__ = [
-    'make_pathsim_model',
-    'map_str_to_object', 
-    'convert_graph_to_python',
+    "make_pathsim_model",
+    "map_str_to_object",
+    "convert_graph_to_python",
 ]

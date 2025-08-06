@@ -32,9 +32,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "sphinx>=4.0.0",
-    "docutils>=0.17.0",
+    "pytest"
 ]
 
 
