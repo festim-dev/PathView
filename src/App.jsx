@@ -19,6 +19,7 @@ import NodeSidebar from './NodeSidebar';
 import { DnDProvider, useDnD } from './DnDContext.jsx';
 import ContextMenu from './ContextMenu.jsx';
 import EventsTab from './EventsTab.jsx';
+import GlobalVariablesTab from './GlobalVariablesTab.jsx';
 import { isValidPythonIdentifier } from './utils.js';
 import { makeEdge } from './CustomEdge';
 import { nodeTypes } from './nodeConfig.js';
@@ -80,6 +81,10 @@ const DnDFlow = () => {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
   const [events, setEvents] = useState([]);
+  
+  // Python code editor state
+  const [pythonCode, setPythonCode] = useState("# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
+  
   const [defaultValues, setDefaultValues] = useState({});
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [tempLabel, setTempLabel] = useState('');
@@ -222,7 +227,8 @@ const DnDFlow = () => {
       nodeCounter,
       solverParams,
       globalVariables,
-      events
+      events,
+      pythonCode
     };
 
     // Check if File System Access API is supported
@@ -302,7 +308,15 @@ const DnDFlow = () => {
           }
 
           // Load the graph data
-          const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables, events: loadedEvents } = graphData;
+          const { 
+            nodes: loadedNodes, 
+            edges: loadedEdges, 
+            nodeCounter: loadedNodeCounter, 
+            solverParams: loadedSolverParams, 
+            globalVariables: loadedGlobalVariables, 
+            events: loadedEvents,
+            pythonCode: loadedPythonCode
+          } = graphData;
           setNodes(loadedNodes || []);
           setEdges(loadedEdges || []);
           setSelectedNode(null);
@@ -320,6 +334,7 @@ const DnDFlow = () => {
           });
           setGlobalVariables(loadedGlobalVariables ?? []);
           setEvents(loadedEvents ?? []);
+          setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
 
           alert('Graph loaded successfully!');
         } catch (error) {
@@ -354,7 +369,15 @@ const DnDFlow = () => {
               return;
             }
 
-            const { nodes: loadedNodes, edges: loadedEdges, nodeCounter: loadedNodeCounter, solverParams: loadedSolverParams, globalVariables: loadedGlobalVariables, events: loadedEvents } = graphData;
+            const { 
+              nodes: loadedNodes, 
+              edges: loadedEdges, 
+              nodeCounter: loadedNodeCounter, 
+              solverParams: loadedSolverParams, 
+              globalVariables: loadedGlobalVariables, 
+              events: loadedEvents,
+              pythonCode: loadedPythonCode
+            } = graphData;
             setNodes(loadedNodes || []);
             setEdges(loadedEdges || []);
             setSelectedNode(null);
@@ -372,6 +395,7 @@ const DnDFlow = () => {
             });
             setGlobalVariables(loadedGlobalVariables ?? []);
             setEvents(loadedEvents ?? []);
+            setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
 
             alert('Graph loaded successfully!');
           } catch (error) {
@@ -540,7 +564,8 @@ const DnDFlow = () => {
         edges,
         solverParams,
         globalVariables,
-        events
+        events,
+        pythonCode
       };
 
       const response = await fetch(getApiEndpoint('/run-pathsim'), {
@@ -566,36 +591,6 @@ const DnDFlow = () => {
       console.error('Error:', error);
       alert('Failed to run Pathsim simulation. Make sure the backend is running.');
     }
-  };
-
-  const addGlobalVariable = () => {
-    const newVariable = {
-      id: Date.now().toString(),
-      name: '',
-      value: '',
-      nameError: false
-    };
-    setGlobalVariables([...globalVariables, newVariable]);
-  };
-
-  const removeGlobalVariable = (id) => {
-    setGlobalVariables(globalVariables.filter(variable => variable.id !== id));
-  };
-
-  const updateGlobalVariable = (id, field, value) => {
-    setGlobalVariables(globalVariables.map(variable => {
-      if (variable.id === id) {
-        const updatedVariable = { ...variable, [field]: value };
-
-        // Validate name field
-        if (field === 'name') {
-          updatedVariable.nameError = value !== '' && !isValidPythonIdentifier(value);
-        }
-
-        return updatedVariable;
-      }
-      return variable;
-    }));
   };
 
   //When user connects two nodes by dragging, creates an edge according to the styles in our makeEdge function
@@ -1645,219 +1640,13 @@ const DnDFlow = () => {
 
       {/* Global Variables Tab */}
       {activeTab === 'globals' && (
-        <div style={{
-          width: '100%',
-          height: 'calc(100vh - 50px)',
-          paddingTop: '50px',
-          backgroundColor: '#1e1e2f',
-          overflow: 'auto',
-        }}>
-          <div style={{
-            padding: '40px',
-            maxWidth: '800px',
-            margin: '0 auto',
-          }}>
-            <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
-              Global Variables
-            </h1>
-            <div style={{
-              backgroundColor: '#2c2c54',
-              padding: '30px',
-              borderRadius: '10px',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-            }}>
-              <p style={{
-                color: '#cccccc',
-                marginBottom: '20px',
-                textAlign: 'center',
-                fontSize: '14px'
-              }}>
-                Define global variables that can be used in node definitions throughout your model.
-              </p>
-
-              {globalVariables.length === 0 ? (
-                <div style={{
-                  textAlign: 'center',
-                  color: '#888',
-                  padding: '40px 20px',
-                  fontStyle: 'italic'
-                }}>
-                  No global variables defined. Click "Add Variable" to create one.
-                </div>
-              ) : (
-                <div style={{ marginBottom: '20px' }}>
-                  {globalVariables.map((variable) => (
-                    <div key={variable.id} style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr auto',
-                      gap: '15px',
-                      alignItems: 'start',
-                      marginBottom: '15px',
-                      padding: '15px',
-                      backgroundColor: '#1e1e2f',
-                      borderRadius: '8px',
-                      border: '1px solid #555'
-                    }}>
-                      <div>
-                        <label style={{
-                          color: '#ffffff',
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}>
-                          Variable Name:
-                        </label>
-                        <input
-                          type="text"
-                          value={variable.name}
-                          onChange={(e) => updateGlobalVariable(variable.id, 'name', e.target.value)}
-                          placeholder="variable_name"
-                          style={{
-                            width: '95%',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: variable.nameError ? '2px solid #e74c3c' : '1px solid #666',
-                            backgroundColor: '#2c2c54',
-                            color: '#ffffff',
-                            fontSize: '14px'
-                          }}
-                        />
-                        {variable.nameError && (
-                          <div style={{
-                            color: '#e74c3c',
-                            fontSize: '11px',
-                            marginTop: '3px',
-                            fontStyle: 'italic'
-                          }}>
-                            Invalid Python variable name
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label style={{
-                          color: '#ffffff',
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}>
-                          Value:
-                        </label>
-                        <input
-                          type="text"
-                          value={variable.value}
-                          onChange={(e) => updateGlobalVariable(variable.id, 'value', e.target.value)}
-                          placeholder="0.5"
-                          style={{
-                            width: '95%',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #666',
-                            backgroundColor: '#2c2c54',
-                            color: '#ffffff',
-                            fontSize: '14px'
-                          }}
-                        />
-                        {/* Placeholder div to maintain alignment */}
-                        <div style={{
-                          height: variable.nameError ? '20px' : '0px',
-                          fontSize: '11px',
-                          marginTop: '3px'
-                        }}>
-                          {/* Empty space to match error message height */}
-                        </div>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        height: '100%',
-                        paddingTop: '10px' // Align with input field (label height + margin)
-                      }}>
-                        <button
-                          onClick={() => removeGlobalVariable(variable.id)}
-                          style={{
-                            padding: '8px 12px',
-                            backgroundColor: '#e74c3c',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            minWidth: '40px'
-                          }}
-                          title="Remove variable"
-                        >
-                          −
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '15px',
-                marginTop: '20px'
-              }}>
-                <button
-                  onClick={addGlobalVariable}
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  + Add Variable
-                </button>
-                <button
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}
-                  onClick={() => setActiveTab('graph')}
-                >
-                  Back to Graph Editor
-                </button>
-              </div>
-            </div>
-
-            <div style={{
-              marginTop: '30px',
-              padding: '20px',
-              backgroundColor: '#2c2c54',
-              borderRadius: '8px',
-              border: '1px solid #555'
-            }}>
-              <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Usage Instructions:</h3>
-              <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
-                <li><strong>Variable names</strong> must be valid Python identifiers (start with letter/underscore, contain only letters/digits/underscores)</li>
-                <li><strong>Cannot use Python keywords</strong> like "if", "for", "class", "def", etc.</li>
-                <li>Use meaningful names (e.g., "flow_rate", "temperature", "my_constant")</li>
-                <li>Use numeric values, expressions, or references to other variables</li>
-                <li>Variables can be referenced in node parameters using their exact names</li>
-                <li>Variables are saved and loaded with your graph files</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <GlobalVariablesTab 
+          globalVariables={globalVariables}
+          setGlobalVariables={setGlobalVariables}
+          setActiveTab={setActiveTab}
+          pythonCode={pythonCode}
+          setPythonCode={setPythonCode}
+        />
       )}
 
       {/* Results Tab */}

@@ -36,6 +36,7 @@ from .custom_pathsim_blocks import (
 from flask import jsonify
 import inspect
 
+
 NAME_TO_SOLVER = {
     "SSPRK22": pathsim.solvers.SSPRK22,
     "SSPRK33": pathsim.solvers.SSPRK33,
@@ -107,7 +108,7 @@ def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
 def make_global_variables(global_vars):
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
-    global_namespace = globals()
+    global_namespace = globals().copy()
 
     for var in global_vars:
         var_name = var.get("name", "").strip()
@@ -136,7 +137,7 @@ def make_global_variables(global_vars):
             # Execute in global namespace for backwards compatibility
             exec(f"{var_name} = {var_value}", global_namespace)
             # Also store in local namespace for eval calls
-            global_namespace[var_name] = eval(var_value)
+            global_namespace[var_name] = eval(var_value, global_namespace)
         except Exception as e:
             raise ValueError(f"Error setting global variable '{var_name}': {str(e)}")
 
@@ -199,8 +200,6 @@ def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
     Returns:
         The constructed block object.
     """
-    if eval_namespace is None:
-        eval_namespace = globals()
 
     if node["type"] not in map_str_to_object:
         raise ValueError(f"Unknown block type: {node['type']}")
@@ -271,16 +270,23 @@ def get_parameters_for_event_class(
             if k in ["func_evt", "func_act"]:
                 # Execute func code if provided
                 func_code = event_data[k]
-                if func_code:
-                    try:
-                        exec(func_code, event_namespace)
-                        if k not in event_namespace:
-                            raise ValueError(f"{k} function not found after execution")
-                    except Exception as e:
-                        raise ValueError(f"Error executing {k} code: {str(e)}")
-                else:
+                if not func_code:
                     raise ValueError(f"{k} code is required but not provided")
+
+                if func_code in event_namespace:
+                    parameters[k] = event_namespace[func_code]
+                    # parameters[f"{k}_identifier"] = func_code
+                    continue
+
+                try:
+                    exec(func_code, event_namespace)
+                    if k not in event_namespace:
+                        raise ValueError(f"{k} function not found after execution")
+                except Exception as e:
+                    raise ValueError(f"Error executing {k} code: {str(e)}")
+
                 parameters[k] = event_namespace[k]
+                # parameters[f"{k}_identifier"] = k
             else:
                 parameters[k] = eval(user_input, event_namespace)
     return parameters
@@ -521,7 +527,16 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
     global_namespace = make_global_variables(global_vars)
 
     # Create a combined namespace that includes built-in functions and global variables
-    eval_namespace = {**globals(), **global_namespace}
+    eval_namespace = globals().copy()
+    eval_namespace.update(global_namespace)
+
+    # Execute python code first to define any variables that blocks might need
+    python_code = graph_data.get("pythonCode", "")
+    if python_code:
+        try:
+            exec(python_code, eval_namespace)
+        except Exception as e:
+            return jsonify({"error": f"Error executing Python code: {str(e)}"}), 400
 
     solver_prms, extra_params, duration = make_solver_params(
         solver_prms, eval_namespace
@@ -543,6 +558,7 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
     for node in nodes:
         var_name = make_var_name(node)
         eval_namespace[var_name] = find_block_by_id(node["id"], blocks)
+
     events += make_events(graph_data.get("events", []), eval_namespace)
 
     # Create the simulation
