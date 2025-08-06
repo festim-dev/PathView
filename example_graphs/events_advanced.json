@@ -1,0 +1,365 @@
+{
+  "nodes": [
+    {
+      "id": "2",
+      "type": "process",
+      "position": {
+        "x": 868.2944372219196,
+        "y": 463.7056320088598
+      },
+      "data": {
+        "label": "process 2",
+        "initial_value": "",
+        "residence_time": "30",
+        "source_term": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "amplifier",
+      "position": {
+        "x": 324.22187866193707,
+        "y": 500.1415773669528
+      },
+      "data": {
+        "label": "amplifier 5",
+        "gain": "-1"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "6",
+      "type": "scope",
+      "position": {
+        "x": 849.5352656218994,
+        "y": 616.3744300730544
+      },
+      "data": {
+        "label": "scope 6",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "7",
+      "type": "scope",
+      "position": {
+        "x": 884.3339278689236,
+        "y": 272.62551973484125
+      },
+      "data": {
+        "label": "scope 7",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "8",
+      "type": "adder",
+      "position": {
+        "x": 470.494411363933,
+        "y": 507.51391609780273
+      },
+      "data": {
+        "label": "adder 8",
+        "operations": ""
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "9",
+      "type": "integrator",
+      "position": {
+        "x": 600.7345026088365,
+        "y": 514.5712609435857
+      },
+      "data": {
+        "label": "storage",
+        "initial_value": "startup_inv",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "10",
+      "type": "pulsesource",
+      "position": {
+        "x": 533.6515111182074,
+        "y": 340.6779400691841
+      },
+      "data": {
+        "label": "fusion rate",
+        "T": "",
+        "amplitude": "",
+        "duty": "",
+        "t_fall": "",
+        "t_rise": "",
+        "tau": ""
+      },
+      "measured": {
+        "width": 205,
+        "height": 53
+      },
+      "selected": true,
+      "dragging": false
+    },
+    {
+      "id": "12",
+      "type": "amplifier",
+      "position": {
+        "x": 734.4442527405984,
+        "y": 407.0512209610127
+      },
+      "data": {
+        "label": "amplifier 12",
+        "gain": "1.1"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e2-6-from_inv",
+      "source": "2",
+      "target": "6",
+      "sourceHandle": "inv",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e5-8",
+      "source": "5",
+      "target": "8",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-8-from_mass_flow_rate",
+      "source": "2",
+      "target": "8",
+      "sourceHandle": "mass_flow_rate",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e8-9",
+      "source": "8",
+      "target": "9",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e9-6",
+      "source": "9",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e10-5",
+      "source": "10",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e10-7",
+      "source": "10",
+      "target": "7",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e10-12",
+      "source": "10",
+      "target": "12",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e12-2",
+      "source": "12",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 13,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "300",
+    "extra_params": "{}"
+  },
+  "globalVariables": [],
+  "events": [
+    {
+      "name": "storage_empty",
+      "type": "ZeroCrossingDown",
+      "func_evt": "fun_stor_evt",
+      "func_act": "fun_stor_act",
+      "tolerance": "1e-8",
+      "id": 1754440495739
+    },
+    {
+      "name": "restart",
+      "type": "ZeroCrossingUp",
+      "func_evt": "func_evt_start",
+      "func_act": "func_act_start",
+      "tolerance": "1e-8",
+      "id": 1754440898819
+    }
+  ],
+  "pythonCode": "def fun_stor_evt(t):\n  *_, I = storage_9()\n  return I\n\ndef fun_stor_act(t):\n  fusion_rate_10.off()\n\nstartup_inv = 10\n\ndef func_evt_start(t):\n  *_, I = storage_9()\n  return I - startup_inv\n\ndef func_act_start(t):\n  fusion_rate_10.on()\n  "
+}
