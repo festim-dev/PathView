@@ -266,14 +266,16 @@ def run_pathsim():
 
         # Share x only if there are only scopes or only spectra
         shared_x = len(scopes) * len(spectra) == 0
-
+        n_rows = len(scopes) + len(spectra)
+        absolute_vertical_spacing = 0.05
+        relative_vertical_spacing = absolute_vertical_spacing / n_rows
         fig = make_subplots(
-            rows=len(scopes) + len(spectra),
+            rows=n_rows,
             cols=1,
             shared_xaxes=shared_x,
             subplot_titles=[scope.label for scope in scopes]
             + [spec.label for spec in spectra],
-            vertical_spacing=0.1,
+            vertical_spacing=relative_vertical_spacing,
         )
 
         # make scope plots
@@ -305,7 +307,7 @@ def run_pathsim():
             fig.update_xaxes(title_text="Frequency", row=len(scopes) + i + 1, col=1)
 
         fig.update_layout(
-            height=600 * (len(scopes) + len(spectra)), hovermode="x unified"
+            height=500 * (len(scopes) + len(spectra)), hovermode="x unified"
         )
 
         # Convert plot to JSON
