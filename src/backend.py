@@ -264,10 +264,13 @@ def run_pathsim():
         # extra work is needed since spectra and scopes don't share the same x axis
         csv_payload = make_csv_payload(scopes)
 
+        # Share x only if there are only scopes or only spectra
+        shared_x = len(scopes) * len(spectra) == 0
+
         fig = make_subplots(
             rows=len(scopes) + len(spectra),
             cols=1,
-            shared_xaxes=False,
+            shared_xaxes=shared_x,
             subplot_titles=[scope.label for scope in scopes]
             + [spec.label for spec in spectra],
             vertical_spacing=0.2,
