@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools-scm[toml] >= 7.0.5"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fuel-cycle-sim"
+version = "0.1.0"
+description = "A Python package for fuel cycle simulation with pathsim integration"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "pathsim>=0.7.0",
+    "matplotlib>=3.7.0",
+    "numpy>=1.24.0",
+    "plotly>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
+
+
+[project.urls]
+Homepage = "https://github.com/yourusername/fuel-cycle-sim"
+Documentation = "https://fuel-cycle-sim.readthedocs.io/"
+Repository = "https://github.com/yourusername/fuel-cycle-sim.git"
+Issues = "https://github.com/yourusername/fuel-cycle-sim/issues"
+
+[tool.setuptools]
+packages = ["fuel_cycle_sim"]
+package-dir = {"fuel_cycle_sim" = "src/python"}
+
+[tool.setuptools_scm]
+write_to = "src/python/_version.py"
+
+[tool.setuptools.package-data]
+fuel_cycle_sim = ["templates/*"]

@@ -37,7 +37,8 @@ python -m venv venv
 source venv/bin/activate        # macOS/Linux
 venv\Scripts\activate           # Windows
 
-pip install -r requirements.txt
+pip install -r requirements.txt  # install the web app requirements (eg. Flask)
+pip install -e .[dev]  # install the python module containing pathsim utils
 ```
 # Running Application
 You can run both frontend and backend at once

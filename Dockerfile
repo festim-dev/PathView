@@ -23,6 +23,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install python core package
+RUN pip install .
+
 # Install gunicorn for production WSGI server
 RUN pip install gunicorn
 

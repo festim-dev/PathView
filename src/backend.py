@@ -11,8 +11,8 @@ import inspect
 import io
 from contextlib import redirect_stdout, redirect_stderr
 
-from .convert_to_python import convert_graph_to_python
-from .pathsim_utils import make_pathsim_model, map_str_to_object
+from fuel_cycle_sim.convert_to_python import convert_graph_to_python
+from fuel_cycle_sim.pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope, Spectrum
 
 # Sphinx imports for docstring processing

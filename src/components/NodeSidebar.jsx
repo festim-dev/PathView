@@ -1,4 +1,4 @@
-import { isValidPythonIdentifier } from './utils.js';
+import { isValidPythonIdentifier } from '../utils.js';
 
 const makeVarName = (node) => {
   // Create a base variable name from the node label

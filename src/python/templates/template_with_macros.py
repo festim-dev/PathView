@@ -2,7 +2,7 @@ import pathsim
 from pathsim import Simulation, Connection
 import numpy as np
 import matplotlib.pyplot as plt
-import src
+import fuel_cycle_sim
 {# Import macros #}
 {% from 'block_macros.py' import create_block, create_integrator_block, create_bubbler_block, create_connections, create_event -%}
 
