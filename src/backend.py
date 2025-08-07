@@ -273,7 +273,7 @@ def run_pathsim():
             shared_xaxes=shared_x,
             subplot_titles=[scope.label for scope in scopes]
             + [spec.label for spec in spectra],
-            vertical_spacing=0.2,
+            vertical_spacing=0.1,
         )
 
         # make scope plots
@@ -305,16 +305,18 @@ def run_pathsim():
             fig.update_xaxes(title_text="Frequency", row=len(scopes) + i + 1, col=1)
 
         fig.update_layout(
-            height=400 * (len(scopes) + len(spectra)), hovermode="x unified"
+            height=600 * (len(scopes) + len(spectra)), hovermode="x unified"
         )
 
         # Convert plot to JSON
         plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        plot_html = fig.to_html()
 
         return jsonify(
             {
                 "success": True,
                 "plot": plot_data,
+                "html": plot_html,
                 "csv_data": csv_payload,
                 "message": "Pathsim simulation completed successfully",
             }
