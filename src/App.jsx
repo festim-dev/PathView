@@ -44,6 +44,7 @@ const DnDFlow = () => {
   const [copyFeedback, setCopyFeedback] = useState('');
   const ref = useRef(null);
   const [csvData, setCsvData] = useState(null);
+  const [htmlData, setHtmlData] = useState(null);
   const reactFlowWrapper = useRef(null);
   // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -481,6 +482,39 @@ const DnDFlow = () => {
     }
   };
 
+  const downloadHtml = async () => {
+    const blob = new Blob([htmlData], { type: "text/html" });
+    const filename = `simulation_${new Date().toISOString().replace(/[:.]/g, "-")}.html`;
+
+    try {
+      if ("showSaveFilePicker" in window) {
+        const options = {
+          suggestedName: filename,
+          types: [{
+            description: "HTML File",
+            accept: { "text/html": [".html"] }
+          }]
+        };
+
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        throw new Error("showSaveFilePicker not supported");
+      }
+    } catch (err) {
+      console.warn("Falling back to automatic download:", err);
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    }
+  };
+
 
 
   // Allows user to save to python script
@@ -581,6 +615,7 @@ const DnDFlow = () => {
         // Store results and switch to results tab
         setSimulationResults(result.plot);
         setCsvData(result.csv_data);
+        setHtmlData(result.html);
         setActiveTab('results');
         alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
@@ -1664,6 +1699,19 @@ const DnDFlow = () => {
             {simulationResults ? (
               <>
                 <div style={{ textAlign: 'right', padding: '0 20px 10px 20px' }}>
+                  <button
+                    style={{
+                      backgroundColor: '#78A083',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 5,
+                      cursor: 'pointer',
+                      marginRight: '10px',
+                    }}
+                    onClick={downloadHtml}
+                  >
+                    Download HTML
+                  </button>
                   <button
                     style={{
                       backgroundColor: '#78A083',
