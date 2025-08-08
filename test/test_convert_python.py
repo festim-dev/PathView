@@ -160,6 +160,7 @@ def test_bubbler_has_reset_times():
             "tolerance_fpi": "1e-6",
         },
         "globalVariables": [],
+        "pythonCode": "def func(t):\n  print('coucou')\n  return 2\n",
     }
     code = convert_graph_to_python(sample_data)
     print(code)
