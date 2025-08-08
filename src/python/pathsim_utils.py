@@ -348,14 +348,10 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     Returns:
         The input index for the block.
     """
-    
+
     if edge["targetHandle"] is not None:
         if block._port_map_in:
-            # aliases are not yet supported for subsystems
-            if isinstance(block, pathsim.Subsystem):
-                return block._port_map_in[edge["targetHandle"]]
-            else:
-                return edge["targetHandle"]
+            return edge["targetHandle"]
 
     if isinstance(block, Function):
         return int(edge["targetHandle"].replace("target-", ""))
@@ -382,11 +378,7 @@ def get_output_index(block: Block, edge: dict) -> int:
     """
     if edge["sourceHandle"] is not None:
         if block._port_map_out:
-            # aliases are not yet supported for subsystems
-            if isinstance(block, pathsim.Subsystem):
-                return block._port_map_out[edge["sourceHandle"]]
-            else:
-                return edge["sourceHandle"]
+            return edge["sourceHandle"]
 
     if isinstance(block, Splitter):
         # Splitter outputs are always in order, so we can use the handle directly

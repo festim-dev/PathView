@@ -1,5 +1,6 @@
 from pathsim.blocks import Block, ODE
 import pathsim.blocks
+import pathsim.events
 from pathsim import Subsystem, Interface, Connection
 import numpy as np
 
@@ -102,6 +103,8 @@ class Integrator(pathsim.blocks.Integrator):
             pathsim.blocks.Schedule(t_start=t, t_end=t, func_act=self.reset)
             for t in reset_times
         ]
+        # need https://github.com/milanofthe/pathsim/pull/66
+        # return pathsim.events.ScheduleList(times_evt=reset_times, func_act=self.reset)
 
 
 # BUBBLER SYSTEM
@@ -163,7 +166,11 @@ class Bubbler(Subsystem):
         add1 = pathsim.blocks.Adder()
         add2 = pathsim.blocks.Adder()
 
+        # can be simplified when https://github.com/milanofthe/pathsim/pull/65 is merged
         interface = Interface()
+        interface._port_map_in = self._port_map_out
+        interface._port_map_out = self._port_map_in
+        interface.__init__()  # reinitialize to rebuild registers
 
         self.vials = [vial_1, vial_2, vial_3, vial_4]
 
@@ -182,28 +189,24 @@ class Bubbler(Subsystem):
             interface,
         ]
         connections = [
-            Connection(
-                interface[self._port_map_in["sample_in_soluble"]], col_eff1
-            ),
+            Connection(interface["sample_in_soluble"], col_eff1),
             Connection(col_eff1[0], vial_1),
             Connection(col_eff1[1], col_eff2),
             Connection(col_eff2[0], vial_2),
             Connection(col_eff2[1], conversion_eff),
             Connection(conversion_eff[0], add1[0]),
             Connection(conversion_eff[1], add2[0]),
-            Connection(
-                interface[self._port_map_in["sample_in_insoluble"]], add1[1]
-            ),
+            Connection(interface["sample_in_insoluble"], add1[1]),
             Connection(add1, col_eff3),
             Connection(col_eff3[0], vial_3),
             Connection(col_eff3[1], col_eff4),
             Connection(col_eff4[0], vial_4),
             Connection(col_eff4[1], add2[1]),
-            Connection(vial_1, interface[self._port_map_out["vial1"]]),
-            Connection(vial_2, interface[self._port_map_out["vial2"]]),
-            Connection(vial_3, interface[self._port_map_out["vial3"]]),
-            Connection(vial_4, interface[self._port_map_out["vial4"]]),
-            Connection(add2, interface[self._port_map_out["sample_out"]]),
+            Connection(vial_1, interface["vial1"]),
+            Connection(vial_2, interface["vial2"]),
+            Connection(vial_3, interface["vial3"]),
+            Connection(vial_4, interface["vial4"]),
+            Connection(add2, interface["sample_out"]),
         ]
         super().__init__(blocks, connections)
 
@@ -221,7 +224,13 @@ class Bubbler(Subsystem):
             )
         return events
 
-    def create_reset_events(self) -> list[pathsim.blocks.Schedule]:
+        # need https://github.com/milanofthe/pathsim/pull/66
+        # events = pathsim.events.ScheduleList(
+        #     times_evt=reset_times, func_act=reset_itg
+        # )
+        # return events
+
+    def create_reset_events(self) -> list[pathsim.events.Schedule]:
         """Create reset events for all vials based on the replacement times.
 
         Raises:
