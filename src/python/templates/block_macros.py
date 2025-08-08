@@ -13,7 +13,7 @@
 {% macro create_integrator_block(node) -%}
 {{ create_block(node) }}
 
-{%- if node["data"].get("replacement_times") %}
+{%- if node["data"].get("reset_times") %}
 events_{{ node["var_name"] }} = {{ node["var_name"] }}.create_reset_events()
 events += events_{{ node["var_name"] }}
 {%- endif %}
