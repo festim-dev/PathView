@@ -93,6 +93,7 @@ map_str_to_event = {
     "ZeroCrossingUp": pathsim.events.ZeroCrossingUp,
     "ZeroCrossing": pathsim.events.ZeroCrossing,
     "Schedule": pathsim.events.Schedule,
+    "ScheduleList": pathsim.events.ScheduleList,
     "Condition": pathsim.events.Condition,
 }
 
