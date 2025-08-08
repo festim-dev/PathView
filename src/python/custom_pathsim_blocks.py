@@ -99,12 +99,15 @@ class Integrator(pathsim.blocks.Integrator):
         else:
             raise ValueError("reset_times must be a single value or a list of times")
 
-        return [
-            pathsim.blocks.Schedule(t_start=t, t_end=t, func_act=self.reset)
-            for t in reset_times
-        ]
-        # need https://github.com/milanofthe/pathsim/pull/66
-        # return pathsim.events.ScheduleList(times_evt=reset_times, func_act=self.reset)
+        def func_act(_):
+            self.reset()
+
+        # can be simplified after https://github.com/milanofthe/pathsim/pull/66
+        event = pathsim.events.ScheduleList(times_evt=reset_times, func_act=func_act)
+        event.func_act = func_act
+        event.t_start = 0
+        event.t_end = None
+        return [event]
 
 
 # BUBBLER SYSTEM
@@ -212,25 +215,18 @@ class Bubbler(Subsystem):
 
     def _create_reset_events_one_vial(
         self, block, reset_times
-    ) -> list[pathsim.blocks.Schedule]:
-        events = []
-
+    ) -> pathsim.events.ScheduleList:
         def reset_itg(_):
             block.reset()
 
-        for t in reset_times:
-            events.append(
-                pathsim.blocks.Schedule(t_start=t, t_end=t, func_act=reset_itg)
-            )
-        return events
+        event = pathsim.events.ScheduleList(times_evt=reset_times, func_act=reset_itg)
+        # won't be needed after https://github.com/milanofthe/pathsim/pull/66
+        event.func_act = reset_itg
+        event.t_start = 0
+        event.t_end = None
+        return event
 
-        # need https://github.com/milanofthe/pathsim/pull/66
-        # events = pathsim.events.ScheduleList(
-        #     times_evt=reset_times, func_act=reset_itg
-        # )
-        # return events
-
-    def create_reset_events(self) -> list[pathsim.events.Schedule]:
+    def create_reset_events(self) -> list[pathsim.events.ScheduleList]:
         """Create reset events for all vials based on the replacement times.
 
         Raises:
@@ -258,7 +254,7 @@ class Bubbler(Subsystem):
                 "reset_times must be a single value or a list with the same length as the number of vials"
             )
         for i, vial in enumerate(self.vials):
-            events.extend(self._create_reset_events_one_vial(vial, reset_times[i]))
+            events.append(self._create_reset_events_one_vial(vial, reset_times[i]))
 
         return events
 
