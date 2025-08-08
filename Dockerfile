@@ -11,6 +11,9 @@ RUN npm run build
 # Python backend stage
 FROM python:3.11-slim
 
+# Build argument for version (can be set at build time)
+ARG VERSION=0.1.0
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -28,7 +31,7 @@ COPY pyproject.toml .
 COPY src/ ./src/
 
 # Install python core package with setuptools-scm version override
-RUN pip install .
+RUN SETUPTOOLS_SCM_PRETEND_VERSION_FOR_FUEL_CYCLE_SIM=${VERSION} pip install .
 
 # Install gunicorn for production WSGI server
 RUN pip install gunicorn
