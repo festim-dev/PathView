@@ -79,7 +79,7 @@ class Integrator(pathsim.blocks.Integrator):
         super().__init__(initial_value=initial_value)
         self.reset_times = reset_times
 
-    def create_reset_events(self):
+    def create_reset_events(self) -> list[pathsim.events.ScheduleList]:
         """Create reset events for the integrator based on the reset times.
 
         Raises:
