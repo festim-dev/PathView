@@ -5,7 +5,6 @@ import numpy as np
 
 
 class Process(ODE):
-    name_to_output_port = {"inv": 0, "mass_flow_rate": 1}
     _port_map_out = {"inv": 0, "mass_flow_rate": 1}
 
     def __init__(self, residence_time=0, initial_value=0, source_term=0):
@@ -48,7 +47,6 @@ class Splitter(Block):
 
 
 class Splitter2(Splitter):
-    name_to_output_port = {"source1": 0, "source2": 1}
     _port_map_out = {"source1": 0, "source2": 1}
 
     def __init__(self, f1=0.5, f2=0.5):
@@ -59,7 +57,6 @@ class Splitter2(Splitter):
 
 
 class Splitter3(Splitter):
-    name_to_output_port = {"source1": 0, "source2": 1, "source3": 2}
     _port_map_out = {"source1": 0, "source2": 1, "source3": 2}
 
     def __init__(self, f1=1 / 3, f2=1 / 3, f3=1 / 3):
@@ -118,17 +115,6 @@ class Bubbler(Subsystem):
     n_soluble_vials: float
     n_insoluble_vials: float
 
-    name_to_input_port = {
-        "sample_in_soluble": 0,
-        "sample_in_insoluble": 1,
-    }
-    name_to_output_port = {
-        "vial1": 0,
-        "vial2": 1,
-        "vial3": 2,
-        "vial4": 3,
-        "sample_out": 4,
-    }
     _port_map_out = {
         "vial1": 0,
         "vial2": 1,
@@ -273,9 +259,6 @@ from pathsim.utils.register import Register
 
 
 class FestimWall(Block):
-    name_to_output_port = {"flux_0": 0, "flux_L": 1}
-    name_to_input_port = {"c_0": 0, "c_L": 1}
-
     _port_map_out = {"flux_0": 0, "flux_L": 1}
     _port_map_in = {"c_0": 0, "c_L": 1}
 
