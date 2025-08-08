@@ -23,15 +23,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install python core package
+# Copy source code and package configuration
 COPY pyproject.toml .
+COPY src/ ./src/
+
+# Install python core package with setuptools-scm version override
 RUN pip install .
 
 # Install gunicorn for production WSGI server
 RUN pip install gunicorn
-
-# Copy backend source code
-COPY src/ ./src/
 # COPY *.py ./
 
 # Copy built frontend from previous stage
