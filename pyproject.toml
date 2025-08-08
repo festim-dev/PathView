@@ -24,7 +24,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-    "pathsim>=0.7.0",
+    "pathsim>=0.8.0",
     "matplotlib>=3.7.0",
     "numpy>=1.24.0",
     "plotly>=6.0",
