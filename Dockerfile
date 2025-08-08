@@ -24,6 +24,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install python core package
+COPY pyproject.toml .
 RUN pip install .
 
 # Install gunicorn for production WSGI server
