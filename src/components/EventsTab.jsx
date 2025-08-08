@@ -9,6 +9,11 @@ const eventDefaults = {
     func_act: '',
     tolerance: '1e-16'
   },
+  'ScheduleList': {
+    times_evt: '',
+    func_act: '',
+    tolerance: '1e-16'
+  },
   'ZeroCrossingDown': {
     func_evt: '',
     func_act: '',
@@ -47,7 +52,8 @@ const EventsTab = ({ events, setEvents }) => {
 
   const eventTypes = [
     'Condition',
-    'Schedule', 
+    'Schedule',
+    'ScheduleList',
     'ZeroCrossing',
     'ZeroCrossingUp',
     'ZeroCrossingDown'
@@ -75,13 +81,13 @@ const EventsTab = ({ events, setEvents }) => {
       // Validate required fields based on event type
       
       // For Schedule, func_act is required
-      if (currentEvent.type === 'Schedule' && !currentEvent.func_act) {
+      if (['Schedule', 'ScheduleList'].includes(currentEvent.type) && !currentEvent.func_act) {
         alert('func_act is required for Schedule events');
         return;
       }
       
       // For other event types, both func_evt and func_act are typically required
-      if (currentEvent.type !== 'Schedule' && (!currentEvent.func_evt || !currentEvent.func_act)) {
+      if (!['Schedule', 'ScheduleList'].includes(currentEvent.type) && (!currentEvent.func_evt || !currentEvent.func_act)) {
         alert('Both func_evt and func_act are required for this event type');
         return;
       }

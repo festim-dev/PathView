@@ -7,7 +7,7 @@ import IntegratorNode from './components/nodes/IntegratorNode';
 import AdderNode from './components/nodes/AdderNode';
 import ScopeNode from './components/nodes/ScopeNode';
 import StepSourceNode from './components/nodes/StepSourceNode';
-import {createFunctionNode} from './components/nodes/FunctionNode';
+import { createFunctionNode } from './components/nodes/FunctionNode';
 import DefaultNode from './components/nodes/DefaultNode';
 import MultiplierNode from './components/nodes/MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './components/nodes/Splitters';
@@ -60,6 +60,32 @@ export const nodeTypes = {
   fir: DefaultNode
 };
 
+export const nodeMathTypes = {
+  sin: DefaultNode,
+  cos: DefaultNode,
+  sqrt: DefaultNode,
+  abs: DefaultNode,
+  pow: DefaultNode,
+  exp: DefaultNode,
+  log: DefaultNode,
+  log10: DefaultNode,
+  tan: DefaultNode,
+  sinh: DefaultNode,
+  cosh: DefaultNode,
+  tanh: DefaultNode,
+  atan: DefaultNode,
+  norm: DefaultNode,
+  mod: DefaultNode,
+  clip: DefaultNode,
+}
+
+// add nodeMathTypes to nodeTypes
+Object.keys(nodeMathTypes).forEach(type => {
+  if (!nodeTypes[type]) {
+    nodeTypes[type] = nodeMathTypes[type];
+  }
+});
+
 // Node categories for better organization
 export const nodeCategories = {
   'Sources': {
@@ -71,7 +97,7 @@ export const nodeCategories = {
     description: 'Signal processing and transformation nodes'
   },
   'Math': {
-    nodes: ['adder', 'multiplier', 'splitter2', 'splitter3'],
+    nodes: ['adder', 'multiplier', 'splitter2', 'splitter3'].concat(Object.keys(nodeMathTypes)),
     description: 'Mathematical operation nodes'
   },
   'Control': {
@@ -124,8 +150,24 @@ export const getNodeDisplayName = (nodeType) => {
     'scope': 'Scope',
     'spectrum': 'Spectrum',
     'differentiator': 'Differentiator',
+    'sin': 'Sine',
+    'cos': 'Cosine',
+    'sqrt': 'Square Root',
+    'abs': 'Absolute',
+    'pow': 'Power',
+    'exp': 'Exponential',
+    'log': 'Logarithm',
+    'log10': 'Logarithm (Base 10)',
+    'tan': 'Tangent',
+    'sinh': 'Hyperbolic Sine',
+    'cosh': 'Hyperbolic Cosine',
+    'tanh': 'Hyperbolic Tangent',
+    'atan': 'Inverse Tangent',
+    'norm': 'Normalization',
+    'mod': 'Modulo',
+    'clip': 'Clipping',
   };
-  
+
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
 };
 

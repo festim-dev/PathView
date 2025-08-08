@@ -110,8 +110,14 @@ def make_edge_data(data: dict) -> list[dict]:
 
             edge["source_var_name"] = node["var_name"]
             edge["target_var_name"] = target_node["var_name"]
-            edge["source_port"] = f"[{output_index}]"
-            edge["target_port"] = f"[{input_index}]"
+            if isinstance(output_index, str):
+                edge["source_port"] = f"['{output_index}']"
+            else:
+                edge["source_port"] = f"[{output_index}]"
+            if isinstance(input_index, str):
+                edge["target_port"] = f"['{input_index}']"
+            else:
+                edge["target_port"] = f"[{input_index}]"
             block_to_input_index[target_block] += 1
 
     return data["edges"]

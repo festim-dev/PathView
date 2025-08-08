@@ -88,11 +88,33 @@ map_str_to_object = {
     "fir": pathsim.blocks.FIR,
 }
 
+math_blocks = {
+    "sin": pathsim.blocks.Sin,
+    "cos": pathsim.blocks.Cos,
+    "sqrt": pathsim.blocks.Sqrt,
+    "abs": pathsim.blocks.Abs,
+    "pow": pathsim.blocks.Pow,
+    "exp": pathsim.blocks.Exp,
+    "log": pathsim.blocks.Log,
+    "log10": pathsim.blocks.Log10,
+    "tan": pathsim.blocks.Tan,
+    "sinh": pathsim.blocks.Sinh,
+    "cosh": pathsim.blocks.Cosh,
+    "tanh": pathsim.blocks.Tanh,
+    "atan": pathsim.blocks.Atan,
+    "norm": pathsim.blocks.Norm,
+    "mod": pathsim.blocks.Mod,
+    "clip": pathsim.blocks.Clip,
+}
+
+map_str_to_object.update(math_blocks)
+
 map_str_to_event = {
     "ZeroCrossingDown": pathsim.events.ZeroCrossingDown,
     "ZeroCrossingUp": pathsim.events.ZeroCrossingUp,
     "ZeroCrossing": pathsim.events.ZeroCrossing,
     "Schedule": pathsim.events.Schedule,
+    "ScheduleList": pathsim.events.ScheduleList,
     "Condition": pathsim.events.Condition,
 }
 
@@ -347,9 +369,12 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     Returns:
         The input index for the block.
     """
-    if hasattr(block, "name_to_input_port"):
-        return block.name_to_input_port[edge["targetHandle"]]
-    elif isinstance(block, Function):
+
+    if edge["targetHandle"] is not None:
+        if block._port_map_in:
+            return edge["targetHandle"]
+
+    if isinstance(block, Function):
         return int(edge["targetHandle"].replace("target-", ""))
     else:
         # make sure that the target block has only one input port (ie. that targetHandle is None)
@@ -372,9 +397,11 @@ def get_output_index(block: Block, edge: dict) -> int:
     Returns:
         The output index for the block.
     """
-    if hasattr(block, "name_to_output_port"):
-        return block.name_to_output_port[edge["sourceHandle"]]
-    elif isinstance(block, Splitter):
+    if edge["sourceHandle"] is not None:
+        if block._port_map_out:
+            return edge["sourceHandle"]
+
+    if isinstance(block, Splitter):
         # Splitter outputs are always in order, so we can use the handle directly
         assert edge["sourceHandle"], edge
         output_index = int(edge["sourceHandle"].replace("source", "")) - 1
