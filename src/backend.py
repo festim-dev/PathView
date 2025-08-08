@@ -103,6 +103,37 @@ def health_check():
     ), 200
 
 
+@app.route("/default-values-all", methods=["GET"])
+def get_all_default_values():
+    try:
+        all_default_values = {}
+        for node_type, block_class in map_str_to_object.items():
+            parameters_for_class = inspect.signature(block_class.__init__).parameters
+            default_values = {}
+            for param in parameters_for_class:
+                if param != "self":  # Skip 'self' parameter
+                    default_value = parameters_for_class[param].default
+                    if default_value is inspect._empty:
+                        default_values[param] = None  # Handle empty defaults
+                    else:
+                        default_values[param] = default_value
+                        # check if default value is serializable to JSON
+                        if not isinstance(
+                            default_value, (int, float, str, bool, list, dict)
+                        ):
+                            # Attempt to convert to JSON serializable type
+                            try:
+                                default_values[param] = json.dumps(default_value)
+                            except TypeError:
+                                # If conversion fails, set to a string 'default'
+                                default_values[param] = "default"
+            all_default_values[node_type] = default_values
+
+        return jsonify(all_default_values)
+    except Exception as e:
+        return jsonify({"error": f"Could not get all default values: {str(e)}"}), 400
+
+
 # returns default values for parameters of a node
 @app.route("/default-values/<string:node_type>", methods=["GET"])
 def get_default_values(node_type):
@@ -135,6 +166,30 @@ def get_default_values(node_type):
         return jsonify(
             {"error": f"Could not get default values for {node_type}: {str(e)}"}
         ), 400
+
+
+@app.route("/get-all-docs", methods=["GET"])
+def get_all_docs():
+    try:
+        all_docs = {}
+        for node_type, block_class in map_str_to_object.items():
+            docstring = inspect.getdoc(block_class)
+
+            # If no docstring, provide a basic description
+            if not docstring:
+                docstring = f"No documentation available for {node_type}."
+
+            # Convert docstring to HTML using docutils/Sphinx-style processing
+            html_content = docstring_to_html(docstring)
+
+            all_docs[node_type] = {
+                "docstring": docstring,  # Keep original for backwards compatibility
+                "html": html_content,  # New HTML version
+            }
+
+        return jsonify(all_docs)
+    except Exception as e:
+        return jsonify({"error": f"Could not get docs for all nodes: {str(e)}"}), 400
 
 
 @app.route("/get-docs/<string:node_type>", methods=["GET"])

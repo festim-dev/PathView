@@ -81,10 +81,10 @@ const DnDFlow = () => {
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
   const [events, setEvents] = useState([]);
-  
+
   // Python code editor state
   const [pythonCode, setPythonCode] = useState("# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-  
+
   const [defaultValues, setDefaultValues] = useState({});
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [tempLabel, setTempLabel] = useState('');
@@ -144,34 +144,77 @@ const DnDFlow = () => {
     }
   };
 
+  // Function to preload all documentation at startup
+  const preloadAllDocumentation = async () => {
+    const availableTypes = Object.keys(nodeTypes);
+
+    try {
+      // Convert types array to a string (or could be sent as JSON array)
+      const response = await fetch(getApiEndpoint(`/get-all-docs`));
+
+      if (response.ok) {
+        const allDocs = await response.json();
+        setNodeDocumentation(allDocs);
+      } else {
+        console.error('Failed to preload documentation');
+        // Fallback: initialize empty documentation for all types
+        const documentationCache = {};
+        availableTypes.forEach(nodeType => {
+          documentationCache[nodeType] = {
+            html: '<p>No documentation available for this node type.</p>',
+            text: 'No documentation available for this node type.'
+          };
+        });
+        setNodeDocumentation(documentationCache);
+      }
+    } catch (error) {
+      console.error('Error preloading documentation:', error);
+      // Fallback: initialize empty documentation for all types
+      const documentationCache = {};
+      availableTypes.forEach(nodeType => {
+        documentationCache[nodeType] = {
+          html: '<p>Error loading documentation.</p>',
+          text: 'Error loading documentation.'
+        };
+      });
+      setNodeDocumentation(documentationCache);
+    }
+  };
+
   // Function to preload all default values at startup
   const preloadDefaultValues = async () => {
     const availableTypes = Object.keys(nodeTypes);
-    const promises = availableTypes.map(async (nodeType) => {
-      try {
-        const response = await fetch(getApiEndpoint(`/default-values/${nodeType}`));
-        if (response.ok) {
-          const defaults = await response.json();
-          return { nodeType, defaults };
-        }
-      } catch (error) {
-        console.warn(`Failed to preload defaults for ${nodeType}:`, error);
+
+    try {
+      const response = await fetch(getApiEndpoint(`/default-values-all`));
+
+      if (response.ok) {
+        const allDefaults = await response.json();
+        setDefaultValues(allDefaults);
+      } else {
+        console.error('Failed to preload default values');
+        // Fallback: initialize empty defaults for all types
+        const defaultValuesCache = {};
+        availableTypes.forEach(nodeType => {
+          defaultValuesCache[nodeType] = {};
+        });
+        setDefaultValues(defaultValuesCache);
       }
-      return { nodeType, defaults: {} };
-    });
-
-    const results = await Promise.all(promises);
-    const defaultValuesCache = {};
-    results.forEach(({ nodeType, defaults }) => {
-      defaultValuesCache[nodeType] = defaults;
-    });
-
-    setDefaultValues(defaultValuesCache);
+    } catch (error) {
+      console.error('Error preloading default values:', error);
+      // Fallback: initialize empty defaults for all types
+      const defaultValuesCache = {};
+      availableTypes.forEach(nodeType => {
+        defaultValuesCache[nodeType] = {};
+      });
+      setDefaultValues(defaultValuesCache);
+    }
   };
 
-  // Preload all default values when component mounts
+  // Preload all default values and documentation when component mounts
   useEffect(() => {
     preloadDefaultValues();
+    preloadAllDocumentation();
   }, []);
 
   const onDrop = useCallback(
@@ -308,12 +351,12 @@ const DnDFlow = () => {
           }
 
           // Load the graph data
-          const { 
-            nodes: loadedNodes, 
-            edges: loadedEdges, 
-            nodeCounter: loadedNodeCounter, 
-            solverParams: loadedSolverParams, 
-            globalVariables: loadedGlobalVariables, 
+          const {
+            nodes: loadedNodes,
+            edges: loadedEdges,
+            nodeCounter: loadedNodeCounter,
+            solverParams: loadedSolverParams,
+            globalVariables: loadedGlobalVariables,
             events: loadedEvents,
             pythonCode: loadedPythonCode
           } = graphData;
@@ -369,12 +412,12 @@ const DnDFlow = () => {
               return;
             }
 
-            const { 
-              nodes: loadedNodes, 
-              edges: loadedEdges, 
-              nodeCounter: loadedNodeCounter, 
-              solverParams: loadedSolverParams, 
-              globalVariables: loadedGlobalVariables, 
+            const {
+              nodes: loadedNodes,
+              edges: loadedEdges,
+              nodeCounter: loadedNodeCounter,
+              solverParams: loadedSolverParams,
+              globalVariables: loadedGlobalVariables,
               events: loadedEvents,
               pythonCode: loadedPythonCode
             } = graphData;
@@ -752,22 +795,31 @@ const DnDFlow = () => {
 
     const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
-    
-    // Fetch default values and documentation for this node type
-    const defaults = await fetchDefaultValues(selectedType);
-    const docs = await fetchNodeDocumentation(selectedType);
-    
-    // Store default values and documentation for this node type
-    setDefaultValues(prev => ({
-      ...prev,
-      [selectedType]: defaults
-    }));
-    
-    setNodeDocumentation(prev => ({
-      ...prev,
-      [selectedType]: docs
-    }));
-    
+
+    // Get default values and documentation for this node type (should be cached from preload)
+    let defaults = defaultValues[selectedType] || {};
+    let docs = nodeDocumentation[selectedType] || {
+      html: '<p>No documentation available for this node type.</p>',
+      text: 'No documentation available for this node type.'
+    };
+
+    // Fallback: fetch if not cached (shouldn't happen normally)
+    if (!defaultValues[selectedType]) {
+      defaults = await fetchDefaultValues(selectedType);
+      setDefaultValues(prev => ({
+        ...prev,
+        [selectedType]: defaults
+      }));
+    }
+
+    if (!nodeDocumentation[selectedType]) {
+      docs = await fetchNodeDocumentation(selectedType);
+      setNodeDocumentation(prev => ({
+        ...prev,
+        [selectedType]: docs
+      }));
+    }
+
     // Create node data with label and initialize all expected fields as empty strings
     let nodeData = { label: `${selectedType} ${newNodeId}` };
 
@@ -933,7 +985,7 @@ const DnDFlow = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedEdge, selectedNode, copiedNode, duplicateNode, setCopyFeedback]);
-  
+
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Tab Navigation */}
@@ -1022,7 +1074,8 @@ const DnDFlow = () => {
         <div style={{
           display: 'flex', flex: 1,
           height: 'calc(100vh - 50px)', // Subtract the tab bar height
-          overflow: 'hidden'}}>
+          overflow: 'hidden'
+        }}>
           {/* Sidebar */}
           <div style={{
             width: '250px',
@@ -1031,7 +1084,7 @@ const DnDFlow = () => {
           }}>
             <Sidebar />
           </div>
-          
+
           {/* Main Graph Area */}
           <div className="dndflow" style={{ flex: 1, position: 'relative' }}>
             <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
@@ -1272,50 +1325,50 @@ const DnDFlow = () => {
               }}
             >
               <div style={{ padding: '20px' }}>
-              <h3>Selected Edge</h3>
-              <div style={{ marginBottom: '10px' }}>
-                <strong>ID:</strong> {selectedEdge.id}
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <strong>Source:</strong> {selectedEdge.source}
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <strong>Target:</strong> {selectedEdge.target}
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <strong>Type:</strong> {selectedEdge.type}
-              </div>
+                <h3>Selected Edge</h3>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>ID:</strong> {selectedEdge.id}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>Source:</strong> {selectedEdge.source}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>Target:</strong> {selectedEdge.target}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>Type:</strong> {selectedEdge.type}
+                </div>
 
-              <br />
-              <button
-                style={{
-                  marginTop: 10,
-                  marginRight: 10,
-                  padding: '8px 12px',
-                  backgroundColor: '#78A083',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 5,
-                  cursor: 'pointer',
-                }}
-                onClick={() => setSelectedEdge(null)}
-              >
-                Close
-              </button>
-              <button
-                style={{
-                  marginTop: 10,
-                  padding: '8px 12px',
-                  backgroundColor: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 5,
-                  cursor: 'pointer',
-                }}
-                onClick={deleteSelectedEdge}
-              >
-                Delete Edge
-              </button>
+                <br />
+                <button
+                  style={{
+                    marginTop: 10,
+                    marginRight: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setSelectedEdge(null)}
+                >
+                  Close
+                </button>
+                <button
+                  style={{
+                    marginTop: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#e74c3c',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                  }}
+                  onClick={deleteSelectedEdge}
+                >
+                  Delete Edge
+                </button>
               </div>
             </div>
           )}
@@ -1674,7 +1727,7 @@ const DnDFlow = () => {
 
       {/* Global Variables Tab */}
       {activeTab === 'globals' && (
-        <GlobalVariablesTab 
+        <GlobalVariablesTab
           globalVariables={globalVariables}
           setGlobalVariables={setGlobalVariables}
           setActiveTab={setActiveTab}
@@ -1752,7 +1805,7 @@ const DnDFlow = () => {
   );
 }
 
-export function App () {
+export function App() {
   return (
     <ReactFlowProvider>
       <DnDProvider>
