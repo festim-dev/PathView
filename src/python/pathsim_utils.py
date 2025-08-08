@@ -88,6 +88,27 @@ map_str_to_object = {
     "fir": pathsim.blocks.FIR,
 }
 
+math_blocks = {
+    "sin": pathsim.blocks.Sin,
+    "cos": pathsim.blocks.Cos,
+    "sqrt": pathsim.blocks.Sqrt,
+    "abs": pathsim.blocks.Abs,
+    "pow": pathsim.blocks.Pow,
+    "exp": pathsim.blocks.Exp,
+    "log": pathsim.blocks.Log,
+    "log10": pathsim.blocks.Log10,
+    "tan": pathsim.blocks.Tan,
+    "sinh": pathsim.blocks.Sinh,
+    "cosh": pathsim.blocks.Cosh,
+    "tanh": pathsim.blocks.Tanh,
+    "atan": pathsim.blocks.Atan,
+    "norm": pathsim.blocks.Norm,
+    "mod": pathsim.blocks.Mod,
+    "clip": pathsim.blocks.Clip,
+}
+
+map_str_to_object.update(math_blocks)
+
 map_str_to_event = {
     "ZeroCrossingDown": pathsim.events.ZeroCrossingDown,
     "ZeroCrossingUp": pathsim.events.ZeroCrossingUp,
