@@ -350,7 +350,11 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     
     if edge["targetHandle"] is not None:
         if block._port_map_in:
-            return block._port_map_in[edge["targetHandle"]]
+            # aliases are not yet supported for subsystems
+            if isinstance(block, pathsim.Subsystem):
+                return block._port_map_in[edge["targetHandle"]]
+            else:
+                return edge["targetHandle"]
 
     if isinstance(block, Function):
         return int(edge["targetHandle"].replace("target-", ""))
@@ -377,7 +381,11 @@ def get_output_index(block: Block, edge: dict) -> int:
     """
     if edge["sourceHandle"] is not None:
         if block._port_map_out:
-            return block._port_map_out[edge["sourceHandle"]]
+            # aliases are not yet supported for subsystems
+            if isinstance(block, pathsim.Subsystem):
+                return block._port_map_out[edge["sourceHandle"]]
+            else:
+                return edge["sourceHandle"]
 
     if isinstance(block, Splitter):
         # Splitter outputs are always in order, so we can use the handle directly
@@ -433,7 +441,7 @@ def make_connections(nodes, edges, blocks) -> list[Connection]:
                     if edge["sourceHandle"]:
                         label += f" ({edge['sourceHandle']})"
                     target_block.labels.append(label)
-            print(f"Connecting {source_block.id} output {output_index} to {target_block.id} input {input_index}")
+
             connection = Connection(
                 source_block[output_index],
                 target_block[input_index],
