@@ -144,6 +144,43 @@ const DnDFlow = () => {
     }
   };
 
+  // Function to preload all documentation at startup
+  const preloadAllDocumentation = async () => {
+    const availableTypes = Object.keys(nodeTypes);
+
+    try {
+      // Convert types array to a string (or could be sent as JSON array)
+      const response = await fetch(getApiEndpoint(`/get-all-docs`));
+
+      if (response.ok) {
+        const allDocs = await response.json();
+        setNodeDocumentation(allDocs);
+      } else {
+        console.error('Failed to preload documentation');
+        // Fallback: initialize empty documentation for all types
+        const documentationCache = {};
+        availableTypes.forEach(nodeType => {
+          documentationCache[nodeType] = {
+            html: '<p>No documentation available for this node type.</p>',
+            text: 'No documentation available for this node type.'
+          };
+        });
+        setNodeDocumentation(documentationCache);
+      }
+    } catch (error) {
+      console.error('Error preloading documentation:', error);
+      // Fallback: initialize empty documentation for all types
+      const documentationCache = {};
+      availableTypes.forEach(nodeType => {
+        documentationCache[nodeType] = {
+          html: '<p>Error loading documentation.</p>',
+          text: 'Error loading documentation.'
+        };
+      });
+      setNodeDocumentation(documentationCache);
+    }
+  };
+
   // Function to preload all default values at startup
   const preloadDefaultValues = async () => {
     const availableTypes = Object.keys(nodeTypes);
@@ -174,9 +211,10 @@ const DnDFlow = () => {
     }
   };
 
-  // Preload all default values when component mounts
+  // Preload all default values and documentation when component mounts
   useEffect(() => {
     preloadDefaultValues();
+    preloadAllDocumentation();
   }, []);
 
   const onDrop = useCallback(
@@ -758,20 +796,29 @@ const DnDFlow = () => {
     const selectedType = availableTypes[choiceIndex];
     const newNodeId = nodeCounter.toString();
 
-    // Fetch default values and documentation for this node type
-    const defaults = await fetchDefaultValues(selectedType);
-    const docs = await fetchNodeDocumentation(selectedType);
+    // Get default values and documentation for this node type (should be cached from preload)
+    let defaults = defaultValues[selectedType] || {};
+    let docs = nodeDocumentation[selectedType] || {
+      html: '<p>No documentation available for this node type.</p>',
+      text: 'No documentation available for this node type.'
+    };
 
-    // Store default values and documentation for this node type
-    setDefaultValues(prev => ({
-      ...prev,
-      [selectedType]: defaults
-    }));
+    // Fallback: fetch if not cached (shouldn't happen normally)
+    if (!defaultValues[selectedType]) {
+      defaults = await fetchDefaultValues(selectedType);
+      setDefaultValues(prev => ({
+        ...prev,
+        [selectedType]: defaults
+      }));
+    }
 
-    setNodeDocumentation(prev => ({
-      ...prev,
-      [selectedType]: docs
-    }));
+    if (!nodeDocumentation[selectedType]) {
+      docs = await fetchNodeDocumentation(selectedType);
+      setNodeDocumentation(prev => ({
+        ...prev,
+        [selectedType]: docs
+      }));
+    }
 
     // Create node data with label and initialize all expected fields as empty strings
     let nodeData = { label: `${selectedType} ${newNodeId}` };

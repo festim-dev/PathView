@@ -168,6 +168,30 @@ def get_default_values(node_type):
         ), 400
 
 
+@app.route("/get-all-docs", methods=["GET"])
+def get_all_docs():
+    try:
+        all_docs = {}
+        for node_type, block_class in map_str_to_object.items():
+            docstring = inspect.getdoc(block_class)
+
+            # If no docstring, provide a basic description
+            if not docstring:
+                docstring = f"No documentation available for {node_type}."
+
+            # Convert docstring to HTML using docutils/Sphinx-style processing
+            html_content = docstring_to_html(docstring)
+
+            all_docs[node_type] = {
+                "docstring": docstring,  # Keep original for backwards compatibility
+                "html": html_content,  # New HTML version
+            }
+
+        return jsonify(all_docs)
+    except Exception as e:
+        return jsonify({"error": f"Could not get docs for all nodes: {str(e)}"}), 400
+
+
 @app.route("/get-docs/<string:node_type>", methods=["GET"])
 def get_docs(node_type):
     try:
