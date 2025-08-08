@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fuel-cycle-sim"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A Python package for fuel cycle simulation with pathsim integration"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -46,8 +46,8 @@ Issues = "https://github.com/yourusername/fuel-cycle-sim/issues"
 packages = ["fuel_cycle_sim"]
 package-dir = {"fuel_cycle_sim" = "src/python"}
 
-[tool.setuptools_scm]
-write_to = "src/python/_version.py"
-
 [tool.setuptools.package-data]
 fuel_cycle_sim = ["templates/*"]
+
+[tool.setuptools_scm]
+write_to = "src/python/_version.py"
