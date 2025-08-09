@@ -13,6 +13,7 @@ import MultiplierNode from './components/nodes/MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './components/nodes/Splitters';
 import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
+import { RandomHandleNode } from './components/nodes/arbitraryNode';
 
 // Node types mapping
 export const nodeTypes = {
@@ -57,7 +58,8 @@ export const nodeTypes = {
   butterworthhighpass: DefaultNode,
   butterworthbandpass: DefaultNode,
   butterworthbandstop: DefaultNode,
-  fir: DefaultNode
+  fir: DefaultNode,
+  arbitrary: RandomHandleNode,
 };
 
 export const nodeMathTypes = {
@@ -113,7 +115,7 @@ export const nodeCategories = {
     description: 'Fuel cycle specific nodes'
   },
   'Others': {
-    nodes: ['samplehold', 'comparator'],
+    nodes: ['samplehold', 'comparator', 'arbitrary'],
     description: 'Miscellaneous nodes'
   },
   'Output': {

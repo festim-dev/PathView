@@ -23,6 +23,8 @@ import GlobalVariablesTab from './components/GlobalVariablesTab.jsx';
 import { makeEdge } from './components/CustomEdge';
 import { nodeTypes } from './nodeConfig.js';
 
+import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
+
 // * Declaring variables *
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
@@ -934,6 +936,46 @@ const DnDFlow = () => {
   }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
 
 
+  // Function to add input to a node
+  const addInputToNode = useCallback((nodeId) => {
+    setNodes((nds) => 
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          const currentInputCount = node.data.inputCount || 0;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              inputCount: currentInputCount + 1
+            }
+          };
+        }
+        return node;
+      })
+    );
+    setMenu(null); // Close the context menu
+  }, [setNodes, setMenu]);
+
+  // Function to add output to a node
+  const addOutputToNode = useCallback((nodeId) => {
+    setNodes((nds) => 
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          const currentOutputCount = node.data.outputCount || 0;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              outputCount: currentOutputCount + 1
+            }
+          };
+        }
+        return node;
+      })
+    );
+    setMenu(null); // Close the context menu
+  }, [setNodes, setMenu]);
+
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -1109,7 +1151,7 @@ const DnDFlow = () => {
                 <MiniMap />
                 <Background variant="dots" gap={12} size={1} />
 
-                {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
+                {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} onAddInput={addInputToNode} onAddOutput={addOutputToNode} {...menu} />}
                 {copyFeedback && (
                   <div
                     style={{
