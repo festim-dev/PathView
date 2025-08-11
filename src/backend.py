@@ -18,6 +18,11 @@ from pathsim.blocks import Scope, Spectrum
 # Sphinx imports for docstring processing
 from docutils.core import publish_parts
 
+# imports for logging progress
+from flask import Response, stream_with_context
+import time
+import logging
+from queue import Queue, Empty
 
 def docstring_to_html(docstring):
     """Convert a Python docstring to HTML using docutils (like Sphinx does)."""
@@ -84,6 +89,42 @@ else:
 SAVE_DIR = "saved_graphs"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
+### for capturing logs from pathsim
+
+@app.get("/logs/stream")
+def logs_stream():
+    def gen():
+        yield "retry: 500\n\n"
+        while True:
+            line = log_queue.get()           
+            for chunk in line.replace('\r', '\n').splitlines():
+                yield f"data: {chunk}\n\n"
+    return Response(gen(), mimetype="text/event-stream")
+
+log_queue = Queue()
+
+class QueueHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            log_queue.put_nowait(msg)
+        except Exception:
+            pass
+
+qhandler = QueueHandler()
+qhandler.setLevel(logging.INFO)           
+qhandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
+root = logging.getLogger()                
+root.setLevel(logging.INFO)
+root.addHandler(qhandler)
+
+ps = logging.getLogger('pathsim')     
+ps.setLevel(logging.INFO)
+ps.propagate = True                   
+ps.addHandler(qhandler)
+
+### log backend ends
 
 # Serve React frontend for production
 @app.route("/")
