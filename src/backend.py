@@ -125,11 +125,6 @@ root = logging.getLogger()
 root.setLevel(logging.INFO)
 root.addHandler(qhandler)
 
-ps = logging.getLogger("pathsim")
-ps.setLevel(logging.INFO)
-ps.propagate = True
-ps.addHandler(qhandler)
-
 ### log backend ends
 
 
@@ -353,6 +348,10 @@ def run_pathsim():
             return jsonify({"error": "No graph data provided"}), 400
 
         my_simulation, duration = make_pathsim_model(graph_data)
+
+        # get the pathsim logger and add the queue handler
+        logger = my_simulation.logger
+        logger.addHandler(qhandler)
 
         # Run the simulation
         my_simulation.run(duration)
