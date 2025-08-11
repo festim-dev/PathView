@@ -257,42 +257,6 @@ def get_docs(node_type):
         return jsonify({"error": f"Could not get docs for {node_type}: {str(e)}"}), 400
 
 
-# Function to save graphs
-@app.route("/save", methods=["POST"])
-def save_graph():
-    data = request.json
-    filename = data.get(
-        "filename", "file_1"
-    )  # sets file_1 as default filename if not provided
-    graph_data = data.get("graph")
-
-    # Enforces .json extension and valid filenames
-    valid_name = f"{filename}.json" if not filename.endswith(".json") else filename
-    file_path = os.path.join(SAVE_DIR, valid_name)
-
-    with open(file_path, "w") as f:
-        json.dump(graph_data, f, indent=2)
-
-    return jsonify({"message": f"Graph saved as {valid_name}"})
-
-
-# Function to load saved graphs
-@app.route("/load", methods=["POST"])
-def load_graph():
-    data = request.json
-    filename = data.get("filename")
-    validname = filename if not filename.endswith(".json") else filename[:-5]
-    filepath = os.path.join(SAVE_DIR, f"{validname}.json")
-
-    if not os.path.exists(filepath):
-        return jsonify({"error": "File not found"}), 404
-
-    with open(filepath, "r") as f:
-        graph_data = json.load(f)
-
-    return jsonify(graph_data)
-
-
 # Function to convert graph to Python script
 @app.route("/convert-to-python", methods=["POST"])
 def convert_to_python():
