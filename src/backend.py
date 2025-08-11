@@ -86,10 +86,6 @@ else:
     )
 
 
-# Creates directory for saved graphs
-SAVE_DIR = "saved_graphs"
-os.makedirs(SAVE_DIR, exist_ok=True)
-
 ### for capturing logs from pathsim
 
 

@@ -40,9 +40,6 @@ RUN pip install gunicorn
 # Copy built frontend from previous stage
 COPY --from=frontend-build /app/dist ./dist
 
-# Create necessary directories
-RUN mkdir -p saved_graphs plots
-
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
