@@ -38,7 +38,9 @@ class Splitter(Block):
         self.n = n  # number of splits
         self.fractions = np.ones(n) / n if fractions is None else np.array(fractions)
         assert len(self.fractions) == n, "Fractions must match number of outputs"
-        assert np.sum(self.fractions) == 1, "Fractions must sum to 1"
+        assert np.isclose(np.sum(self.fractions), 1), (
+            f"Fractions must sum to 1, not {np.sum(self.fractions)}"
+        )
 
     def update(self, t):
         # get the input from port '0'
