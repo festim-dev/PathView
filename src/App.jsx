@@ -1253,7 +1253,7 @@ const DnDFlow = () => {
                   }}
                   onClick={resetGraph}
                 >
-                  Reset Graph
+                  New graph
                 </button>
                 <button
                   style={{
