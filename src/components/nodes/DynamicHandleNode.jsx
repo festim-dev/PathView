@@ -31,7 +31,7 @@ export function DynamicHandleNode({ id, data }) {
       style={{
         width: Math.max(180, (data.label?.length || 8) * 8 + 40),
         height: Math.max(60, Math.max(inputHandleCount, outputHandleCount) * 25 + 30),
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 0,
         padding: 10,

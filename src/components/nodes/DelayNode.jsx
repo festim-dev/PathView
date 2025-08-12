@@ -7,7 +7,7 @@ export default function DelayNode({ data }) {
       style={{
         width: 80,
         height: 60,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 8,
         padding: 8,

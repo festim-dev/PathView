@@ -7,7 +7,7 @@ export default function BubblerNode({ data }) {
       style={{
         width: 210,
         height: 140,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 8,
         padding: 10,

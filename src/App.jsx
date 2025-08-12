@@ -272,7 +272,10 @@ const DnDFlow = () => {
       }
 
       // Create node data with label and initialize all expected fields as empty strings
-      let nodeData = { label: `${type} ${newNodeId}` };
+      let nodeData = { 
+        label: `${type} ${newNodeId}`,
+        nodeColor: '#DDE6ED' // Default node color
+      };
 
       // if node in nodeDynamicHandles, ensure add outputCount and inputCount to data
       if (nodeDynamicHandles.includes(type)) {
@@ -386,7 +389,7 @@ const DnDFlow = () => {
             return;
           }
 
-          // Load the graph data
+          // Load the graph data and ensure nodeColor exists on all nodes
           const {
             nodes: loadedNodes,
             edges: loadedEdges,
@@ -396,7 +399,17 @@ const DnDFlow = () => {
             events: loadedEvents,
             pythonCode: loadedPythonCode
           } = graphData;
-          setNodes(loadedNodes || []);
+
+          // Ensure all loaded nodes have a nodeColor property
+          const nodesWithColors = (loadedNodes || []).map(node => ({
+            ...node,
+            data: {
+              ...node.data,
+              nodeColor: node.data.nodeColor || '#DDE6ED'
+            }
+          }));
+
+          setNodes(nodesWithColors);
           setEdges(loadedEdges || []);
           setSelectedNode(null);
           setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
@@ -457,7 +470,17 @@ const DnDFlow = () => {
               events: loadedEvents,
               pythonCode: loadedPythonCode
             } = graphData;
-            setNodes(loadedNodes || []);
+
+            // Ensure all loaded nodes have a nodeColor property
+            const nodesWithColors = (loadedNodes || []).map(node => ({
+              ...node,
+              data: {
+                ...node.data,
+                nodeColor: node.data.nodeColor || '#DDE6ED'
+              }
+            }));
+
+            setNodes(nodesWithColors);
             setEdges(loadedEdges || []);
             setSelectedNode(null);
             setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
