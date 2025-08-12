@@ -14,9 +14,10 @@ The main workflow involves:
 
 Key mappings are provided for:
 - Block types (map_str_to_object): Maps string identifiers to PathSim block classes
-- Event types (map_str_to_event): Maps string identifiers to PathSim event classes  
+- Event types (map_str_to_event): Maps string identifiers to PathSim event classes
 - Solver types (NAME_TO_SOLVER): Maps string identifiers to PathSim solver classes
 """
+
 import math
 import numpy as np
 from pathsim import Simulation, Connection
@@ -167,11 +168,11 @@ map_str_to_event = {
 def find_node_by_id(node_id: str, nodes: list[dict]) -> dict:
     """
     Find a node by its ID in a list of nodes.
-    
+
     Args:
         node_id: The ID of the node to find.
         nodes: A list of node dictionaries to search through.
-        
+
     Returns:
         The node dictionary with the matching ID, or None if not found.
     """
@@ -181,11 +182,11 @@ def find_node_by_id(node_id: str, nodes: list[dict]) -> dict:
 def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
     """
     Find a block by its ID in a list of blocks.
-    
+
     Args:
         block_id: The ID of the block to find.
         blocks: A list of Block objects to search through.
-        
+
     Returns:
         The Block object with the matching ID, or None if not found.
     """
@@ -195,16 +196,16 @@ def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
 def make_global_variables(global_vars):
     """
     Validate and execute global variable definitions to make them usable in the simulation.
-    
+
     Args:
-        global_vars: A list of dictionaries containing variable definitions, where each 
+        global_vars: A list of dictionaries containing variable definitions, where each
                     dictionary has 'name' and 'value' keys.
-                    
+
     Returns:
         dict: A namespace dictionary containing the global variables.
-        
+
     Raises:
-        ValueError: If a variable name is invalid, is a Python keyword, or if there's 
+        ValueError: If a variable name is invalid, is a Python keyword, or if there's
                    an error evaluating the variable value.
     """
     # Validate and exec global variables so that they are usable later in this script.
@@ -248,18 +249,18 @@ def make_global_variables(global_vars):
 def make_solver_params(solver_prms, eval_namespace=None):
     """
     Process and validate solver parameters from the graph data.
-    
+
     Args:
-        solver_prms: Dictionary containing solver parameters including Solver type, 
+        solver_prms: Dictionary containing solver parameters including Solver type,
                     simulation_duration, and other solver-specific parameters.
         eval_namespace: Optional namespace for evaluating parameter expressions.
-        
+
     Returns:
         tuple: A tuple containing:
             - solver_prms (dict): Processed solver parameters
             - extra_params (dict): Additional parameters for the solver
             - duration (float): Simulation duration
-            
+
     Raises:
         ValueError: If invalid parameter values are provided or if solver type is unknown.
     """
@@ -367,15 +368,15 @@ def get_parameters_for_event_class(
 ):
     """
     Extract and process parameters for an event class from event data.
-    
+
     Args:
         event_class: The event class type to create parameters for.
         event_data: Dictionary containing the event configuration data.
         eval_namespace: Optional namespace for evaluating expressions and executing functions.
-        
+
     Returns:
         dict: A dictionary of parameters ready to be passed to the event class constructor.
-        
+
     Raises:
         ValueError: If required parameters are missing, if function code execution fails,
                    or if parameter evaluation fails.
@@ -432,15 +433,15 @@ def get_parameters_for_event_class(
 def get_parameters_for_block_class(block_class, node, eval_namespace):
     """
     Extract and process parameters for a block class from node data.
-    
+
     Args:
         block_class: The block class type to create parameters for.
         node: Dictionary containing the node configuration data.
         eval_namespace: Namespace for evaluating parameter expressions.
-        
+
     Returns:
         dict: A dictionary of parameters ready to be passed to the block class constructor.
-        
+
     Raises:
         ValueError: If required parameters are missing or if parameter evaluation fails.
     """
@@ -475,11 +476,11 @@ def make_blocks(
 ) -> tuple[list[Block], list[Event]]:
     """
     Create Block objects from node data and collect any associated events.
-    
+
     Args:
         nodes: List of node dictionaries containing block configuration data.
         eval_namespace: Optional namespace for evaluating expressions.
-        
+
     Returns:
         tuple: A tuple containing:
             - blocks (list[Block]): List of created Block objects
@@ -510,7 +511,7 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
 
     Returns:
         int: The input index for the block.
-        
+
     Raises:
         AssertionError: If the target block has multiple input ports but the connection
                        method hasn't been implemented for that block type.
@@ -543,7 +544,7 @@ def get_output_index(block: Block, edge: dict) -> int:
 
     Returns:
         int: The output index for the block.
-        
+
     Raises:
         ValueError: If an invalid source handle is provided for a Splitter block.
         AssertionError: If the source block has multiple output ports but the connection
@@ -579,18 +580,18 @@ def get_output_index(block: Block, edge: dict) -> int:
 def make_connections(nodes, edges, blocks) -> list[Connection]:
     """
     Create PathSim Connection objects from nodes, edges, and blocks data.
-    
+
     This function processes the graph structure to create proper connections between blocks,
     handling special cases for scopes and different block types with multiple inputs/outputs.
-    
+
     Args:
         nodes: List of node dictionaries containing block information.
         edges: List of edge dictionaries defining connections between nodes.
         blocks: List of Block objects that have been created from the nodes.
-        
+
     Returns:
         list[Connection]: List of PathSim Connection objects linking block inputs and outputs.
-        
+
     Note:
         This function also handles labeling for Scope and Spectrum blocks automatically.
     """
@@ -666,14 +667,14 @@ def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Ev
 def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
     """
     Create a default Scope block that connects to all other blocks in the simulation.
-    
+
     This function creates a default scope when no explicit scope exists in the graph,
     ensuring that all block outputs are captured for visualization.
-    
+
     Args:
         nodes: List of node dictionaries containing block information (used for labels).
         blocks: List of Block objects to connect to the default scope.
-        
+
     Returns:
         tuple: A tuple containing:
             - scope_default (Scope): The created default Scope block
@@ -732,11 +733,11 @@ def make_var_name(node: dict) -> str:
 def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
     """
     Create a complete PathSim simulation model from graph data.
-    
+
     This is the main function that orchestrates the creation of a PathSim simulation
     from a graph representation. It processes nodes, edges, solver parameters, global
     variables, events, and custom Python code to build a complete simulation model.
-    
+
     Args:
         graph_data: Dictionary containing the complete graph representation with keys:
             - nodes: List of node dictionaries representing blocks
@@ -745,12 +746,12 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
             - globalVariables: Dictionary of global variable definitions
             - events: List of event dictionaries (optional)
             - pythonCode: Custom Python code to execute (optional)
-            
+
     Returns:
         tuple: A tuple containing:
             - simulation (Simulation): The configured PathSim Simulation object
             - duration (float): The simulation duration
-            
+
     Raises:
         ValueError: If there are errors in processing any component of the graph data.
         Exception: If custom Python code execution fails.
