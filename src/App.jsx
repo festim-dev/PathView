@@ -1,5 +1,5 @@
 // * Imports *
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, version } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -305,6 +305,7 @@ const DnDFlow = () => {
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
     const graphData = {
+      version: versionInfo ? Object.fromEntries(Object.entries(versionInfo).filter(([key]) => key !== 'status')) : 'unknown',
       nodes,
       edges,
       nodeCounter,
