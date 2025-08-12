@@ -77,8 +77,22 @@ def make_edge_data(data: dict) -> list[dict]:
     data = data.copy()
 
     # we need the namespace since we call make_blocks
-    namespace = make_global_variables(data["globalVariables"])
-    blocks, _ = make_blocks(data["nodes"], eval_namespace=namespace)
+
+    global_vars = data.get("globalVariables", {})
+
+    # Get the global variables namespace to use in eval calls
+    global_namespace = make_global_variables(global_vars)
+
+    # Create a combined namespace that includes built-in functions and global variables
+    eval_namespace = globals().copy()
+    eval_namespace.update(global_namespace)
+
+    # Execute python code first to define any variables that blocks might need
+    python_code = data.get("pythonCode", "")
+    if python_code:
+        exec(python_code, eval_namespace)
+
+    blocks, _ = make_blocks(data["nodes"], eval_namespace=eval_namespace)
 
     # Process each node and its sorted incoming edges to create connections
     block_to_input_index = {b: 0 for b in blocks}
