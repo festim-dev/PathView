@@ -20,26 +20,6 @@ An interactive visual tool for modeling and simulating nuclear fuel cycle compon
    :alt: Node.js 18+
 
 
-===============================
-Statement of Need
-===============================
-
-System modeling is a critical aspect of nuclear engineering that requires sophisticated tools to analyze material flows, reactor performance, and waste management strategies. PathView addresses the need for:
-
-**Accessibility**
-   Traditional system simulation tools are often complex, proprietary, or require extensive training. This tool provides an intuitive visual interface that makes system modeling accessible to students, researchers, and professionals.
-
-**Interactivity**
-   Static models and command-line tools limit exploration and understanding. Our interactive visual approach allows users to build, modify, and experiment with system scenarios in real-time.
-
-**Educational Value**
-   The visual nature of the tool makes it ideal for teaching system concepts, allowing students to see the connections between different components and understand material flows.
-
-**Research Flexibility**
-   Researchers need tools that can be easily modified and extended. The open-source nature and modular architecture enable customization for specific research needs.
-
-**Modern Technology Stack**
-   Built with modern web technologies (React, Python) that ensure maintainability, extensibility, and cross-platform compatibility.
 
 ===============================
 Installation Guide
@@ -56,10 +36,6 @@ Before installing PathView, ensure your system meets the following requirements:
    - pip for Python package management
    - Git (for development)
 
-**Supported Operating Systems:**
-   - Linux (Ubuntu 20.04+, CentOS 8+)
-   - macOS 10.15+
-   - Windows 10+
 
 Installation Steps
 ------------------
@@ -92,7 +68,15 @@ Installation Steps
       
       # On Windows:
       venv\Scripts\activate
+   
+   Alternatively, you can use Conda:
+   .. code-block:: bash
 
+      conda create -n pathview python=3.8
+      conda activate pathview
+      pip install --upgrade pip
+      pip install -e .
+   
 4. **Install Backend Dependencies**
    
    .. code-block:: bash
@@ -110,56 +94,30 @@ Installation Steps
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
 
-Troubleshooting
----------------
-
-**Common Issues:**
-
-- **Node.js version conflicts**: Use nvm to manage Node.js versions
-- **Python path issues**: Ensure Python 3.8+ is in your PATH
-- **Port conflicts**: Check if ports 5173 or 8000 are already in use
-- **Permission errors**: Use appropriate permissions for installation directories
-
 ===============================
 Example Usage
 ===============================
-
-Quick Start Example
--------------------
 
 Here's a simple example to get you started with PathView:
 
 WIP
 
 
-Use Cases
----------
-
-**Educational Scenarios**
-   - Simple fuel cycle for classroom demonstrations
-   - Impact of tritium breeding ratio for fusion reactors
-
-**Research Applications**
-   - Advanced reactor fuel cycle analysis
-   - Multi-recycling scenarios
-   - Waste minimization strategies
-
-**Planning and Analysis**
-   - Regional fuel cycle infrastructure planning
-   - Economic optimization studies
-   - Material flow tracking
-
 ===============================
 Roadmap
 ===============================
 
-WIP
+- Export graph as Subsystem and load it back
+- User-defined block class
+- Support for user plugins (eg. fuel cycle, thermodynamic models, etc.)
+- Enhanced visualization options
+- More example scenarios
+- Annotations and comments on graph
+- More styling options for nodes and edges
 
 ===============================
 Community Guidelines
 ===============================
-
-Welcome to the PathView community! We're committed to fostering an inclusive, collaborative environment for all contributors.
 
 Code of Conduct
 ----------------
@@ -171,7 +129,7 @@ Contributing Guidelines
 
 **Getting Started**
    1. Fork the repository
-   2. Create a feature branch (``git checkout -b feature/awesome-feature``)
+   2. Create a feature branch (``git checkout -b awesome-feature``)
    3. Make your changes
    4. Add tests for new functionality if needed
    5. Ensure all tests pass
