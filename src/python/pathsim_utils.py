@@ -377,7 +377,7 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
             return edge["targetHandle"]
 
     # TODO maybe we could directly use the targetHandle as a port alias for these:
-    if isinstance(block, (Function, ODE)):
+    elif type(block) in (Function, ODE):
         return int(edge["targetHandle"].replace("target-", ""))
     else:
         # make sure that the target block has only one input port (ie. that targetHandle is None)
@@ -414,7 +414,7 @@ def get_output_index(block: Block, edge: dict) -> int:
             )
         return output_index
     # TODO maybe we could directly use the targetHandle as a port alias for these:
-    elif isinstance(block, (Function, ODE)):
+    elif type(block) in (Function, ODE):
         # Function and ODE outputs are always in order, so we can use the handle directly
         assert edge["sourceHandle"], edge
         return int(edge["sourceHandle"].replace("source-", ""))
