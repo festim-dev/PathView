@@ -13,6 +13,7 @@ from contextlib import redirect_stdout, redirect_stderr
 
 from pathview.convert_to_python import convert_graph_to_python
 from pathview.pathsim_utils import make_pathsim_model, map_str_to_object
+from pathview.custom_pathsim_blocks import Table1D
 from pathsim.blocks import Scope, Spectrum
 
 # Sphinx imports for docstring processing
@@ -375,13 +376,35 @@ def run_pathsim():
 
             for p, d in enumerate(data):
                 lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-                if isinstance(scope, Spectrum):
-                    d = abs(d)
                 fig.add_trace(
                     go.Scatter(x=time, y=d, mode="lines", name=lb), row=i + 1, col=1
                 )
 
             fig.update_xaxes(title_text="Time", row=len(scopes), col=1)
+
+        # make Table1D plots
+        for b in my_simulation.blocks:
+            # if it's a Table1d, check if it's connected to a scope
+            if isinstance(b, Table1D):
+                for c in my_simulation.connections:
+                    if b in c.get_blocks():
+                        for s in scopes:
+                            if s in c.get_blocks():
+                                # if connected to a scope, add a vertical line at each table point
+                                time_points = b.points
+                                values = b.values
+                                # add scatter points
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=time_points,
+                                        y=values,
+                                        mode="markers",
+                                        name=f"{b.label} points",
+                                        marker=dict(symbol="x", size=10),
+                                    ),
+                                    row=scopes.index(s) + 1,
+                                    col=1,
+                                )
 
         # make spectrum plots
         for i, spec in enumerate(spectra):

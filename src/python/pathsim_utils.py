@@ -33,6 +33,7 @@ from .custom_pathsim_blocks import (
     Bubbler,
     FestimWall,
     Integrator,
+    Table1D,
 )
 from flask import jsonify
 import inspect
@@ -112,6 +113,7 @@ map_str_to_object = {
     "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
     "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
     "fir": pathsim.blocks.FIR,
+    "table": Table1D,
 }
 
 math_blocks = {

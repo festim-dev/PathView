@@ -108,6 +108,23 @@ class Integrator(pathsim.blocks.Integrator):
         return [event]
 
 
+class Table1D(Block):
+    """Block that holds a 1D table of values."""
+
+    def __init__(self, points: list[float], values: list[float]):
+        """
+        Args:
+            points: List of points (x-coordinates) for the table.
+            values: List of values (y-coordinates) for the table.
+        """
+        super().__init__()
+        self.points = np.array(points)
+        self.values = np.array(values)
+
+    def update(self, t):
+        return
+
+
 # BUBBLER SYSTEM
 
 
