@@ -7,6 +7,7 @@ import fuel_cycle_sim
 {% from 'block_macros.py' import create_block, create_integrator_block, create_bubbler_block, create_connections, create_event -%}
 
 # Create global variables
+
 {%- if pythonCode %}
 {{ pythonCode }}
 {% endif -%}
