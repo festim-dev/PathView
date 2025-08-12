@@ -1,5 +1,5 @@
 // * Imports *
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, version } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -27,6 +27,19 @@ import LogDock from './components/LogDock.jsx';
 import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
 
 // * Declaring variables *
+
+// Default solver parameters
+const DEFAULT_SOLVER_PARAMS = {
+  dt: '0.01',
+  dt_min: '1e-16',
+  dt_max: '',
+  Solver: 'SSPRK22',
+  tolerance_fpi: '1e-10',
+  iterations_max: '200',
+  log: 'true',
+  simulation_duration: '10.0',
+  extra_params: '{}'
+};
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
 const initialNodes = [];
@@ -78,17 +91,7 @@ const DnDFlow = () => {
 
 
   // Solver parameters state
-  const [solverParams, setSolverParams] = useState({
-    dt: '0.01',
-    dt_min: '1e-6',
-    dt_max: '1.0',
-    Solver: 'SSPRK22',
-    tolerance_fpi: '1e-6',
-    iterations_max: '100',
-    log: 'true',
-    simulation_duration: '50.0',
-    extra_params: '{}'
-  });
+  const [solverParams, setSolverParams] = useState(DEFAULT_SOLVER_PARAMS);
 
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
@@ -102,6 +105,7 @@ const DnDFlow = () => {
   const [tempLabel, setTempLabel] = useState('');
   const [nodeDocumentation, setNodeDocumentation] = useState({});
   const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(true);
 
   // Function to fetch default values for a node type (with caching)
   const fetchDefaultValues = async (nodeType) => {
@@ -305,6 +309,7 @@ const DnDFlow = () => {
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
     const graphData = {
+      version: versionInfo ? Object.fromEntries(Object.entries(versionInfo).filter(([key]) => key !== 'status')) : 'unknown',
       nodes,
       edges,
       nodeCounter,
@@ -333,8 +338,6 @@ const DnDFlow = () => {
         await writable.write(JSON.stringify(graphData, null, 2));
         await writable.close();
 
-        // Success message
-        alert('Graph saved successfully!');
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error('Error saving file:', error);
@@ -357,8 +360,6 @@ const DnDFlow = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      alert('Graph downloaded successfully!');
     }
   };
 
@@ -414,22 +415,10 @@ const DnDFlow = () => {
           setEdges(loadedEdges || []);
           setSelectedNode(null);
           setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-          setSolverParams(loadedSolverParams ?? {
-            dt: '0.01',
-            dt_min: '1e-6',
-            dt_max: '1.0',
-            Solver: 'SSPRK22',
-            tolerance_fpi: '1e-6',
-            iterations_max: '100',
-            log: 'true',
-            simulation_duration: '50.0',
-            extra_params: '{}'
-          });
+          setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
           setGlobalVariables(loadedGlobalVariables ?? []);
           setEvents(loadedEvents ?? []);
           setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-
-          alert('Graph loaded successfully!');
         } catch (error) {
           console.error('Error parsing file:', error);
           alert('Error reading file. Please make sure it\'s a valid JSON file.');
@@ -485,22 +474,10 @@ const DnDFlow = () => {
             setEdges(loadedEdges || []);
             setSelectedNode(null);
             setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-            setSolverParams(loadedSolverParams ?? {
-              dt: '0.01',
-              dt_min: '1e-6',
-              dt_max: '1.0',
-              Solver: 'SSPRK22',
-              tolerance_fpi: '1e-6',
-              iterations_max: '100',
-              log: 'true',
-              simulation_duration: '50.0',
-              extra_params: '{}'
-            });
+            setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
             setGlobalVariables(loadedGlobalVariables ?? []);
             setEvents(loadedEvents ?? []);
             setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-
-            alert('Graph loaded successfully!');
           } catch (error) {
             console.error('Error parsing file:', error);
             alert('Error reading file. Please make sure it\'s a valid JSON file.');
@@ -522,17 +499,7 @@ const DnDFlow = () => {
     setEdges(initialEdges);
     setSelectedNode(null);
     setNodeCounter(0);
-    setSolverParams({
-      dt: '0.01',
-      dt_min: '1e-6',
-      dt_max: '1.0',
-      Solver: 'SSPRK22',
-      tolerance_fpi: '1e-6',
-      iterations_max: '100',
-      log: 'true',
-      simulation_duration: '50.0',
-      extra_params: '{}'
-    });
+    setSolverParams(DEFAULT_SOLVER_PARAMS);
     setGlobalVariables([]);
   };
   const downloadCsv = async () => {
@@ -629,6 +596,7 @@ const DnDFlow = () => {
         nodeCounter,
         solverParams,
         globalVariables,
+        pythonCode,
         events
       };
 
@@ -661,8 +629,6 @@ const DnDFlow = () => {
             const writable = await fileHandle.createWritable();
             await writable.write(result.script);
             await writable.close();
-
-            alert('Python script generated and saved successfully!');
           } catch (error) {
             if (error.name !== 'AbortError') {
               console.error('Error saving Python file:', error);
@@ -681,8 +647,6 @@ const DnDFlow = () => {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-
-          alert('Python script generated and downloaded to your default downloads folder!');
         }
       } else {
         alert(`Error generating Python script: ${result.error}`);
@@ -733,13 +697,12 @@ const DnDFlow = () => {
         setCsvData(result.csv_data);
         setHtmlData(result.html);
         setActiveTab('results');
-        alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
         alert(`Error running Pathsim simulation: ${result.error}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to run Pathsim simulation. Make sure the backend is running.');
+      alert(`Failed to run Pathsim simulation. Make sure the backend is running. : ${error.message}`);
     }
   };
 
@@ -840,77 +803,6 @@ const DnDFlow = () => {
       }))
     );
   };
-  // Function to add a new node to the graph
-  const addNode = async () => {
-    // Get available node types from nodeTypes object
-    const availableTypes = Object.keys(nodeTypes);
-
-    // Create options string for the prompt
-    const typeOptions = availableTypes.map((type, index) => `${index + 1}. ${type}`).join('\n');
-
-    const userInput = prompt(
-      `Select a node type by entering the number:\n\n${typeOptions}\n\nEnter your choice (1-${availableTypes.length}):`
-    );
-
-    // If user cancels the prompt
-    if (!userInput) {
-      return;
-    }
-
-    // Parse the user input
-    const choiceIndex = parseInt(userInput) - 1;
-
-    // Validate the choice
-    if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= availableTypes.length) {
-      alert('Invalid choice. Please enter a number between 1 and ' + availableTypes.length);
-      return;
-    }
-
-    const selectedType = availableTypes[choiceIndex];
-    const newNodeId = nodeCounter.toString();
-
-    // Get default values and documentation for this node type (should be cached from preload)
-    let defaults = defaultValues[selectedType] || {};
-    let docs = nodeDocumentation[selectedType] || {
-      html: '<p>No documentation available for this node type.</p>',
-      text: 'No documentation available for this node type.'
-    };
-
-    // Fallback: fetch if not cached (shouldn't happen normally)
-    if (!defaultValues[selectedType]) {
-      defaults = await fetchDefaultValues(selectedType);
-      setDefaultValues(prev => ({
-        ...prev,
-        [selectedType]: defaults
-      }));
-    }
-
-    if (!nodeDocumentation[selectedType]) {
-      docs = await fetchNodeDocumentation(selectedType);
-      setNodeDocumentation(prev => ({
-        ...prev,
-        [selectedType]: docs
-      }));
-    }
-
-    // Create node data with label and initialize all expected fields as empty strings
-    let nodeData = { label: `${selectedType} ${newNodeId}` };
-
-    // Initialize all expected parameters as empty strings
-    Object.keys(defaults).forEach(key => {
-      nodeData[key] = '';
-    });
-
-    const newNode = {
-      id: newNodeId,
-      type: selectedType,
-      position: { x: 200 + nodes.length * 50, y: 200 },
-      data: nodeData,
-    };
-
-    setNodes((nds) => [...nds, newNode]);
-    setNodeCounter((count) => count + 1);
-  };
 
   // Function to pop context menu when right-clicking on a node
   const onNodeContextMenu = useCallback(
@@ -918,16 +810,16 @@ const DnDFlow = () => {
       // Prevent native context menu from showing
       event.preventDefault();
 
-      // Calculate position of the context menu. We want to make sure it
-      // doesn't get positioned off-screen.
+      // Get the ReactFlow pane's bounding rectangle to calculate relative position
       const pane = ref.current.getBoundingClientRect();
+
+      // Position the context menu directly at the click coordinates relative to the pane
       setMenu({
         id: node.id,
-        top: event.clientY < pane.height - 200 && event.clientY,
-        left: event.clientX < pane.width - 200 && event.clientX,
-        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
-        bottom:
-          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+        top: event.clientY - pane.top,
+        left: event.clientX - pane.left,
+        right: false,
+        bottom: false,
       });
     },
     [setMenu],
@@ -1290,23 +1182,6 @@ const DnDFlow = () => {
                 <button
                   style={{
                     position: 'absolute',
-                    left: 20,
-                    top: 20,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={addNode}
-                >
-                  Add Node
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
                     right: 20,
                     top: 20,
                     zIndex: 10,
@@ -1341,7 +1216,7 @@ const DnDFlow = () => {
                 <button
                   style={{
                     position: 'absolute',
-                    left: 130,
+                    left: 20,
                     top: 20,
                     zIndex: 10,
                     padding: '8px 12px',
@@ -1353,7 +1228,7 @@ const DnDFlow = () => {
                   }}
                   onClick={resetGraph}
                 >
-                  Reset Graph
+                  New graph
                 </button>
                 <button
                   style={{
@@ -1384,34 +1259,58 @@ const DnDFlow = () => {
                     border: 'none',
                     borderRadius: 5,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                   onClick={runPathsim}
                 >
+                  <span style={{ fontSize: '14px', lineHeight: '1' }}>▶</span>
                   Run
                 </button>
 
 
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '50%',
-                    right: 20,
-                    backgroundColor: 'rgba(0, 0, 0, 0.31)',
-                    color: 'white',
-                    padding: '8px 12px',
-                    borderRadius: 4,
-                    fontSize: '12px',
-                    zIndex: 10,
-                    maxWidth: '200px',
-                  }}
-                >
-                  <strong>Keyboard Shortcuts:</strong><br />
-                  Ctrl+C: Copy selected node<br />
-                  Ctrl+V: Paste copied node<br />
-                  Ctrl+D: Duplicate selected node<br />
-                  Del/Backspace: Delete selection<br />
-                  Right-click: Context menu
-                </div>
+                {showKeyboardShortcuts && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '50%',
+                      right: 20,
+                      backgroundColor: 'rgba(0, 0, 0, 0.31)',
+                      color: 'white',
+                      padding: '8px 12px',
+                      borderRadius: 4,
+                      fontSize: '12px',
+                      zIndex: 10,
+                      maxWidth: '200px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                      <strong>Keyboard Shortcuts:</strong>
+                      <button
+                        onClick={() => setShowKeyboardShortcuts(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          padding: '0 0 0 8px',
+                          lineHeight: '1',
+                        }}
+                        title="Close shortcuts panel"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    Ctrl+C: Copy selected node<br />
+                    Ctrl+V: Paste copied node<br />
+                    Ctrl+D: Duplicate selected node<br />
+                    Del/Backspace: Delete selection<br />
+                    Right-click: Context menu
+                  </div>
+                )}
               </ReactFlow>
             </div>
           </div>
@@ -1551,7 +1450,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="0.01"
                   />
                 </div>
 
@@ -1577,7 +1475,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1e-6"
                   />
                 </div>
 
@@ -1603,7 +1500,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1.0"
                   />
                 </div>
 
@@ -1631,7 +1527,33 @@ const DnDFlow = () => {
                   >
                     <option value="SSPRK22">SSPRK22</option>
                     <option value="SSPRK33">SSPRK33</option>
+                    <option value="SSPRK34">SSPRK34</option>
+                    <option value="RK4">RK4</option>
+                    <option value="RKBS32">RKBS32</option>
+                    <option value="RKCK54">RKCK54</option>
+                    <option value="RKDP54">RKDP54</option>
+                    <option value="RKDP87">RKDP87</option>
                     <option value="RKF21">RKF21</option>
+                    <option value="RKF45">RKF45</option>
+                    <option value="RKF78">RKF78</option>
+                    <option value="RKV65">RKV65</option>
+                    <option value="BDF">BDF</option>
+                    <option value="EUF">EUF</option>
+                    <option value="EUB">EUB</option>
+                    <option value="GEAR21">GEAR21</option>
+                    <option value="GEAR32">GEAR32</option>
+                    <option value="GEAR43">GEAR43</option>
+                    <option value="GEAR54">GEAR54</option>
+                    <option value="GEAR52A">GEAR52A</option>
+                    <option value="DIRK2">DIRK2</option>
+                    <option value="DIRK3">DIRK3</option>
+                    <option value="ESDIRK32">ESDIRK32</option>
+                    <option value="ESDIRK4">ESDIRK4</option>
+                    <option value="ESDIRK43">ESDIRK43</option>
+                    <option value="ESDIRK54">ESDIRK54</option>
+                    <option value="ESDIRK85">ESDIRK85</option>
+                    <option value="STEADYSTATE">SteadyState</option>
+
                   </select>
                 </div>
 
@@ -1657,7 +1579,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1e-6"
                   />
                 </div>
 
@@ -1683,7 +1604,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="100"
                   />
                 </div>
 
@@ -1709,7 +1629,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="50.0"
                   />
                 </div>
 
@@ -1793,11 +1712,11 @@ const DnDFlow = () => {
                     // Reset to default values
                     setSolverParams({
                       dt: '0.01',
-                      dt_min: '1e-6',
-                      dt_max: '1.0',
+                      dt_min: '1e-16',
+                      dt_max: '',
                       Solver: 'SSPRK22',
-                      tolerance_fpi: '1e-6',
-                      iterations_max: '100',
+                      tolerance_fpi: '1e-10',
+                      iterations_max: '200',
                       log: 'true',
                       simulation_duration: '50.0'
                     });

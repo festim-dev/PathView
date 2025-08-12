@@ -1,4 +1,8 @@
 {
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
   "nodes": [
     {
       "id": "0",
@@ -12,7 +16,8 @@
         "alpha": "",
         "freq": "np.linspace(0, 1*np.pi, 600)",
         "labels": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -30,11 +35,12 @@
       },
       "data": {
         "label": "High frequency",
-        "func": "lambda t: np.sin(1.5*t *2*np.pi)"
+        "func": "lambda t: np.sin(1.5*t *2*np.pi)",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
-        "width": 205,
-        "height": 53
+        "width": 206,
+        "height": 54
       },
       "selected": false,
       "dragging": false
@@ -50,7 +56,8 @@
         "label": "scope 2",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -68,11 +75,12 @@
       },
       "data": {
         "label": "Low frequency",
-        "func": "lambda t: np.sin(0.5*t * 2*np.pi)"
+        "func": "lambda t: np.sin(0.5*t * 2*np.pi)",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
-        "width": 205,
-        "height": 53
+        "width": 206,
+        "height": 54
       },
       "selected": false,
       "dragging": false
@@ -86,7 +94,8 @@
       },
       "data": {
         "label": "adder 4",
-        "operations": ""
+        "operations": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 64,
@@ -184,5 +193,7 @@
     "simulation_duration": "2*2*np.pi",
     "extra_params": "{}"
   },
-  "globalVariables": []
+  "globalVariables": [],
+  "events": [],
+  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
 }

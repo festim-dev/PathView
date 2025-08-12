@@ -151,12 +151,12 @@ def get_version():
 
         import pathview
 
-        fcs_version = getattr(pathview, "__version__", "Unknown")
+        pathview_version = getattr(pathview, "__version__", "Unknown")
 
         return jsonify(
             {
                 "pathsim_version": pathsim_version,
-                "pathview_version": fcs_version,
+                "pathview_version": pathview_version,
                 "status": "success",
             }
         ), 200
