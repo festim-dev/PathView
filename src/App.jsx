@@ -102,6 +102,7 @@ const DnDFlow = () => {
   const [tempLabel, setTempLabel] = useState('');
   const [nodeDocumentation, setNodeDocumentation] = useState({});
   const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(true);
 
   // Function to fetch default values for a node type (with caching)
   const fetchDefaultValues = async (nodeType) => {
@@ -1290,27 +1291,47 @@ const DnDFlow = () => {
                 </button>
 
 
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '50%',
-                    right: 20,
-                    backgroundColor: 'rgba(0, 0, 0, 0.31)',
-                    color: 'white',
-                    padding: '8px 12px',
-                    borderRadius: 4,
-                    fontSize: '12px',
-                    zIndex: 10,
-                    maxWidth: '200px',
-                  }}
-                >
-                  <strong>Keyboard Shortcuts:</strong><br />
-                  Ctrl+C: Copy selected node<br />
-                  Ctrl+V: Paste copied node<br />
-                  Ctrl+D: Duplicate selected node<br />
-                  Del/Backspace: Delete selection<br />
-                  Right-click: Context menu
-                </div>
+                {showKeyboardShortcuts && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '50%',
+                      right: 20,
+                      backgroundColor: 'rgba(0, 0, 0, 0.31)',
+                      color: 'white',
+                      padding: '8px 12px',
+                      borderRadius: 4,
+                      fontSize: '12px',
+                      zIndex: 10,
+                      maxWidth: '200px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                      <strong>Keyboard Shortcuts:</strong>
+                      <button
+                        onClick={() => setShowKeyboardShortcuts(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          padding: '0 0 0 8px',
+                          lineHeight: '1',
+                        }}
+                        title="Close shortcuts panel"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    Ctrl+C: Copy selected node<br />
+                    Ctrl+V: Paste copied node<br />
+                    Ctrl+D: Duplicate selected node<br />
+                    Del/Backspace: Delete selection<br />
+                    Right-click: Context menu
+                  </div>
+                )}
               </ReactFlow>
             </div>
           </div>
