@@ -1101,15 +1101,32 @@ const DnDFlow = () => {
         {/* Help Button */}
         <button
           style={{
-            padding: '10px 20px',
-            margin: '5px 10px 5px 5px',
-            backgroundColor: '#007ACC',
+            padding: '8px 12px',
+            margin: '5px 15px 5px 5px',
+            backgroundColor: '#4A90E2',
             color: 'white',
             border: 'none',
-            borderRadius: 5,
+            borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
+            fontSize: '18px',
+            fontWeight: '600',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 6px rgba(74, 144, 226, 0.3)',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#357ABD';
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#4A90E2';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 6px rgba(74, 144, 226, 0.3)';
           }}
           onClick={() => {
             // TODO - open modal, navigate to help page, etc.
@@ -1117,7 +1134,7 @@ const DnDFlow = () => {
           }}
           title="Get help and documentation"
         >
-          Help
+          ?
         </button>
       </div>
 
