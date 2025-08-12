@@ -15,7 +15,7 @@ export function AmplifierNode({ data }) {
     >
 
       <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon points="0,0 100,50 0,100" fill="#DDE6ED" />
+          <polygon points="0,0 100,50 0,100" fill={data.nodeColor || "#DDE6ED"} />
       </svg>
       <div style={{ 
         fontSize: '12px',
@@ -50,7 +50,7 @@ export function AmplifierNodeReverse({ data }) {
     >
 
       <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon points="0,50 100,100 100,0" fill="#DDE6ED" />
+          <polygon points="0,50 100,100 100,0" fill={data.nodeColor || "#DDE6ED"} />
       </svg>
       <div style={{ 
         fontSize: '12px',

@@ -7,7 +7,7 @@ export default function ScopeNode({ data }) {
       style={{
         width: 100,
         height: 120,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 12,
         padding: 10,
