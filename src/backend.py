@@ -18,6 +18,12 @@ from pathsim.blocks import Scope, Spectrum
 # Sphinx imports for docstring processing
 from docutils.core import publish_parts
 
+# imports for logging progress
+from flask import Response, stream_with_context
+import time
+import logging
+from queue import Queue, Empty
+
 
 def docstring_to_html(docstring):
     """Convert a Python docstring to HTML using docutils (like Sphinx does)."""
@@ -80,9 +86,42 @@ else:
     )
 
 
-# Creates directory for saved graphs
-SAVE_DIR = "saved_graphs"
-os.makedirs(SAVE_DIR, exist_ok=True)
+### for capturing logs from pathsim
+
+
+@app.get("/logs/stream")
+def logs_stream():
+    def gen():
+        yield "retry: 500\n\n"
+        while True:
+            line = log_queue.get()
+            for chunk in line.replace("\r", "\n").splitlines():
+                yield f"data: {chunk}\n\n"
+
+    return Response(gen(), mimetype="text/event-stream")
+
+
+log_queue = Queue()
+
+
+class QueueHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            log_queue.put_nowait(msg)
+        except Exception:
+            pass
+
+
+qhandler = QueueHandler()
+qhandler.setLevel(logging.INFO)
+qhandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+root.addHandler(qhandler)
+
+### log backend ends
 
 
 # Serve React frontend for production
@@ -218,42 +257,6 @@ def get_docs(node_type):
         return jsonify({"error": f"Could not get docs for {node_type}: {str(e)}"}), 400
 
 
-# Function to save graphs
-@app.route("/save", methods=["POST"])
-def save_graph():
-    data = request.json
-    filename = data.get(
-        "filename", "file_1"
-    )  # sets file_1 as default filename if not provided
-    graph_data = data.get("graph")
-
-    # Enforces .json extension and valid filenames
-    valid_name = f"{filename}.json" if not filename.endswith(".json") else filename
-    file_path = os.path.join(SAVE_DIR, valid_name)
-
-    with open(file_path, "w") as f:
-        json.dump(graph_data, f, indent=2)
-
-    return jsonify({"message": f"Graph saved as {valid_name}"})
-
-
-# Function to load saved graphs
-@app.route("/load", methods=["POST"])
-def load_graph():
-    data = request.json
-    filename = data.get("filename")
-    validname = filename if not filename.endswith(".json") else filename[:-5]
-    filepath = os.path.join(SAVE_DIR, f"{validname}.json")
-
-    if not os.path.exists(filepath):
-        return jsonify({"error": "File not found"}), 404
-
-    with open(filepath, "r") as f:
-        graph_data = json.load(f)
-
-    return jsonify(graph_data)
-
-
 # Function to convert graph to Python script
 @app.route("/convert-to-python", methods=["POST"])
 def convert_to_python():
@@ -305,6 +308,10 @@ def run_pathsim():
             return jsonify({"error": "No graph data provided"}), 400
 
         my_simulation, duration = make_pathsim_model(graph_data)
+
+        # get the pathsim logger and add the queue handler
+        logger = my_simulation.logger
+        logger.addHandler(qhandler)
 
         # Run the simulation
         my_simulation.run(duration)

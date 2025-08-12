@@ -22,6 +22,7 @@ import EventsTab from './components/EventsTab.jsx';
 import GlobalVariablesTab from './components/GlobalVariablesTab.jsx';
 import { makeEdge } from './components/CustomEdge';
 import { nodeTypes } from './nodeConfig.js';
+import LogDock from './components/LogDock.jsx';
 
 import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
 
@@ -52,6 +53,12 @@ const DnDFlow = () => {
   // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { screenToFlowPosition } = useReactFlow();
   const [type] = useDnD();
+
+  // for the log dock
+  const [dockOpen, setDockOpen] = useState(false);
+  const [logLines, setLogLines] = useState([]);
+  const sseRef = useRef(null);
+  const append = (line) => setLogLines((prev) => [...prev, line]);
 
   // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
@@ -636,6 +643,17 @@ const DnDFlow = () => {
   };
   // Function to run pathsim simulation
   const runPathsim = async () => {
+    setDockOpen(true);
+    setLogLines([]);
+
+    if (sseRef.current) sseRef.current.close();
+    const es = new EventSource(getApiEndpoint('/logs/stream'));
+    sseRef.current = es;
+
+    es.addEventListener('start', () => append('log stream connected…'));
+    es.onmessage = (evt) => append(evt.data);
+    es.onerror = () => { append('log stream error'); es.close(); sseRef.current = null; };
+
     try {
       const graphData = {
         nodes,
@@ -655,6 +673,8 @@ const DnDFlow = () => {
       });
 
       const result = await response.json();
+
+      if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
 
       if (result.success) {
         // Store results and switch to results tab
@@ -1843,6 +1863,12 @@ const DnDFlow = () => {
           </div>
         </div>
       )}
+      <LogDock
+        open={dockOpen}
+        onClose={() => { setDockOpen(false); if (sseRef.current) sseRef.current.close(); }}
+        lines={logLines}
+        progress={null}
+      />
     </div>
   );
 }
