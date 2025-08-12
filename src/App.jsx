@@ -1181,7 +1181,7 @@ const DnDFlow = () => {
             const message = `Help documentation coming soon!\n\n` +
               `Version Information:\n` +
               `• PathSim: ${pathsimVersion}\n` +
-              `• Fuel Cycle Sim: ${fcsVersion}\n\n`;
+              `• PathView: ${fcsVersion}\n\n`;
 
             alert(message);
           }}

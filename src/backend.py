@@ -131,15 +131,13 @@ def serve_frontend():
     if os.getenv("FLASK_ENV") == "production":
         return app.send_static_file("index.html")
     else:
-        return jsonify({"message": "Fuel Cycle Simulator API", "status": "running"})
+        return jsonify({"message": "PathView API", "status": "running"})
 
 
 # Health check endpoint for Cloud Run
 @app.route("/health", methods=["GET"])
 def health_check():
-    return jsonify(
-        {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
-    ), 200
+    return jsonify({"status": "healthy", "message": "PathView Backend is running"}), 200
 
 
 # Version information endpoint
