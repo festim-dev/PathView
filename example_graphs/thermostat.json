@@ -1,99 +1,74 @@
 {
-  "version": {
-    "pathsim_version": "0.8.2",
-    "pathview_version": "0.1.dev470+g017515800.d20250812"
-  },
   "nodes": [
     {
-      "data": {
-        "label": "Error",
-        "nodeColor": "#DDE6ED"
-      },
-      "dragging": false,
-      "id": "error_summer",
-      "measured": {
-        "height": 64,
-        "width": 64
-      },
+      "id": "0",
+      "type": "constant",
       "position": {
-        "x": 225,
-        "y": 223
+        "x": 362.0580206745773,
+        "y": 113.03456573089142
+      },
+      "data": {
+        "label": "Heater",
+        "nodeColor": "#DDE6ED",
+        "value": "H"
+      },
+      "measured": {
+        "width": 206,
+        "height": 54
       },
       "selected": false,
-      "type": "adder"
-    },
-    {
-      "data": {
-        "gain": "0.4",
-        "label": "Feedback Gain",
-        "nodeColor": "#DDE6ED"
-      },
-      "dragging": false,
-      "id": "feedback_gain",
-      "measured": {
-        "height": 80,
-        "width": 90
-      },
-      "position": {
-        "x": 416,
-        "y": 445
-      },
-      "selected": false,
-      "type": "amplifier"
-    },
-    {
-      "data": {
-        "gain": "-1",
-        "label": "x -1",
-        "nodeColor": "#DDE6ED"
-      },
-      "dragging": false,
-      "id": "minus_one",
-      "measured": {
-        "height": 80,
-        "width": 90
-      },
-      "position": {
-        "x": 598,
-        "y": 382
-      },
-      "selected": false,
-      "type": "amplifier"
+      "dragging": false
     },
     {
       "id": "1",
-      "type": "integrator",
+      "type": "constant",
       "position": {
-        "x": 657,
-        "y": 101
+        "x": 358.8241979165283,
+        "y": 278.1947482777457
       },
       "data": {
-        "label": "integrator 1",
-        "initial_value": "",
-        "reset_times": "",
-        "nodeColor": "#DDE6ED"
+        "label": "ambient",
+        "nodeColor": "#DDE6ED",
+        "value": "a*Ta"
       },
       "measured": {
-        "width": 200,
-        "height": 48
+        "width": 206,
+        "height": 54
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "adder",
+      "position": {
+        "x": 701.2462888781952,
+        "y": 219.1770926972872
+      },
+      "data": {
+        "label": "adder 2",
+        "nodeColor": "#DDE6ED",
+        "operations": ""
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
       },
       "selected": false,
       "dragging": false
     },
     {
       "id": "3",
-      "type": "pid",
+      "type": "integrator",
       "position": {
-        "x": 392,
-        "y": 116
+        "x": 848.807989889327,
+        "y": 225.51709663815075
       },
       "data": {
-        "label": "pid 3",
-        "Kp": "1.5",
-        "Ki": "0.5",
-        "Kd": "0.1",
-        "f_max": "10",
-        "nodeColor": "#DDE6ED"
+        "label": "integ",
+        "nodeColor": "#DDE6ED",
+        "initial_value": "Ta",
+        "reset_times": ""
       },
       "measured": {
         "width": 200,
@@ -104,20 +79,19 @@
     },
     {
       "id": "4",
-      "type": "stepsource",
+      "type": "amplifier_reverse",
       "position": {
-        "x": 90.83795441551936,
-        "y": 44.05817319772359
+        "x": 796.3023843801966,
+        "y": 344.45184195466436
       },
       "data": {
-        "label": "Reference Input",
-        "amplitude": "1",
-        "tau": "1",
-        "nodeColor": "#DDE6ED"
+        "label": "amp",
+        "nodeColor": "#DDE6ED",
+        "gain": "-a"
       },
       "measured": {
-        "width": 120,
-        "height": 120
+        "width": 90,
+        "height": 80
       },
       "selected": false,
       "dragging": false
@@ -126,15 +100,15 @@
       "id": "5",
       "type": "scope",
       "position": {
-        "x": 1020.7686932100712,
-        "y": 141.28116398185887
+        "x": 1157.8007854929265,
+        "y": 66.31785200000635
       },
       "data": {
         "label": "scope 5",
+        "nodeColor": "#DDE6ED",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": "",
-        "nodeColor": "#DDE6ED"
+        "t_wait": ""
       },
       "measured": {
         "width": 120,
@@ -146,8 +120,46 @@
   ],
   "edges": [
     {
-      "id": "eerror_summer-3",
-      "source": "error_summer",
+      "id": "e0-2",
+      "source": "0",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-3",
+      "source": "2",
       "target": "3",
       "sourceHandle": null,
       "targetHandle": null,
@@ -165,9 +177,28 @@
       }
     },
     {
-      "id": "e3-1",
+      "id": "e4-2",
+      "source": "4",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-4",
       "source": "3",
-      "target": "1",
+      "target": "4",
       "sourceHandle": null,
       "targetHandle": null,
       "type": "smoothstep",
@@ -184,85 +215,8 @@
       }
     },
     {
-      "id": "efeedback_gain-minus_one",
-      "source": "feedback_gain",
-      "target": "minus_one",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "eminus_one-error_summer",
-      "source": "minus_one",
-      "target": "error_summer",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "e1-feedback_gain",
-      "source": "1",
-      "target": "feedback_gain",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      },
-      "selected": false
-    },
-    {
-      "id": "e4-error_summer",
-      "source": "4",
-      "target": "error_summer",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "e4-5",
-      "source": "4",
+      "id": "e3-5",
+      "source": "3",
       "target": "5",
       "sourceHandle": null,
       "targetHandle": null,
@@ -280,27 +234,8 @@
       }
     },
     {
-      "id": "eerror_summer-5",
-      "source": "error_summer",
-      "target": "5",
-      "sourceHandle": null,
-      "targetHandle": null,
-      "type": "smoothstep",
-      "data": {},
-      "style": {
-        "strokeWidth": 2,
-        "stroke": "#ECDFCC"
-      },
-      "markerEnd": {
-        "type": "arrowclosed",
-        "width": 20,
-        "height": 20,
-        "color": "#ECDFCC"
-      }
-    },
-    {
-      "id": "efeedback_gain-5",
-      "source": "feedback_gain",
+      "id": "e0-5",
+      "source": "0",
       "target": "5",
       "sourceHandle": null,
       "targetHandle": null,
@@ -322,15 +257,32 @@
   "solverParams": {
     "dt": "0.01",
     "dt_min": "1e-6",
-    "dt_max": "1.0",
+    "dt_max": "0.05",
     "Solver": "SSPRK22",
     "tolerance_fpi": "1e-6",
     "iterations_max": "100",
     "log": "true",
-    "simulation_duration": "35",
+    "simulation_duration": "30",
     "extra_params": "{}"
   },
   "globalVariables": [],
-  "events": [],
-  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
+  "events": [
+    {
+      "name": "heater_off",
+      "type": "ZeroCrossingUp",
+      "func_evt": "def func_evt(t):\n    *_, x = integ_3()\n    return x - Kp",
+      "func_act": "def func_act(t):\n    heater_0.off()",
+      "tolerance": "1e-8",
+      "id": 1755016407956
+    },
+    {
+      "name": "heater_on",
+      "type": "ZeroCrossingDown",
+      "func_evt": "def func_evt(t):\n    *_, x = integ_3()\n    return x - Km",
+      "func_act": "def func_act(t):\n    heater_0.on()",
+      "tolerance": "1e-8",
+      "id": 1755016519588
+    }
+  ],
+  "pythonCode": "a = 0.3  #thermal capacity of room\nTa = 10  #ambient temperature\nH = 5    #heater power\nKp = 25  #upper temperature threshold\nKm = 23  #lower temperature threshold"
 }
