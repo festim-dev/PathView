@@ -28,6 +28,19 @@ import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
 
 // * Declaring variables *
 
+// Default solver parameters
+const DEFAULT_SOLVER_PARAMS = {
+  dt: '0.01',
+  dt_min: '1e-16',
+  dt_max: '',
+  Solver: 'SSPRK22',
+  tolerance_fpi: '1e-10',
+  iterations_max: '200',
+  log: 'true',
+  simulation_duration: '10.0',
+  extra_params: '{}'
+};
+
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
 const initialNodes = [];
 const initialEdges = [];
@@ -78,17 +91,7 @@ const DnDFlow = () => {
 
 
   // Solver parameters state
-  const [solverParams, setSolverParams] = useState({
-    dt: '0.01',
-    dt_min: '1e-6',
-    dt_max: '1.0',
-    Solver: 'SSPRK22',
-    tolerance_fpi: '1e-6',
-    iterations_max: '100',
-    log: 'true',
-    simulation_duration: '50.0',
-    extra_params: '{}'
-  });
+  const [solverParams, setSolverParams] = useState(DEFAULT_SOLVER_PARAMS);
 
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
@@ -411,17 +414,7 @@ const DnDFlow = () => {
           setEdges(loadedEdges || []);
           setSelectedNode(null);
           setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-          setSolverParams(loadedSolverParams ?? {
-            dt: '0.01',
-            dt_min: '1e-6',
-            dt_max: '1.0',
-            Solver: 'SSPRK22',
-            tolerance_fpi: '1e-6',
-            iterations_max: '100',
-            log: 'true',
-            simulation_duration: '50.0',
-            extra_params: '{}'
-          });
+          setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
           setGlobalVariables(loadedGlobalVariables ?? []);
           setEvents(loadedEvents ?? []);
           setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
@@ -480,17 +473,7 @@ const DnDFlow = () => {
             setEdges(loadedEdges || []);
             setSelectedNode(null);
             setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-            setSolverParams(loadedSolverParams ?? {
-              dt: '0.01',
-              dt_min: '1e-6',
-              dt_max: '1.0',
-              Solver: 'SSPRK22',
-              tolerance_fpi: '1e-6',
-              iterations_max: '100',
-              log: 'true',
-              simulation_duration: '50.0',
-              extra_params: '{}'
-            });
+            setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
             setGlobalVariables(loadedGlobalVariables ?? []);
             setEvents(loadedEvents ?? []);
             setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
@@ -515,17 +498,7 @@ const DnDFlow = () => {
     setEdges(initialEdges);
     setSelectedNode(null);
     setNodeCounter(0);
-    setSolverParams({
-      dt: '0.01',
-      dt_min: '1e-6',
-      dt_max: '1.0',
-      Solver: 'SSPRK22',
-      tolerance_fpi: '1e-6',
-      iterations_max: '100',
-      log: 'true',
-      simulation_duration: '50.0',
-      extra_params: '{}'
-    });
+    setSolverParams(DEFAULT_SOLVER_PARAMS);
     setGlobalVariables([]);
   };
   const downloadCsv = async () => {
@@ -1476,7 +1449,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="0.01"
                   />
                 </div>
 
@@ -1502,7 +1474,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1e-6"
                   />
                 </div>
 
@@ -1528,7 +1499,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1.0"
                   />
                 </div>
 
@@ -1608,7 +1578,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1e-6"
                   />
                 </div>
 
@@ -1634,7 +1603,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="100"
                   />
                 </div>
 
@@ -1660,7 +1628,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="50.0"
                   />
                 </div>
 
@@ -1744,11 +1711,11 @@ const DnDFlow = () => {
                     // Reset to default values
                     setSolverParams({
                       dt: '0.01',
-                      dt_min: '1e-6',
-                      dt_max: '1.0',
+                      dt_min: '1e-16',
+                      dt_max: '',
                       Solver: 'SSPRK22',
-                      tolerance_fpi: '1e-6',
-                      iterations_max: '100',
+                      tolerance_fpi: '1e-10',
+                      iterations_max: '200',
                       log: 'true',
                       simulation_duration: '50.0'
                     });

@@ -203,7 +203,11 @@ def make_solver_params(solver_prms, eval_namespace=None):
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
             try:
-                solver_prms[k] = eval(v, eval_namespace)
+                if v == "":
+                    # TODO get the default from pathsim._constants
+                    solver_prms[k] = None
+                else:
+                    solver_prms[k] = eval(v, eval_namespace)
             except Exception as e:
                 return jsonify(
                     {"error": f"Invalid value for {k}: {v}. Error: {str(e)}"}
