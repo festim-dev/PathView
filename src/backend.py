@@ -375,8 +375,6 @@ def run_pathsim():
 
             for p, d in enumerate(data):
                 lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-                if isinstance(scope, Spectrum):
-                    d = abs(d)
                 fig.add_trace(
                     go.Scatter(x=time, y=d, mode="lines", name=lb), row=i + 1, col=1
                 )
