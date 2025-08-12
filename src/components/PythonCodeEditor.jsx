@@ -63,7 +63,27 @@ const PythonCodeEditor = ({
       </div>
       
       <div className="editor-container" style={{ height }}>
-        <CodeMirror value={code} onChange={handleCodeChange} extensions={[python({ python: true })]} theme={vscodeDark} options={{ fontSize: 24 }}/>
+        <CodeMirror 
+          value={code} 
+          onChange={handleCodeChange} 
+          extensions={[python({ python: true })]} 
+          theme={vscodeDark} 
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: true,
+            dropCursor: false,
+            allowMultipleSelections: false,
+            indentOnInput: true,
+            bracketMatching: true,
+            closeBrackets: true,
+            autocompletion: true,
+            highlightSelectionMatches: true,
+          }}
+          style={{
+            fontSize: '14px',
+            height: '100%',
+          }}
+        />
       </div>
 
       {executionResult && (
