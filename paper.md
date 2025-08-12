@@ -47,14 +47,15 @@ Many established simulation platforms, such as MathWorks Simulink, Modelica, or 
 A demonstration video is provided in the online documentation.
 
 ![Caption for example figure.\label{fig:example}](example.png){ width=80% }
+![Caption for example figure.\label{fig:example_results}](example_results.png){ width=80% }
 
 # Features
 
 
 - **Node creation and connection**: Choose from 58 different simulation node types, configure parameters, and connect them visually.
 - **Custom styling**: Change node colours for improved readability.
-- **Integrated simulation**: Run PathSim simulations directly from the GUI.
-- **Interactive visualisation**: Embedded Plotly plots for real-time data exploration.
+- **Integrated simulation**: Run `PathSim` simulations directly from the GUI.
+- **Interactive visualisation**: Embedded `plotly` plots for interactive data exploration.
 - **Advanced global variables**: Define global variables, including via an integrated Python editor for complex expressions.
 - **Flexible I/O**: Save and load models in JSON format; export to Python scripts for advanced or automated use.
 - **Modular and extensible**: Designed for easy integration of new node types and custom functionality.
