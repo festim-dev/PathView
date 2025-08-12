@@ -13,7 +13,7 @@ import MultiplierNode from './components/nodes/MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './components/nodes/Splitters';
 import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
-import { DynamicHandleNode } from './components/nodes/arbitraryNode';
+import { DynamicHandleNode } from './components/nodes/DynamicHandleNode';
 
 // Node types mapping
 export const nodeTypes = {
