@@ -1284,9 +1284,13 @@ const DnDFlow = () => {
                     border: 'none',
                     borderRadius: 5,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                   onClick={runPathsim}
                 >
+                  <span style={{ fontSize: '14px', lineHeight: '1' }}>▶</span>
                   Run
                 </button>
 
