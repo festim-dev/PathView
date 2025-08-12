@@ -107,15 +107,23 @@ WIP
 Roadmap
 ===============================
 
-- Support more PathSim solvers
-- Export graph as Subsystem and load it back
-- Improved UI/UX
-- User-defined block class
-- Support for user plugins (eg. fuel cycle, thermodynamic models, etc.)
-- Enhanced visualization options
-- More example scenarios
-- Annotations and comments on graph
-- More styling options for nodes and edges
+**Core Functionality & Solvers**
+   - Support more PathSim solvers
+   - User-defined block class
+   - Support for user plugins (eg. fuel cycle, thermodynamic models, etc.)
+
+**Graph Management & Import/Export**
+   - Export graph as Subsystem and load it back
+
+**User Interface & Experience**
+   - Improved UI/UX
+   - Capability to rotate/flip nodes
+   - Enhanced visualization options
+   - More styling options for nodes and edges
+
+**Documentation & Examples**
+   - More example scenarios
+   - Annotations and comments on graph
 
 ===============================
 Community Guidelines
