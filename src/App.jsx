@@ -58,7 +58,9 @@ const DnDFlow = () => {
   const [dockOpen, setDockOpen] = useState(false);
   const [logLines, setLogLines] = useState([]);
   const sseRef = useRef(null);
-  const append = (line) => setLogLines((prev) => [...prev, line]);
+  
+  // for version information
+  const [versionInfo, setVersionInfo] = useState(null);
 
   // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
@@ -124,6 +126,24 @@ const DnDFlow = () => {
     } catch (error) {
       console.error('Error fetching default values:', error);
       return {};
+    }
+  };
+
+  // Function to fetch version information
+  const fetchVersionInfo = async () => {
+    try {
+      const response = await fetch(getApiEndpoint('/version'));
+      if (response.ok) {
+        const versionData = await response.json();
+        setVersionInfo(versionData);
+        return versionData;
+      } else {
+        console.error('Failed to fetch version information');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching version information:', error);
+      return null;
     }
   };
 
@@ -224,6 +244,7 @@ const DnDFlow = () => {
   useEffect(() => {
     preloadDefaultValues();
     preloadAllDocumentation();
+    fetchVersionInfo(); // Fetch version information on component mount
   }, []);
 
   const onDrop = useCallback(
@@ -1021,78 +1042,128 @@ const DnDFlow = () => {
         backgroundColor: '#2c2c2c',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         zIndex: 15,
         borderBottom: '1px solid #ccc'
       }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('graph')}
+          >
+            Graph Editor
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'events' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('events')}
+          >
+            Events
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('solver')}
+          >
+            Solver Parameters
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('globals')}
+          >
+            Global Variables
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('results')}
+          >
+            Results
+          </button>
+        </div>
+        
+        {/* Help Button */}
         <button
           style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
+            padding: '8px 12px',
+            margin: '5px 15px 5px 5px',
+            backgroundColor: '#4A90E2',
             color: 'white',
             border: 'none',
-            borderRadius: 5,
+            borderRadius: '50%',
             cursor: 'pointer',
+            fontSize: '18px',
+            fontWeight: '600',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 6px rgba(74, 144, 226, 0.3)',
           }}
-          onClick={() => setActiveTab('graph')}
-        >
-          Graph Editor
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'events' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#357ABD';
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.4)';
           }}
-          onClick={() => setActiveTab('events')}
-        >
-          Events
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#4A90E2';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 6px rgba(74, 144, 226, 0.3)';
           }}
-          onClick={() => setActiveTab('solver')}
-        >
-          Solver Parameters
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
+          onClick={() => {
+            // Display version information and help
+            const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
+            const fcsVersion = versionInfo?.fuel_cycle_sim_version || 'Loading...';
+            
+            const message = `Help documentation coming soon!\n\n` +
+              `Version Information:\n` +
+              `• PathSim: ${pathsimVersion}\n` +
+              `• Fuel Cycle Sim: ${fcsVersion}\n\n`;
+              
+            alert(message);
           }}
-          onClick={() => setActiveTab('globals')}
+          title="Get help, documentation, and version information"
         >
-          Global Variables
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={() => setActiveTab('results')}
-        >
-          Results
+          ?
         </button>
       </div>
 
