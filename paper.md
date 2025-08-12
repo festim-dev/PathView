@@ -46,8 +46,9 @@ Many established simulation platforms, such as MathWorks Simulink, Modelica, or 
 
 A demonstration video is provided in the online documentation.
 
-![Caption for example figure.\label{fig:example}](example.png){ width=80% }
-![Caption for example figure.\label{fig:example_results}](example_results.png){ width=80% }
+![Graph editor tab.\label{fig:example}](example.png){ width=80% }
+
+![Results tab with interactive plotly graph.\label{fig:example_results}](example_results.png){ width=80% }
 
 # Features
 
