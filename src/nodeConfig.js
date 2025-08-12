@@ -13,7 +13,7 @@ import MultiplierNode from './components/nodes/MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './components/nodes/Splitters';
 import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
-import { RandomHandleNode } from './components/nodes/arbitraryNode';
+import { DynamicHandleNode } from './components/nodes/arbitraryNode';
 
 // Node types mapping
 export const nodeTypes = {
@@ -59,7 +59,7 @@ export const nodeTypes = {
   butterworthbandpass: DefaultNode,
   butterworthbandstop: DefaultNode,
   fir: DefaultNode,
-  arbitrary: RandomHandleNode,
+  arbitrary: DynamicHandleNode,
 };
 
 export const nodeMathTypes = {
@@ -87,6 +87,8 @@ Object.keys(nodeMathTypes).forEach(type => {
     nodeTypes[type] = nodeMathTypes[type];
   }
 });
+
+export const nodeDynamicHandles = ['arbitrary']; 
 
 // Node categories for better organization
 export const nodeCategories = {

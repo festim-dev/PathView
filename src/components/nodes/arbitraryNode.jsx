@@ -1,21 +1,21 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Handle, useUpdateNodeInternals } from '@xyflow/react';
  
-export function RandomHandleNode({ id, data }) {
+export function DynamicHandleNode({ id, data }) {
   const updateNodeInternals = useUpdateNodeInternals();
-  const [inputHandleCount, setInputHandleCount] = useState(data.inputCount || 0);
-  const [outputHandleCount, setOutputHandleCount] = useState(data.outputCount || 0);
+  const [inputHandleCount, setInputHandleCount] = useState(parseInt(data.inputCount) || 0);
+  const [outputHandleCount, setOutputHandleCount] = useState(parseInt(data.outputCount) || 0);
   
   useEffect(() => {
     let shouldUpdate = false;
     
-    if (data.inputCount !== undefined && data.inputCount !== inputHandleCount) {
-      setInputHandleCount(data.inputCount);
+    if (data.inputCount !== undefined && parseInt(data.inputCount) !== inputHandleCount) {
+      setInputHandleCount(parseInt(data.inputCount) || 0);
       shouldUpdate = true;
     }
     
-    if (data.outputCount !== undefined && data.outputCount !== outputHandleCount) {
-      setOutputHandleCount(data.outputCount);
+    if (data.outputCount !== undefined && parseInt(data.outputCount) !== outputHandleCount) {
+      setOutputHandleCount(parseInt(data.outputCount) || 0);
       shouldUpdate = true;
     }
     
@@ -61,7 +61,7 @@ export function RandomHandleNode({ id, data }) {
             {/* Input label for multiple inputs */}
             {inputHandleCount > 1 && (
               <div
-                style={{
+              style={{
                   position: 'absolute',
                   left: '8px',
                   top: `${topPercentage}%`,
@@ -70,9 +70,9 @@ export function RandomHandleNode({ id, data }) {
                   fontWeight: 'normal',
                   color: '#666',
                   pointerEvents: 'none',
-                }}
+              }}
               >
-                {index + 1}
+              {index + 1}
               </div>
             )}
           </React.Fragment>
@@ -97,7 +97,7 @@ export function RandomHandleNode({ id, data }) {
             {/* Output label for multiple outputs */}
             {outputHandleCount > 1 && (
               <div
-                style={{
+              style={{
                   position: 'absolute',
                   right: '8px',
                   top: `${topPercentage}%`,
@@ -106,9 +106,9 @@ export function RandomHandleNode({ id, data }) {
                   fontWeight: 'normal',
                   color: '#666',
                   pointerEvents: 'none',
-                }}
+              }}
               >
-                {index + 1}
+              {index + 1}
               </div>
             )}
           </React.Fragment>
@@ -125,16 +125,6 @@ export function RandomHandleNode({ id, data }) {
         alignItems: 'center'
       }}>
         <div>{data.label}</div>
-        {(inputHandleCount > 0 || outputHandleCount > 0) && (
-          <small style={{ 
-            fontWeight: 'normal', 
-            color: '#666',
-            fontSize: '10px',
-            marginTop: '4px'
-          }}>
-            Right-click to add handles
-          </small>
-        )}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ import ContextMenu from './components/ContextMenu.jsx';
 import EventsTab from './components/EventsTab.jsx';
 import GlobalVariablesTab from './components/GlobalVariablesTab.jsx';
 import { makeEdge } from './components/CustomEdge';
-import { nodeTypes } from './nodeConfig.js';
+import { nodeTypes, nodeDynamicHandles } from './nodeConfig.js';
 import LogDock from './components/LogDock.jsx';
 
 import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
@@ -252,6 +252,12 @@ const DnDFlow = () => {
 
       // Create node data with label and initialize all expected fields as empty strings
       let nodeData = { label: `${type} ${newNodeId}` };
+
+      // if node in nodeDynamicHandles, ensure add outputCount and inputCount to data
+      if (nodeDynamicHandles.includes(type)) {
+        nodeData.inputCount = 1;
+        nodeData.outputCount = 1;
+      }
 
       // Initialize all expected parameters as empty strings
       Object.keys(defaults).forEach(key => {
@@ -955,47 +961,6 @@ const DnDFlow = () => {
     setMenu(null); // Close the context menu
   }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
 
-
-  // Function to add input to a node
-  const addInputToNode = useCallback((nodeId) => {
-    setNodes((nds) => 
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          const currentInputCount = node.data.inputCount || 0;
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              inputCount: currentInputCount + 1
-            }
-          };
-        }
-        return node;
-      })
-    );
-    setMenu(null); // Close the context menu
-  }, [setNodes, setMenu]);
-
-  // Function to add output to a node
-  const addOutputToNode = useCallback((nodeId) => {
-    setNodes((nds) => 
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          const currentOutputCount = node.data.outputCount || 0;
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              outputCount: currentOutputCount + 1
-            }
-          };
-        }
-        return node;
-      })
-    );
-    setMenu(null); // Close the context menu
-  }, [setNodes, setMenu]);
-
   // Keyboard event handler for deleting selected items
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -1171,7 +1136,7 @@ const DnDFlow = () => {
                 <MiniMap />
                 <Background variant="dots" gap={12} size={1} />
 
-                {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} onAddInput={addInputToNode} onAddOutput={addOutputToNode} {...menu} />}
+                {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
                 {copyFeedback && (
                   <div
                     style={{

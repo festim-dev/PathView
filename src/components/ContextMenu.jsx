@@ -9,8 +9,6 @@ export default function ContextMenu({
   bottom,
   onClick,
   onDuplicate,
-  onAddInput,
-  onAddOutput,
   ...props
 }) {
   const { setNodes, setEdges } = useReactFlow();
@@ -24,16 +22,6 @@ export default function ContextMenu({
     setEdges((edges) => edges.filter((edge) => edge.source !== id && edge.target !== id));
     onClick && onClick(); // Close menu after action
   }, [id, setNodes, setEdges, onClick]);
- 
-  const addInput = useCallback(() => {
-    onAddInput && onAddInput(id);
-    onClick && onClick(); // Close menu after action
-  }, [id, onAddInput, onClick]);
-
-  const addOutput = useCallback(() => {
-    onAddOutput && onAddOutput(id);
-    onClick && onClick(); // Close menu after action
-  }, [id, onAddOutput, onClick]);
 
   return (
     <div
@@ -46,8 +34,6 @@ export default function ContextMenu({
       </p>
       <button onClick={duplicateNode}>duplicate</button>
       <button onClick={deleteNode}>delete</button>
-      <button onClick={addInput}>add input</button>
-      <button onClick={addOutput}>add output</button>
     </div>
   );
 }
