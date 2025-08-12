@@ -58,7 +58,7 @@ const DnDFlow = () => {
   const [dockOpen, setDockOpen] = useState(false);
   const [logLines, setLogLines] = useState([]);
   const sseRef = useRef(null);
-  
+
   // for version information
   const [versionInfo, setVersionInfo] = useState(null);
 
@@ -272,7 +272,7 @@ const DnDFlow = () => {
       }
 
       // Create node data with label and initialize all expected fields as empty strings
-      let nodeData = { 
+      let nodeData = {
         label: `${type} ${newNodeId}`,
         nodeColor: '#DDE6ED' // Default node color
       };
@@ -695,6 +695,11 @@ const DnDFlow = () => {
   const runPathsim = async () => {
     setDockOpen(true);
     setLogLines([]);
+
+    // Helper function to append log lines
+    const append = (line) => {
+      setLogLines(prev => [...prev, line]);
+    };
 
     if (sseRef.current) sseRef.current.close();
     const es = new EventSource(getApiEndpoint('/logs/stream'));
@@ -1141,7 +1146,7 @@ const DnDFlow = () => {
             Results
           </button>
         </div>
-        
+
         {/* Help Button */}
         <button
           style={{
@@ -1176,12 +1181,12 @@ const DnDFlow = () => {
             // Display version information and help
             const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
             const fcsVersion = versionInfo?.fuel_cycle_sim_version || 'Loading...';
-            
+
             const message = `Help documentation coming soon!\n\n` +
               `Version Information:\n` +
               `• PathSim: ${pathsimVersion}\n` +
               `• Fuel Cycle Sim: ${fcsVersion}\n\n`;
-              
+
             alert(message);
           }}
           title="Get help, documentation, and version information"
