@@ -1,4 +1,8 @@
 {
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
   "nodes": [
     {
       "id": "2",
@@ -11,7 +15,8 @@
         "label": "process 2",
         "initial_value": "",
         "residence_time": "30",
-        "source_term": ""
+        "source_term": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 200,
@@ -29,7 +34,8 @@
       },
       "data": {
         "label": "amplifier 5",
-        "gain": "-1"
+        "gain": "-1",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 90,
@@ -49,7 +55,8 @@
         "label": "scope 6",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -69,7 +76,8 @@
         "label": "scope 7",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -87,7 +95,8 @@
       },
       "data": {
         "label": "adder 8",
-        "operations": ""
+        "operations": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 64,
@@ -106,7 +115,8 @@
       "data": {
         "label": "storage",
         "initial_value": "startup_inv",
-        "reset_times": ""
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 200,
@@ -129,11 +139,12 @@
         "duty": "",
         "t_fall": "",
         "t_rise": "",
-        "tau": ""
+        "tau": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
-        "width": 205,
-        "height": 53
+        "width": 206,
+        "height": 54
       },
       "selected": true,
       "dragging": false
@@ -147,7 +158,8 @@
       },
       "data": {
         "label": "amplifier 12",
-        "gain": "1.1"
+        "gain": "1.1",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 90,

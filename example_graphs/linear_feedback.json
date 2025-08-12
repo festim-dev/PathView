@@ -1,4 +1,8 @@
 {
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
   "nodes": [
     {
       "id": "1",
@@ -10,7 +14,8 @@
       "data": {
         "label": "Source s(t)",
         "amplitude": "1",
-        "tau": "tau"
+        "tau": "tau",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -30,7 +35,8 @@
         "label": "Scope",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -48,7 +54,8 @@
       },
       "data": {
         "label": "Amp a",
-        "gain": "a"
+        "gain": "a",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 90,
@@ -67,7 +74,8 @@
       "data": {
         "label": "Integrator x(t)",
         "initial_value": "x0",
-        "reset_times": ""
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 200,
@@ -85,7 +93,8 @@
       },
       "data": {
         "label": "adder 6",
-        "operations": ""
+        "operations": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 64,
@@ -240,5 +249,7 @@
       "value": "3",
       "nameError": false
     }
-  ]
+  ],
+  "events": [],
+  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
 }

@@ -1,9 +1,14 @@
 {
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
   "nodes": [
     {
       "data": {
         "gain": "-1",
-        "label": "x (-1)"
+        "label": "x (-1)",
+        "nodeColor": "#DDE6ED"
       },
       "dragging": false,
       "id": "4",
@@ -23,7 +28,8 @@
         "label": "Neutron rate",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "dragging": false,
       "id": "6",
@@ -41,7 +47,8 @@
     {
       "data": {
         "gain": "3e-3",
-        "label": "TBR"
+        "label": "TBR",
+        "nodeColor": "#DDE6ED"
       },
       "dragging": false,
       "id": "7",
@@ -61,7 +68,8 @@
         "initial_value": "",
         "label": "BABY",
         "residence_time": "(k_IV + k_OV)/baby_vol",
-        "source_term": ""
+        "source_term": "",
+        "nodeColor": "#DDE6ED"
       },
       "dragging": false,
       "id": "8",
@@ -81,7 +89,8 @@
         "label": "IV vial activity",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "dragging": false,
       "id": "21",
@@ -100,7 +109,8 @@
       "data": {
         "f1": "0.01",
         "f2": "0.99",
-        "label": "soluble vs insoluble"
+        "label": "soluble vs insoluble",
+        "nodeColor": "#DDE6ED"
       },
       "dragging": false,
       "id": "1",
@@ -126,7 +136,8 @@
         "label": "IV bubbler",
         "conversion_efficiency": "0.95",
         "vial_efficiency": "0.9",
-        "replacement_times": "np.arange(5, 50, step=3)"
+        "replacement_times": "np.arange(5, 50, step=3)",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 230,
@@ -145,7 +156,8 @@
       "data": {
         "label": "IV vs OV",
         "f1": "k_IV/(k_IV + k_OV)",
-        "f2": "k_OV/(k_IV + k_OV)"
+        "f2": "k_OV/(k_IV + k_OV)",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -164,7 +176,8 @@
       "data": {
         "label": "soluble vs insoluble",
         "f1": "0.01",
-        "f2": "0.99"
+        "f2": "0.99",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -184,7 +197,8 @@
         "label": "OV bubbler",
         "conversion_efficiency": "0.95",
         "vial_efficiency": "0.9",
-        "replacement_times": "np.arange(5, 50, step=5)"
+        "replacement_times": "np.arange(5, 50, step=5)",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 230,
@@ -203,7 +217,8 @@
       "data": {
         "label": "environment",
         "initial_value": "",
-        "reset_times": ""
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 200,
@@ -223,7 +238,8 @@
         "label": "OV vial activity",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -243,7 +259,8 @@
         "label": "BABY inventory",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -262,7 +279,8 @@
       "data": {
         "label": "Stepsource",
         "amplitude": "1",
-        "tau": "4"
+        "tau": "4",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -281,7 +299,8 @@
       "data": {
         "label": "Stepsource",
         "amplitude": "1",
-        "tau": "2"
+        "tau": "2",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -301,7 +320,8 @@
         "label": "Neutron source",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -800,5 +820,7 @@
       "value": "1",
       "nameError": false
     }
-  ]
+  ],
+  "events": [],
+  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
 }
