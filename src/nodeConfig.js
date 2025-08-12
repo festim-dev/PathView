@@ -59,6 +59,7 @@ export const nodeTypes = {
   butterworthbandstop: DefaultNode,
   fir: DefaultNode,
   ode: DynamicHandleNode,
+  table: SourceNode,
 };
 
 export const nodeMathTypes = {
@@ -116,7 +117,7 @@ export const nodeCategories = {
     description: 'Fuel cycle specific nodes'
   },
   'Others': {
-    nodes: ['samplehold', 'comparator'],
+    nodes: ['samplehold', 'comparator', 'table'],
     description: 'Miscellaneous nodes'
   },
   'Output': {
@@ -184,6 +185,7 @@ export const getNodeDisplayName = (nodeType) => {
     'butterworthbandpass': 'Butterworth Band-Pass Filter',
     'butterworthbandstop': 'Butterworth Band-Stop Filter',
     'fir': 'FIR Filter',
+    'table': 'Table1D',
   };
 
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
