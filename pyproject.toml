@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel", "setuptools-scm[toml] >= 7.0.5"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fuel-cycle-sim"
+name = "pathview"
 dynamic = ["version"]
-description = "A Python package for fuel cycle simulation with pathsim integration"
+description = "A Graphical User Interface for System Simulation"
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
@@ -37,17 +37,17 @@ dev = [
 
 
 [project.urls]
-Homepage = "https://github.com/yourusername/fuel-cycle-sim"
-Documentation = "https://fuel-cycle-sim.readthedocs.io/"
-Repository = "https://github.com/yourusername/fuel-cycle-sim.git"
-Issues = "https://github.com/yourusername/fuel-cycle-sim/issues"
+Homepage = "https://github.com/festim-dev/pathview"
+Documentation = "https://pathview.readthedocs.io/"
+Repository = "https://github.com/festim-dev/pathview.git"
+Issues = "https://github.com/festim-dev/pathview/issues"
 
 [tool.setuptools]
-packages = ["fuel_cycle_sim"]
-package-dir = {"fuel_cycle_sim" = "src/python"}
+packages = ["pathview"]
+package-dir = {"pathview" = "src/python"}
 
 [tool.setuptools.package-data]
-fuel_cycle_sim = ["templates/*"]
+pathview = ["templates/*"]
 
 [tool.setuptools_scm]
 write_to = "src/python/_version.py"

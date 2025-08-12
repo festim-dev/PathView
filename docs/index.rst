@@ -1,9 +1,9 @@
-.. fuel-cycle-sim documentation master file, created by
+.. pathview documentation master file, created by
    sphinx-quickstart on Wed Jul 23 14:07:29 2025.
 
-==========================================
-Fuel Cycle Simulator (name will change...)
-==========================================
+========
+PathView
+========
 
 An interactive visual tool for modeling and simulating nuclear fuel cycle components using React Flow frontend and Python Flask backend.
 
@@ -67,9 +67,9 @@ Installation Steps
 1. **Clone the Repository**
    
    .. code-block:: bash
-   
-      git clone https://github.com/yourusername/fuel-cycle-sim.git
-      cd fuel-cycle-sim
+
+      git clone https://github.com/festim-dev/pathview.git
+      cd pathview
 
 2. **Install Frontend Dependencies**
    
