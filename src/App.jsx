@@ -827,77 +827,6 @@ const DnDFlow = () => {
       }))
     );
   };
-  // Function to add a new node to the graph
-  const addNode = async () => {
-    // Get available node types from nodeTypes object
-    const availableTypes = Object.keys(nodeTypes);
-
-    // Create options string for the prompt
-    const typeOptions = availableTypes.map((type, index) => `${index + 1}. ${type}`).join('\n');
-
-    const userInput = prompt(
-      `Select a node type by entering the number:\n\n${typeOptions}\n\nEnter your choice (1-${availableTypes.length}):`
-    );
-
-    // If user cancels the prompt
-    if (!userInput) {
-      return;
-    }
-
-    // Parse the user input
-    const choiceIndex = parseInt(userInput) - 1;
-
-    // Validate the choice
-    if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= availableTypes.length) {
-      alert('Invalid choice. Please enter a number between 1 and ' + availableTypes.length);
-      return;
-    }
-
-    const selectedType = availableTypes[choiceIndex];
-    const newNodeId = nodeCounter.toString();
-
-    // Get default values and documentation for this node type (should be cached from preload)
-    let defaults = defaultValues[selectedType] || {};
-    let docs = nodeDocumentation[selectedType] || {
-      html: '<p>No documentation available for this node type.</p>',
-      text: 'No documentation available for this node type.'
-    };
-
-    // Fallback: fetch if not cached (shouldn't happen normally)
-    if (!defaultValues[selectedType]) {
-      defaults = await fetchDefaultValues(selectedType);
-      setDefaultValues(prev => ({
-        ...prev,
-        [selectedType]: defaults
-      }));
-    }
-
-    if (!nodeDocumentation[selectedType]) {
-      docs = await fetchNodeDocumentation(selectedType);
-      setNodeDocumentation(prev => ({
-        ...prev,
-        [selectedType]: docs
-      }));
-    }
-
-    // Create node data with label and initialize all expected fields as empty strings
-    let nodeData = { label: `${selectedType} ${newNodeId}` };
-
-    // Initialize all expected parameters as empty strings
-    Object.keys(defaults).forEach(key => {
-      nodeData[key] = '';
-    });
-
-    const newNode = {
-      id: newNodeId,
-      type: selectedType,
-      position: { x: 200 + nodes.length * 50, y: 200 },
-      data: nodeData,
-    };
-
-    setNodes((nds) => [...nds, newNode]);
-    setNodeCounter((count) => count + 1);
-  };
 
   // Function to pop context menu when right-clicking on a node
   const onNodeContextMenu = useCallback(
@@ -1277,23 +1206,6 @@ const DnDFlow = () => {
                 <button
                   style={{
                     position: 'absolute',
-                    left: 20,
-                    top: 20,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={addNode}
-                >
-                  Add Node
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
                     right: 20,
                     top: 20,
                     zIndex: 10,
@@ -1328,7 +1240,7 @@ const DnDFlow = () => {
                 <button
                   style={{
                     position: 'absolute',
-                    left: 130,
+                    left: 20,
                     top: 20,
                     zIndex: 10,
                     padding: '8px 12px',
