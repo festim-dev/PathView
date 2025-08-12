@@ -324,7 +324,7 @@ const DnDFlow = () => {
       try {
         // Modern approach: Use File System Access API for proper "Save As" dialog
         const fileHandle = await window.showSaveFilePicker({
-          suggestedName: 'fuel-cycle-graph.json',
+          suggestedName: 'pathview_graph.json',
           types: [{
             description: 'JSON files',
             accept: {

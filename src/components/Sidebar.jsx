@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useDnD } from './DnDContext';
 import { nodeCategories, getNodeDisplayName } from '../nodeConfig.js';
- 
+
 export default () => {
   const [_, setType] = useDnD();
   const [expandedCategories, setExpandedCategories] = useState({
-    'Sources': true,
+    'Sources': false,
     'Processing': true,
     'Math': true,
     'Control': false,
     'Fuel Cycle': false,
     'Output': true
   });
- 
+
   const onDragStart = (event, nodeType) => {
     setType(nodeType);
     event.dataTransfer.effectAllowed = 'move';
@@ -39,9 +39,9 @@ export default () => {
     };
     return categoryClasses[categoryName] || 'dndnode';
   };
- 
+
   return (
-    <aside style={{ 
+    <aside style={{
       padding: '16px',
       height: '100%',
       overflowY: 'auto',
@@ -57,10 +57,10 @@ export default () => {
       }}>
         Drag nodes to the canvas to add them to your graph
       </div>
-      
+
       {Object.entries(nodeCategories).map(([categoryName, categoryData]) => (
         <div key={categoryName} style={{ marginBottom: '16px' }}>
-          <div 
+          <div
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -91,15 +91,15 @@ export default () => {
               ▶
             </span>
           </div>
-          
+
           {expandedCategories[categoryName] && (
             <div style={{ paddingLeft: '8px' }}>
               <div className="sidebar-description">
                 {categoryData.description}
               </div>
-              
+
               {categoryData.nodes.map(nodeType => (
-                <div 
+                <div
                   key={nodeType}
                   className={getNodeClass(categoryName)}
                   draggable
