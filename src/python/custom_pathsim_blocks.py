@@ -6,6 +6,15 @@ import numpy as np
 
 
 class Process(ODE):
+    """
+    A block that represents a process with a residence time and a source term.
+
+    Args:
+        residence_time: Residence time of the process.
+        initial_value: Initial value of the process.
+        source_term: Source term of the process.
+    """
+
     _port_map_out = {"inv": 0, "mass_flow_rate": 1}
 
     def __init__(self, residence_time=0, initial_value=0, source_term=0):
@@ -33,6 +42,8 @@ class Process(ODE):
 
 
 class Splitter(Block):
+    """Splitter block that splits the input signal into multiple outputs based on specified fractions."""
+
     def __init__(self, n=2, fractions=None):
         super().__init__()
         self.n = n  # number of splits
@@ -70,7 +81,42 @@ class Splitter3(Splitter):
 
 
 class Integrator(pathsim.blocks.Integrator):
-    """Integrator block with a reset method."""
+    """Integrates the input signal using a numerical integration engine like this:
+
+    .. math::
+
+        y(t) = \\int_0^t u(\\tau) \\ d \\tau
+    
+    or in differential form like this:
+
+    .. math::
+        \\begin{eqnarray}
+            \\dot{x}(t) &= u(t) \\\\
+                   y(t) &= x(t) 
+        \\end{eqnarray}
+
+    The Integrator block is inherently MIMO capable, so `u` and `y` can be vectors.
+    
+    Example
+    -------
+    This is how to initialize the integrator: 
+
+    .. code-block:: python
+    
+        #initial value 0.0
+        i1 = Integrator()
+
+        #initial value 2.5
+        i2 = Integrator(2.5)
+    
+
+    Parameters
+    ----------
+    initial_value : float, array
+        initial value of integrator
+    reset_times : list, optional
+        List of times at which the integrator is reset.
+    """
 
     def __init__(self, initial_value=0.0, reset_times=None):
         """
@@ -112,7 +158,17 @@ class Integrator(pathsim.blocks.Integrator):
 
 
 class Bubbler(Subsystem):
-    """Subsystem representing a tritium bubbling system with 4 vials."""
+    """
+    Subsystem representing a tritium bubbling system with 4 vials.
+
+    Args:
+        conversion_efficiency: Conversion efficiency from insoluble to soluble (between 0 and 1).
+        vial_efficiency: collection efficiency of each vial (between 0 and 1).
+        replacement_times: List of times at which each vial is replaced. If None, no replacement
+            events are created. If a single value is provided, it is used for all vials.
+            If a single list of floats is provided, it will be used for all vials.
+            If a list of lists is provided, each sublist corresponds to the replacement times for each vial.
+    """
 
     vial_efficiency: float
     conversion_efficiency: float
@@ -137,15 +193,6 @@ class Bubbler(Subsystem):
         vial_efficiency=0.9,
         replacement_times=None,
     ):
-        """
-        Args:
-            conversion_efficiency: Conversion efficiency from insoluble to soluble (between 0 and 1).
-            vial_efficiency: collection efficiency of each vial (between 0 and 1).
-            replacement_times: List of times at which each vial is replaced. If None, no replacement
-                events are created. If a single value is provided, it is used for all vials.
-                If a single list of floats is provided, it will be used for all vials.
-                If a list of lists is provided, each sublist corresponds to the replacement times for each vial.
-        """
         self.reset_times = replacement_times
         self.n_soluble_vials = 2
         self.n_insoluble_vials = 2
