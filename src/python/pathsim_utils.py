@@ -323,7 +323,7 @@ def get_parameters_for_block_class(block_class, node, eval_namespace):
         if k == "self":
             continue
         # Skip 'operations' for Adder, as it is handled separately
-        # https://github.com/festim-dev/fuel-cycle-sim/issues/73
+        # https://github.com/festim-dev/pathview/issues/73
         if k in ["operations"]:
             continue
         user_input = node["data"][k]
