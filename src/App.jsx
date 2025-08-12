@@ -835,16 +835,16 @@ const DnDFlow = () => {
       // Prevent native context menu from showing
       event.preventDefault();
 
-      // Calculate position of the context menu. We want to make sure it
-      // doesn't get positioned off-screen.
+      // Get the ReactFlow pane's bounding rectangle to calculate relative position
       const pane = ref.current.getBoundingClientRect();
+
+      // Position the context menu directly at the click coordinates relative to the pane
       setMenu({
         id: node.id,
-        top: event.clientY < pane.height - 200 && event.clientY,
-        left: event.clientX < pane.width - 200 && event.clientX,
-        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
-        bottom:
-          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+        top: event.clientY - pane.top,
+        left: event.clientX - pane.left,
+        right: false,
+        bottom: false,
       });
     },
     [setMenu],

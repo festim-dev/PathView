@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
- 
+
 export default function ContextMenu({
   id,
   top,
@@ -12,11 +12,11 @@ export default function ContextMenu({
   ...props
 }) {
   const { setNodes, setEdges } = useReactFlow();
-  
+
   const duplicateNode = useCallback(() => {
     onDuplicate(id);
   }, [id, onDuplicate]);
- 
+
   const deleteNode = useCallback(() => {
     setNodes((nodes) => nodes.filter((node) => node.id !== id));
     setEdges((edges) => edges.filter((edge) => edge.source !== id && edge.target !== id));
