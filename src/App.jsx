@@ -333,8 +333,6 @@ const DnDFlow = () => {
         await writable.write(JSON.stringify(graphData, null, 2));
         await writable.close();
 
-        // Success message
-        alert('Graph saved successfully!');
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error('Error saving file:', error);
@@ -357,8 +355,6 @@ const DnDFlow = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      alert('Graph downloaded successfully!');
     }
   };
 
@@ -428,8 +424,6 @@ const DnDFlow = () => {
           setGlobalVariables(loadedGlobalVariables ?? []);
           setEvents(loadedEvents ?? []);
           setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-
-          alert('Graph loaded successfully!');
         } catch (error) {
           console.error('Error parsing file:', error);
           alert('Error reading file. Please make sure it\'s a valid JSON file.');
@@ -499,8 +493,6 @@ const DnDFlow = () => {
             setGlobalVariables(loadedGlobalVariables ?? []);
             setEvents(loadedEvents ?? []);
             setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-
-            alert('Graph loaded successfully!');
           } catch (error) {
             console.error('Error parsing file:', error);
             alert('Error reading file. Please make sure it\'s a valid JSON file.');
@@ -661,8 +653,6 @@ const DnDFlow = () => {
             const writable = await fileHandle.createWritable();
             await writable.write(result.script);
             await writable.close();
-
-            alert('Python script generated and saved successfully!');
           } catch (error) {
             if (error.name !== 'AbortError') {
               console.error('Error saving Python file:', error);
@@ -681,8 +671,6 @@ const DnDFlow = () => {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-
-          alert('Python script generated and downloaded to your default downloads folder!');
         }
       } else {
         alert(`Error generating Python script: ${result.error}`);
@@ -733,13 +721,12 @@ const DnDFlow = () => {
         setCsvData(result.csv_data);
         setHtmlData(result.html);
         setActiveTab('results');
-        alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
         alert(`Error running Pathsim simulation: ${result.error}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to run Pathsim simulation. Make sure the backend is running.');
+      alert(`Failed to run Pathsim simulation. Make sure the backend is running. : ${error.message}`);
     }
   };
 
