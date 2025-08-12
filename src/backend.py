@@ -142,6 +142,37 @@ def health_check():
     ), 200
 
 
+# Version information endpoint
+@app.route("/version", methods=["GET"])
+def get_version():
+    try:
+        # Get pathsim version
+        import pathsim
+
+        pathsim_version = getattr(pathsim, "__version__", "Unknown")
+
+        import fuel_cycle_sim
+
+        fcs_version = getattr(fuel_cycle_sim, "__version__", "Unknown")
+
+        return jsonify(
+            {
+                "pathsim_version": pathsim_version,
+                "fuel_cycle_sim_version": fcs_version,
+                "status": "success",
+            }
+        ), 200
+    except Exception as e:
+        return jsonify(
+            {
+                "pathsim_version": "Unknown",
+                "fuel_cycle_sim_version": "Unknown",
+                "status": "error",
+                "error": str(e),
+            }
+        ), 200
+
+
 @app.route("/default-values-all", methods=["GET"])
 def get_all_default_values():
     try:

@@ -58,7 +58,9 @@ const DnDFlow = () => {
   const [dockOpen, setDockOpen] = useState(false);
   const [logLines, setLogLines] = useState([]);
   const sseRef = useRef(null);
-  const append = (line) => setLogLines((prev) => [...prev, line]);
+  
+  // for version information
+  const [versionInfo, setVersionInfo] = useState(null);
 
   // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
@@ -124,6 +126,24 @@ const DnDFlow = () => {
     } catch (error) {
       console.error('Error fetching default values:', error);
       return {};
+    }
+  };
+
+  // Function to fetch version information
+  const fetchVersionInfo = async () => {
+    try {
+      const response = await fetch(getApiEndpoint('/version'));
+      if (response.ok) {
+        const versionData = await response.json();
+        setVersionInfo(versionData);
+        return versionData;
+      } else {
+        console.error('Failed to fetch version information');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching version information:', error);
+      return null;
     }
   };
 
@@ -224,6 +244,7 @@ const DnDFlow = () => {
   useEffect(() => {
     preloadDefaultValues();
     preloadAllDocumentation();
+    fetchVersionInfo(); // Fetch version information on component mount
   }, []);
 
   const onDrop = useCallback(
@@ -1129,10 +1150,18 @@ const DnDFlow = () => {
             e.target.style.boxShadow = '0 2px 6px rgba(74, 144, 226, 0.3)';
           }}
           onClick={() => {
-            // TODO - open modal, navigate to help page, etc.
-            alert('Help documentation coming soon! Check the README.md file in the repository for current documentation.');
+            // Display version information and help
+            const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
+            const fcsVersion = versionInfo?.fuel_cycle_sim_version || 'Loading...';
+            
+            const message = `Help documentation coming soon!\n\n` +
+              `Version Information:\n` +
+              `• PathSim: ${pathsimVersion}\n` +
+              `• Fuel Cycle Sim: ${fcsVersion}\n\n`;
+              
+            alert(message);
           }}
-          title="Get help and documentation"
+          title="Get help, documentation, and version information"
         >
           ?
         </button>
