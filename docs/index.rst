@@ -109,6 +109,7 @@ Roadmap
 
 - Support more PathSim solvers
 - Export graph as Subsystem and load it back
+- Improved UI/UX
 - User-defined block class
 - Support for user plugins (eg. fuel cycle, thermodynamic models, etc.)
 - Enhanced visualization options
