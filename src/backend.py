@@ -18,6 +18,12 @@ from pathsim.blocks import Scope, Spectrum
 # Sphinx imports for docstring processing
 from docutils.core import publish_parts
 
+# imports for logging progress
+from flask import Response, stream_with_context
+import time
+import logging
+from queue import Queue, Empty
+
 
 def docstring_to_html(docstring):
     """Convert a Python docstring to HTML using docutils (like Sphinx does)."""
@@ -80,9 +86,42 @@ else:
     )
 
 
-# Creates directory for saved graphs
-SAVE_DIR = "saved_graphs"
-os.makedirs(SAVE_DIR, exist_ok=True)
+### for capturing logs from pathsim
+
+
+@app.get("/logs/stream")
+def logs_stream():
+    def gen():
+        yield "retry: 500\n\n"
+        while True:
+            line = log_queue.get()
+            for chunk in line.replace("\r", "\n").splitlines():
+                yield f"data: {chunk}\n\n"
+
+    return Response(gen(), mimetype="text/event-stream")
+
+
+log_queue = Queue()
+
+
+class QueueHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            log_queue.put_nowait(msg)
+        except Exception:
+            pass
+
+
+qhandler = QueueHandler()
+qhandler.setLevel(logging.INFO)
+qhandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+root.addHandler(qhandler)
+
+### log backend ends
 
 
 # Serve React frontend for production
@@ -101,6 +140,68 @@ def health_check():
     return jsonify(
         {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
     ), 200
+
+
+# Version information endpoint
+@app.route("/version", methods=["GET"])
+def get_version():
+    try:
+        # Get pathsim version
+        import pathsim
+
+        pathsim_version = getattr(pathsim, "__version__", "Unknown")
+
+        import fuel_cycle_sim
+
+        fcs_version = getattr(fuel_cycle_sim, "__version__", "Unknown")
+
+        return jsonify(
+            {
+                "pathsim_version": pathsim_version,
+                "fuel_cycle_sim_version": fcs_version,
+                "status": "success",
+            }
+        ), 200
+    except Exception as e:
+        return jsonify(
+            {
+                "pathsim_version": "Unknown",
+                "fuel_cycle_sim_version": "Unknown",
+                "status": "error",
+                "error": str(e),
+            }
+        ), 200
+
+
+@app.route("/default-values-all", methods=["GET"])
+def get_all_default_values():
+    try:
+        all_default_values = {}
+        for node_type, block_class in map_str_to_object.items():
+            parameters_for_class = inspect.signature(block_class.__init__).parameters
+            default_values = {}
+            for param in parameters_for_class:
+                if param != "self":  # Skip 'self' parameter
+                    default_value = parameters_for_class[param].default
+                    if default_value is inspect._empty:
+                        default_values[param] = None  # Handle empty defaults
+                    else:
+                        default_values[param] = default_value
+                        # check if default value is serializable to JSON
+                        if not isinstance(
+                            default_value, (int, float, str, bool, list, dict)
+                        ):
+                            # Attempt to convert to JSON serializable type
+                            try:
+                                default_values[param] = json.dumps(default_value)
+                            except TypeError:
+                                # If conversion fails, set to a string 'default'
+                                default_values[param] = "default"
+            all_default_values[node_type] = default_values
+
+        return jsonify(all_default_values)
+    except Exception as e:
+        return jsonify({"error": f"Could not get all default values: {str(e)}"}), 400
 
 
 # returns default values for parameters of a node
@@ -137,6 +238,30 @@ def get_default_values(node_type):
         ), 400
 
 
+@app.route("/get-all-docs", methods=["GET"])
+def get_all_docs():
+    try:
+        all_docs = {}
+        for node_type, block_class in map_str_to_object.items():
+            docstring = inspect.getdoc(block_class)
+
+            # If no docstring, provide a basic description
+            if not docstring:
+                docstring = f"No documentation available for {node_type}."
+
+            # Convert docstring to HTML using docutils/Sphinx-style processing
+            html_content = docstring_to_html(docstring)
+
+            all_docs[node_type] = {
+                "docstring": docstring,  # Keep original for backwards compatibility
+                "html": html_content,  # New HTML version
+            }
+
+        return jsonify(all_docs)
+    except Exception as e:
+        return jsonify({"error": f"Could not get docs for all nodes: {str(e)}"}), 400
+
+
 @app.route("/get-docs/<string:node_type>", methods=["GET"])
 def get_docs(node_type):
     try:
@@ -161,42 +286,6 @@ def get_docs(node_type):
         )
     except Exception as e:
         return jsonify({"error": f"Could not get docs for {node_type}: {str(e)}"}), 400
-
-
-# Function to save graphs
-@app.route("/save", methods=["POST"])
-def save_graph():
-    data = request.json
-    filename = data.get(
-        "filename", "file_1"
-    )  # sets file_1 as default filename if not provided
-    graph_data = data.get("graph")
-
-    # Enforces .json extension and valid filenames
-    valid_name = f"{filename}.json" if not filename.endswith(".json") else filename
-    file_path = os.path.join(SAVE_DIR, valid_name)
-
-    with open(file_path, "w") as f:
-        json.dump(graph_data, f, indent=2)
-
-    return jsonify({"message": f"Graph saved as {valid_name}"})
-
-
-# Function to load saved graphs
-@app.route("/load", methods=["POST"])
-def load_graph():
-    data = request.json
-    filename = data.get("filename")
-    validname = filename if not filename.endswith(".json") else filename[:-5]
-    filepath = os.path.join(SAVE_DIR, f"{validname}.json")
-
-    if not os.path.exists(filepath):
-        return jsonify({"error": "File not found"}), 404
-
-    with open(filepath, "r") as f:
-        graph_data = json.load(f)
-
-    return jsonify(graph_data)
 
 
 # Function to convert graph to Python script
@@ -250,6 +339,10 @@ def run_pathsim():
             return jsonify({"error": "No graph data provided"}), 400
 
         my_simulation, duration = make_pathsim_model(graph_data)
+
+        # get the pathsim logger and add the queue handler
+        logger = my_simulation.logger
+        logger.addHandler(qhandler)
 
         # Run the simulation
         my_simulation.run(duration)

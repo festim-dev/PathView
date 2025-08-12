@@ -13,6 +13,7 @@ import MultiplierNode from './components/nodes/MultiplierNode';
 import { Splitter2Node, Splitter3Node } from './components/nodes/Splitters';
 import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
+import { DynamicHandleNode } from './components/nodes/DynamicHandleNode';
 
 // Node types mapping
 export const nodeTypes = {
@@ -37,8 +38,7 @@ export const nodeTypes = {
   adder: AdderNode,
   multiplier: MultiplierNode,
   scope: ScopeNode,
-  function: createFunctionNode(1, 1), // Default FunctionNode with 1 input and 1 output
-  function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
+  function: DynamicHandleNode,
   rng: SourceNode,
   pid: DefaultNode,
   antiwinduppid: DefaultNode,
@@ -57,7 +57,8 @@ export const nodeTypes = {
   butterworthhighpass: DefaultNode,
   butterworthbandpass: DefaultNode,
   butterworthbandstop: DefaultNode,
-  fir: DefaultNode
+  fir: DefaultNode,
+  ode: DynamicHandleNode,
 };
 
 export const nodeMathTypes = {
@@ -86,6 +87,8 @@ Object.keys(nodeMathTypes).forEach(type => {
   }
 });
 
+export const nodeDynamicHandles = ['ode', 'function']; 
+
 // Node categories for better organization
 export const nodeCategories = {
   'Sources': {
@@ -93,7 +96,7 @@ export const nodeCategories = {
     description: 'Signal and data source nodes'
   },
   'Processing': {
-    nodes: ['delay', 'amplifier', 'amplifier_reverse', 'integrator', 'differentiator', 'function', 'function2to2'],
+    nodes: ['delay', 'amplifier', 'amplifier_reverse', 'integrator', 'differentiator', 'function', 'ode'],
     description: 'Signal processing and transformation nodes'
   },
   'Math': {
@@ -138,8 +141,8 @@ export const getNodeDisplayName = (nodeType) => {
     'amplifier_reverse': 'Amplifier (Reverse)',
     'integrator': 'Integrator',
     'function': 'Function',
-    'function2to2': 'Function (2→2)',
     'adder': 'Adder',
+    'ode': 'ODE',
     'multiplier': 'Multiplier',
     'splitter2': 'Splitter (1→2)',
     'splitter3': 'Splitter (1→3)',

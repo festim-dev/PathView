@@ -7,7 +7,7 @@ export function ProcessNode({ data }) {
       style={{
         width: 180,
         height: 100,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 12,
         padding: 10,
@@ -55,7 +55,7 @@ export function ProcessNodeHorizontal({ data }) {
       style={{
         width: 100,
         height: 180,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 12,
         padding: 10,

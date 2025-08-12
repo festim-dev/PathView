@@ -15,7 +15,7 @@ export function AmplifierNode({ data }) {
     >
 
       <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon points="0,0 100,50 0,100" fill="#DDE6ED" />
+          <polygon points="0,0 100,50 0,100" fill={data.nodeColor || "#DDE6ED"} />
       </svg>
       <div style={{ 
         fontSize: '12px',
@@ -30,30 +30,8 @@ export function AmplifierNode({ data }) {
       </div>
 
 
-      <Handle 
-        type="target" 
-        position="left" 
-        style={{ 
-          background: '#555',
-          left: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
-      <Handle 
-        type="source" 
-        position="right" 
-        style={{ 
-          background: '#555',
-          right: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
+      <Handle type="target" position="left" style={{ background: '#555' }} />
+      <Handle type="source" position="right" style={{ background: '#555' }} />
     </div>
   );
 }
@@ -72,7 +50,7 @@ export function AmplifierNodeReverse({ data }) {
     >
 
       <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon points="0,50 100,100 100,0" fill="#DDE6ED" />
+          <polygon points="0,50 100,100 100,0" fill={data.nodeColor || "#DDE6ED"} />
       </svg>
       <div style={{ 
         fontSize: '12px',
@@ -87,30 +65,8 @@ export function AmplifierNodeReverse({ data }) {
       </div>
 
 
-      <Handle 
-        type="target" 
-        position="right" 
-        style={{ 
-          background: '#555',
-          right: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
-      <Handle 
-        type="source" 
-        position="left" 
-        style={{ 
-          background: '#555',
-          left: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
+      <Handle type="target" position="right" style={{ background: '#555' }} />
+      <Handle type="source" position="left" style={{ background: '#555' }} />
     </div>
   );
 }

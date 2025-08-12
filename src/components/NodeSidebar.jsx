@@ -155,10 +155,10 @@ const NodeSidebar = ({
           const nodeDefaults = defaultValues[selectedNode.type] || {};
 
           // Create a list of all possible parameters (both current data and defaults)
-          // Exclude 'label' since it's now editable directly in the title
+          // Exclude 'label' and 'nodeColor' since they're handled separately
           const allParams = new Set([
-            ...Object.keys(selectedNode.data).filter(key => key !== 'label'),
-            ...Object.keys(nodeDefaults).filter(key => key !== 'label')
+            ...Object.keys(selectedNode.data).filter(key => key !== 'label' && key !== 'nodeColor'),
+            ...Object.keys(nodeDefaults).filter(key => key !== 'label' && key !== 'nodeColor')
           ]);
 
           return Array.from(allParams)
@@ -211,6 +211,133 @@ const NodeSidebar = ({
               );
             });
         })()}
+
+        {/* Color Picker Section */}
+        <div style={{ 
+          marginTop: '20px',
+          marginBottom: '20px',
+          borderTop: '1px solid #555',
+          paddingTop: '15px'
+        }}>
+          <h4 style={{ 
+            margin: '0 0 12px 0',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#a8b3cf',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>Node Color</h4>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '8px'
+          }}>
+            <input
+              type="color"
+              value={selectedNode.data.nodeColor || '#DDE6ED'}
+              onChange={(e) => {
+                const newColor = e.target.value;
+                const updatedNode = {
+                  ...selectedNode,
+                  data: { ...selectedNode.data, nodeColor: newColor },
+                };
+
+                setNodes((nds) =>
+                  nds.map((node) =>
+                    node.id === selectedNode.id ? updatedNode : node
+                  )
+                );
+                setSelectedNode(updatedNode);
+              }}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '6px',
+                border: '2px solid #555',
+                backgroundColor: 'transparent',
+                cursor: 'pointer',
+                padding: '0'
+              }}
+            />
+            
+            <input
+              type="text"
+              value={selectedNode.data.nodeColor || '#DDE6ED'}
+              onChange={(e) => {
+                const newColor = e.target.value;
+                const updatedNode = {
+                  ...selectedNode,
+                  data: { ...selectedNode.data, nodeColor: newColor },
+                };
+
+                setNodes((nds) =>
+                  nds.map((node) =>
+                    node.id === selectedNode.id ? updatedNode : node
+                  )
+                );
+                setSelectedNode(updatedNode);
+              }}
+              placeholder="#DDE6ED"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '4px',
+                border: '1px solid #555',
+                backgroundColor: '#2a2a3e',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontFamily: 'monospace'
+              }}
+            />
+          </div>
+          
+          {/* Color preset buttons */}
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '8px',
+            marginTop: '12px'
+          }}>
+            {['#DDE6ED', '#FFE5E5', '#E5F3FF', '#E5FFE5', '#FFF5E5', '#F0E5FF', '#FFE5F5', '#E5FFFF'].map(color => (
+              <button
+                key={color}
+                onClick={() => {
+                  const updatedNode = {
+                    ...selectedNode,
+                    data: { ...selectedNode.data, nodeColor: color },
+                  };
+
+                  setNodes((nds) =>
+                    nds.map((node) =>
+                      node.id === selectedNode.id ? updatedNode : node
+                    )
+                  );
+                  setSelectedNode(updatedNode);
+                }}
+                style={{
+                  width: '100%',
+                  height: '30px',
+                  backgroundColor: color,
+                  border: selectedNode.data.nodeColor === color ? '2px solid #007bff' : '1px solid #666',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedNode.data.nodeColor !== color) {
+                    e.target.style.transform = 'scale(1.05)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                }}
+                title={color}
+              />
+            ))}
+          </div>
+        </div>
 
         <br />
         <button

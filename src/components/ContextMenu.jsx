@@ -22,7 +22,7 @@ export default function ContextMenu({
     setEdges((edges) => edges.filter((edge) => edge.source !== id && edge.target !== id));
     onClick && onClick(); // Close menu after action
   }, [id, setNodes, setEdges, onClick]);
- 
+
   return (
     <div
       style={{ top, left, right, bottom }}

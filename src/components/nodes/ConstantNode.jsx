@@ -6,7 +6,7 @@ export default function ConstantNode({ data }) {
     <div
       style={{
         width: 180,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 12,
         padding: 10,

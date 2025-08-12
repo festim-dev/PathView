@@ -11,6 +11,9 @@ RUN npm run build
 # Python backend stage
 FROM python:3.11-slim
 
+# Build argument for version (can be set at build time)
+ARG VERSION=0.1.0
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -23,21 +26,19 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install python core package
-RUN pip install .
+# Copy source code and package configuration
+COPY pyproject.toml .
+COPY src/ ./src/
+
+# Install python core package with setuptools-scm version override
+RUN SETUPTOOLS_SCM_PRETEND_VERSION_FOR_FUEL_CYCLE_SIM=${VERSION} pip install .
 
 # Install gunicorn for production WSGI server
 RUN pip install gunicorn
-
-# Copy backend source code
-COPY src/ ./src/
 # COPY *.py ./
 
 # Copy built frontend from previous stage
 COPY --from=frontend-build /app/dist ./dist
-
-# Create necessary directories
-RUN mkdir -p saved_graphs plots
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app \

@@ -7,7 +7,7 @@ export function Splitter2Node({ data }) {
       style={{
         width: 100,
         height: 100,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 0,
         padding: 10,
@@ -88,7 +88,7 @@ export function Splitter3Node({ data }) {
       style={{
         width: 100,
         height: 100,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 0,
         padding: 10,

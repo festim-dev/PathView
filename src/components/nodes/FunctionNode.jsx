@@ -98,7 +98,7 @@ export function createFunctionNode(numInputs, numOutputs) {
         style={{
           width: dynamicWidth,
           height: dynamicHeight,
-          background: '#DDE6ED',
+          background: data.nodeColor || '#DDE6ED',
           color: 'black',
           borderRadius: 0,
           padding: 10,

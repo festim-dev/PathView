@@ -7,7 +7,7 @@ export default function WallNode({ data }) {
       style={{
         width: 50,
         height: 180,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: 0,
         padding: 10,

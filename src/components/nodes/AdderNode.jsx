@@ -7,7 +7,7 @@ export default function AdderNode({ data }) {
       style={{
         width: 60,
         height: 60,
-        background: '#DDE6ED',
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
         borderRadius: '50%',
         display: 'flex',
