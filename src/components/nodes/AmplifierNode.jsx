@@ -30,30 +30,8 @@ export function AmplifierNode({ data }) {
       </div>
 
 
-      <Handle 
-        type="target" 
-        position="left" 
-        style={{ 
-          background: '#555',
-          left: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
-      <Handle 
-        type="source" 
-        position="right" 
-        style={{ 
-          background: '#555',
-          right: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
+      <Handle type="target" position="left" style={{ background: '#555' }} />
+      <Handle type="source" position="right" style={{ background: '#555' }} />
     </div>
   );
 }
@@ -87,30 +65,8 @@ export function AmplifierNodeReverse({ data }) {
       </div>
 
 
-      <Handle 
-        type="target" 
-        position="right" 
-        style={{ 
-          background: '#555',
-          right: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
-      <Handle 
-        type="source" 
-        position="left" 
-        style={{ 
-          background: '#555',
-          left: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '12px',
-          height: '12px'
-        }} 
-      />
+      <Handle type="target" position="right" style={{ background: '#555' }} />
+      <Handle type="source" position="left" style={{ background: '#555' }} />
     </div>
   );
 }
