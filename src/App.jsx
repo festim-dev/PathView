@@ -1021,78 +1021,103 @@ const DnDFlow = () => {
         backgroundColor: '#2c2c2c',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         zIndex: 15,
         borderBottom: '1px solid #ccc'
       }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('graph')}
+          >
+            Graph Editor
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'events' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('events')}
+          >
+            Events
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('solver')}
+          >
+            Solver Parameters
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('globals')}
+          >
+            Global Variables
+          </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              margin: '5px',
+              backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveTab('results')}
+          >
+            Results
+          </button>
+        </div>
+        
+        {/* Help Button */}
         <button
           style={{
             padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
+            margin: '5px 10px 5px 5px',
+            backgroundColor: '#007ACC',
             color: 'white',
             border: 'none',
             borderRadius: 5,
             cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
           }}
-          onClick={() => setActiveTab('graph')}
-        >
-          Graph Editor
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'events' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
+          onClick={() => {
+            // TODO - open modal, navigate to help page, etc.
+            alert('Help documentation coming soon! Check the README.md file in the repository for current documentation.');
           }}
-          onClick={() => setActiveTab('events')}
+          title="Get help and documentation"
         >
-          Events
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={() => setActiveTab('solver')}
-        >
-          Solver Parameters
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={() => setActiveTab('globals')}
-        >
-          Global Variables
-        </button>
-        <button
-          style={{
-            padding: '10px 20px',
-            margin: '5px',
-            backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-          onClick={() => setActiveTab('results')}
-        >
-          Results
+          Help
         </button>
       </div>
 
