@@ -1,17 +1,18 @@
 ---
-title: 'PathView: A Graphical User Interface for system simulation'
+title: 'PathView: A Graphical User Interface for System Simulation'
 tags:
   - Python
   - block diagram
   - system modelling
 authors:
   - name: Remi Delaporte-Mathurin
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-1064-8882
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Tasnim Zulfiqar
     affiliation: 1
   - name: James Dark
+    orcid: 0000-0002-0456-7210
     affiliation: 1
 affiliations:
  - name: Plasma Science and Fusion Center, Massachusetts Institute of Technology, Cambridge, 02139, USA
@@ -24,81 +25,39 @@ bibliography: paper.bib
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+`PathView` is an interactive, browser-based graphical interface for the system simulation framework `PathSim` [@Rother2025]. It enables users to build models quickly in an intuitive, visual environment. Built with `ReactFlow` [@reactflow], `PathView` allows users to:
+
+- Drag and drop simulation nodes onto a canvas.
+- Connect nodes to define system structure.
+- Create and manage subsystems for hierarchical modelling.
+- Configure event detection and advanced simulation options.
+- Configure solver parameters
+- Easily extend functionality through a modular architecture.
+
+In addition to mirroring nearly all of `PathSim`'s capabilities, `PathView` uses `Jinja2` templates to generate fully executable Python scripts from graphical models, enabling seamless transition between GUI-based and code-based workflows.
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+`PathSim` is a powerful and flexible simulation framework for modelling complex systems. However, building large-scale or intricate models solely through Python scripting can be cumbersome and error-prone, particularly for new users or for projects that benefit from visual inspection of system layout.
+Many established simulation platforms, such as MathWorks Simulink, Modelica, or Aspen Plus, provide graphical user interfaces to enhance usability, model comprehension, and collaboration. Until now, such a visual modelling environment was missing for `PathSim`.
+`PathView` fills this gap by providing a modern, interactive, and extensible GUI, reducing the barrier to entry for new users and improving productivity for experienced modellers.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+# Example
 
-# Mathematics
+A demonstration video is provided in the online documentation.
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+![Caption for example figure.\label{fig:example}](example.png){ width=80% }
 
-Double dollars make self-standing equations:
+# Features
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
+- **Node creation and connection**: Choose from 58 different simulation node types, configure parameters, and connect them visually.
+- **Custom styling**: Change node colours for improved readability.
+- **Integrated simulation**: Run PathSim simulations directly from the GUI.
+- **Interactive visualisation**: Embedded Plotly plots for real-time data exploration.
+- **Advanced global variables**: Define global variables, including via an integrated Python editor for complex expressions.
+- **Flexible I/O**: Save and load models in JSON format; export to Python scripts for advanced or automated use.
+- **Modular and extensible**: Designed for easy integration of new node types and custom functionality.
 
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
 
 # References
