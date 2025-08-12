@@ -622,6 +622,7 @@ const DnDFlow = () => {
         nodeCounter,
         solverParams,
         globalVariables,
+        pythonCode,
         events
       };
 
