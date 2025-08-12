@@ -87,7 +87,7 @@ Object.keys(nodeMathTypes).forEach(type => {
   }
 });
 
-export const nodeDynamicHandles = ['ode', 'function']; 
+export const nodeDynamicHandles = ['ode', 'function'];
 
 // Node categories for better organization
 export const nodeCategories = {
@@ -132,6 +132,14 @@ export const getNodeDisplayName = (nodeType) => {
     'constant': 'Constant',
     'stepsource': 'Step',
     'pulsesource': 'Pulse',
+    'trianglewavesource': 'Triangle Wave',
+    'sinusoidalsource': 'Sinusoidal Source',
+    'gaussianpulsesource': 'Gaussian Pulse Source',
+    'sinusoidalphasenoisesource': 'Sinusoidal Alpha Noise Source',
+    'chirpphasenoisesource': 'Chirp Phase Noise Source',
+    'chirpsource': 'Chirp Source',
+    'clocksource': 'Clock Source',
+    'squarewavesource': 'Square Wave',
     'white_noise': 'White Noise',
     'pink_noise': 'Pink Noise',
     'process': 'Process',
@@ -148,6 +156,7 @@ export const getNodeDisplayName = (nodeType) => {
     'splitter3': 'Splitter (1→3)',
     'rng': 'Random Number Generator',
     'pid': 'PID Controller',
+    'antiwinduppid': 'Anti-Windup PID',
     'bubbler': 'Bubbler',
     'wall': 'Wall',
     'scope': 'Scope',
@@ -169,6 +178,12 @@ export const getNodeDisplayName = (nodeType) => {
     'norm': 'Normalization',
     'mod': 'Modulo',
     'clip': 'Clipping',
+    'allpassfilter': 'All-Pass Filter',
+    'butterworthlowpass': 'Butterworth Low-Pass Filter',
+    'butterworthhighpass': 'Butterworth High-Pass Filter',
+    'butterworthbandpass': 'Butterworth Band-Pass Filter',
+    'butterworthbandstop': 'Butterworth Band-Stop Filter',
+    'fir': 'FIR Filter',
   };
 
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
