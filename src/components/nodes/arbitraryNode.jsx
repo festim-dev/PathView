@@ -47,12 +47,12 @@ export function DynamicHandleNode({ id, data }) {
       {Array.from({ length: inputHandleCount }).map((_, index) => {
         const topPercentage = inputHandleCount === 1 ? 50 : ((index + 1) / (inputHandleCount + 1)) * 100;
         return (
-          <React.Fragment key={`input-${index}`}>
+          <React.Fragment key={`target-${index}`}>
             <Handle
-              key={`input-${index}`}
+              key={`target-${index}`}
               type="target"
               position="left"
-              id={`input-${index}`}
+              id={`target-${index}`}
               style={{ 
                 background: '#555',
                 top: `${topPercentage}%`
@@ -83,12 +83,12 @@ export function DynamicHandleNode({ id, data }) {
       {Array.from({ length: outputHandleCount }).map((_, index) => {
         const topPercentage = outputHandleCount === 1 ? 50 : ((index + 1) / (outputHandleCount + 1)) * 100;
         return (
-          <React.Fragment key={`output-${index}`}>
+          <React.Fragment key={`source-${index}`}>
             <Handle
-              key={`output-${index}`}
+              key={`source-${index}`}
               type="source"
               position="right"
-              id={`output-${index}`}
+              id={`source-${index}`}
               style={{ 
                 background: '#555',
                 top: `${topPercentage}%`

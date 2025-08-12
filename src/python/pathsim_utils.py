@@ -19,6 +19,7 @@ from pathsim.blocks import (
     PID,
     Spectrum,
     Differentiator,
+    ODE,
     Schedule,
 )
 import pathsim.blocks
@@ -73,6 +74,7 @@ map_str_to_object = {
     "function": Function,
     "function2to2": Function,
     "delay": Delay,
+    "ode": ODE,
     "bubbler": Bubbler,
     "wall": FestimWall,
     "white_noise": WhiteNoise,
@@ -374,7 +376,8 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
         if block._port_map_in:
             return edge["targetHandle"]
 
-    if isinstance(block, Function):
+    # TODO maybe we could directly use the targetHandle as a port alias for these:
+    if isinstance(block, (Function, ODE)):
         return int(edge["targetHandle"].replace("target-", ""))
     else:
         # make sure that the target block has only one input port (ie. that targetHandle is None)
@@ -410,8 +413,9 @@ def get_output_index(block: Block, edge: dict) -> int:
                 f"Invalid source handle '{edge['sourceHandle']}' for {edge}."
             )
         return output_index
-    elif isinstance(block, Function):
-        # Function outputs are always in order, so we can use the handle directly
+    # TODO maybe we could directly use the targetHandle as a port alias for these:
+    elif isinstance(block, (Function, ODE)):
+        # Function and ODE outputs are always in order, so we can use the handle directly
         assert edge["sourceHandle"], edge
         return int(edge["sourceHandle"].replace("source-", ""))
     else:
