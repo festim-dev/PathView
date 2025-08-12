@@ -38,8 +38,7 @@ export const nodeTypes = {
   adder: AdderNode,
   multiplier: MultiplierNode,
   scope: ScopeNode,
-  function: DynamicHandleNode, // Default FunctionNode with 1 input and 1 output
-  function2to2: createFunctionNode(2, 2), // FunctionNode with 2 inputs and 2 outputs
+  function: DynamicHandleNode,
   rng: SourceNode,
   pid: DefaultNode,
   antiwinduppid: DefaultNode,
@@ -97,7 +96,7 @@ export const nodeCategories = {
     description: 'Signal and data source nodes'
   },
   'Processing': {
-    nodes: ['delay', 'amplifier', 'amplifier_reverse', 'integrator', 'differentiator', 'function', 'function2to2', 'ode'],
+    nodes: ['delay', 'amplifier', 'amplifier_reverse', 'integrator', 'differentiator', 'function', 'ode'],
     description: 'Signal processing and transformation nodes'
   },
   'Math': {
@@ -142,7 +141,6 @@ export const getNodeDisplayName = (nodeType) => {
     'amplifier_reverse': 'Amplifier (Reverse)',
     'integrator': 'Integrator',
     'function': 'Function',
-    'function2to2': 'Function (2→2)',
     'adder': 'Adder',
     'ode': 'ODE',
     'multiplier': 'Multiplier',
