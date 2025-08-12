@@ -1,13 +1,7 @@
-"""
-Fuel Cycle Simulation Package
-
-A Python package for fuel cycle simulation with pathsim integration.
-"""
-
 from importlib import metadata
 
 try:
-    __version__ = metadata.version("fuel_cycle_sim")
+    __version__ = metadata.version("pathview")
 except Exception:
     __version__ = "unknown"
 

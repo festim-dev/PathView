@@ -1,4 +1,4 @@
-from fuel_cycle_sim import convert_graph_to_python
+from pathview import convert_graph_to_python
 import json
 import pytest
 from pathlib import Path

@@ -31,7 +31,7 @@ COPY pyproject.toml .
 COPY src/ ./src/
 
 # Install python core package with setuptools-scm version override
-RUN SETUPTOOLS_SCM_PRETEND_VERSION_FOR_FUEL_CYCLE_SIM=${VERSION} pip install .
+RUN SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PATHVIEW=${VERSION} pip install .
 
 # Install gunicorn for production WSGI server
 RUN pip install gunicorn

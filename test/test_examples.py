@@ -1,4 +1,4 @@
-from fuel_cycle_sim.pathsim_utils import make_pathsim_model
+from pathview.pathsim_utils import make_pathsim_model
 import json
 
 import pytest

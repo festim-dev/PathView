@@ -1,5 +1,5 @@
-from fuel_cycle_sim.pathsim_utils import auto_block_construction, make_connections
-from fuel_cycle_sim.custom_pathsim_blocks import (
+from pathview.pathsim_utils import auto_block_construction, make_connections
+from pathview.custom_pathsim_blocks import (
     Process,
     Splitter2,
     Splitter3,
