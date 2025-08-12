@@ -1,0 +1,141 @@
+import React, { useCallback, useState, useEffect } from 'react';
+import { Handle, useUpdateNodeInternals } from '@xyflow/react';
+ 
+export function RandomHandleNode({ id, data }) {
+  const updateNodeInternals = useUpdateNodeInternals();
+  const [inputHandleCount, setInputHandleCount] = useState(data.inputCount || 0);
+  const [outputHandleCount, setOutputHandleCount] = useState(data.outputCount || 0);
+  
+  useEffect(() => {
+    let shouldUpdate = false;
+    
+    if (data.inputCount !== undefined && data.inputCount !== inputHandleCount) {
+      setInputHandleCount(data.inputCount);
+      shouldUpdate = true;
+    }
+    
+    if (data.outputCount !== undefined && data.outputCount !== outputHandleCount) {
+      setOutputHandleCount(data.outputCount);
+      shouldUpdate = true;
+    }
+    
+    if (shouldUpdate) {
+      updateNodeInternals(id);
+    }
+  }, [data.inputCount, data.outputCount, inputHandleCount, outputHandleCount, id, updateNodeInternals]);
+  
+
+ 
+  return (
+    <div
+      style={{
+        width: Math.max(180, (data.label?.length || 8) * 8 + 40),
+        height: Math.max(60, Math.max(inputHandleCount, outputHandleCount) * 25 + 30),
+        background: '#DDE6ED',
+        color: 'black',
+        borderRadius: 0,
+        padding: 10,
+        fontWeight: 'bold',
+        position: 'relative',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {/* Input Handles (left side) */}
+      {Array.from({ length: inputHandleCount }).map((_, index) => {
+        const topPercentage = inputHandleCount === 1 ? 50 : ((index + 1) / (inputHandleCount + 1)) * 100;
+        return (
+          <React.Fragment key={`input-${index}`}>
+            <Handle
+              key={`input-${index}`}
+              type="target"
+              position="left"
+              id={`input-${index}`}
+              style={{ 
+                background: '#555',
+                top: `${topPercentage}%`
+              }}
+            />
+            {/* Input label for multiple inputs */}
+            {inputHandleCount > 1 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '8px',
+                  top: `${topPercentage}%`,
+                  transform: 'translateY(-50%)',
+                  fontSize: '10px',
+                  fontWeight: 'normal',
+                  color: '#666',
+                  pointerEvents: 'none',
+                }}
+              >
+                {index + 1}
+              </div>
+            )}
+          </React.Fragment>
+        );
+      })}
+      
+      {/* Output Handles (right side) */}
+      {Array.from({ length: outputHandleCount }).map((_, index) => {
+        const topPercentage = outputHandleCount === 1 ? 50 : ((index + 1) / (outputHandleCount + 1)) * 100;
+        return (
+          <React.Fragment key={`output-${index}`}>
+            <Handle
+              key={`output-${index}`}
+              type="source"
+              position="right"
+              id={`output-${index}`}
+              style={{ 
+                background: '#555',
+                top: `${topPercentage}%`
+              }}
+            />
+            {/* Output label for multiple outputs */}
+            {outputHandleCount > 1 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: `${topPercentage}%`,
+                  transform: 'translateY(-50%)',
+                  fontSize: '10px',
+                  fontWeight: 'normal',
+                  color: '#666',
+                  pointerEvents: 'none',
+                }}
+              >
+                {index + 1}
+              </div>
+            )}
+          </React.Fragment>
+        );
+      })}
+
+      {/* Main content */}
+      <div style={{ 
+        textAlign: 'center', 
+        wordWrap: 'break-word', 
+        maxWidth: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        <div>{data.label}</div>
+        {(inputHandleCount > 0 || outputHandleCount > 0) && (
+          <small style={{ 
+            fontWeight: 'normal', 
+            color: '#666',
+            fontSize: '10px',
+            marginTop: '4px'
+          }}>
+            Right-click to add handles
+          </small>
+        )}
+      </div>
+    </div>
+  );
+}
