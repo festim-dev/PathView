@@ -21,8 +21,10 @@ import ContextMenu from './components/ContextMenu.jsx';
 import EventsTab from './components/EventsTab.jsx';
 import GlobalVariablesTab from './components/GlobalVariablesTab.jsx';
 import { makeEdge } from './components/CustomEdge';
-import { nodeTypes } from './nodeConfig.js';
+import { nodeTypes, nodeDynamicHandles } from './nodeConfig.js';
 import LogDock from './components/LogDock.jsx';
+
+import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
 
 // * Declaring variables *
 
@@ -250,6 +252,12 @@ const DnDFlow = () => {
 
       // Create node data with label and initialize all expected fields as empty strings
       let nodeData = { label: `${type} ${newNodeId}` };
+
+      // if node in nodeDynamicHandles, ensure add outputCount and inputCount to data
+      if (nodeDynamicHandles.includes(type)) {
+        nodeData.inputCount = 1;
+        nodeData.outputCount = 1;
+      }
 
       // Initialize all expected parameters as empty strings
       Object.keys(defaults).forEach(key => {
@@ -952,7 +960,6 @@ const DnDFlow = () => {
     setNodeCounter((count) => count + 1);
     setMenu(null); // Close the context menu
   }, [nodes, nodeCounter, setNodeCounter, setNodes, setMenu]);
-
 
   // Keyboard event handler for deleting selected items
   useEffect(() => {
