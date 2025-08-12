@@ -1,9 +1,9 @@
-.. fuel-cycle-sim documentation master file, created by
+.. pathview documentation master file, created by
    sphinx-quickstart on Wed Jul 23 14:07:29 2025.
 
-==========================================
-Fuel Cycle Simulator (name will change...)
-==========================================
+========
+PathView
+========
 
 An interactive visual tool for modeling and simulating nuclear fuel cycle components using React Flow frontend and Python Flask backend.
 
@@ -24,16 +24,16 @@ An interactive visual tool for modeling and simulating nuclear fuel cycle compon
 Statement of Need
 ===============================
 
-Fusion fuel cycle modeling is a critical aspect of nuclear engineering that requires sophisticated tools to analyze material flows, reactor performance, and waste management strategies. The Fuel Cycle Simulator addresses the need for:
+System modeling is a critical aspect of nuclear engineering that requires sophisticated tools to analyze material flows, reactor performance, and waste management strategies. PathView addresses the need for:
 
 **Accessibility**
-   Traditional fuel cycle simulation tools are often complex, proprietary, or require extensive training. This tool provides an intuitive visual interface that makes fuel cycle modeling accessible to students, researchers, and professionals.
+   Traditional system simulation tools are often complex, proprietary, or require extensive training. This tool provides an intuitive visual interface that makes system modeling accessible to students, researchers, and professionals.
 
 **Interactivity**
-   Static models and command-line tools limit exploration and understanding. Our interactive visual approach allows users to build, modify, and experiment with fuel cycle scenarios in real-time.
+   Static models and command-line tools limit exploration and understanding. Our interactive visual approach allows users to build, modify, and experiment with system scenarios in real-time.
 
 **Educational Value**
-   The visual nature of the tool makes it ideal for teaching fuel cycle concepts, allowing students to see the connections between different components and understand material flows.
+   The visual nature of the tool makes it ideal for teaching system concepts, allowing students to see the connections between different components and understand material flows.
 
 **Research Flexibility**
    Researchers need tools that can be easily modified and extended. The open-source nature and modular architecture enable customization for specific research needs.
@@ -48,7 +48,7 @@ Installation Guide
 System Requirements
 -------------------
 
-Before installing the Fuel Cycle Simulator, ensure your system meets the following requirements:
+Before installing PathView, ensure your system meets the following requirements:
 
 **Required Software:**
    - Node.js 18+ and npm
@@ -67,9 +67,9 @@ Installation Steps
 1. **Clone the Repository**
    
    .. code-block:: bash
-   
-      git clone https://github.com/yourusername/fuel-cycle-sim.git
-      cd fuel-cycle-sim
+
+      git clone https://github.com/festim-dev/pathview.git
+      cd pathview
 
 2. **Install Frontend Dependencies**
    
@@ -127,7 +127,7 @@ Example Usage
 Quick Start Example
 -------------------
 
-Here's a simple example to get you started with the Fuel Cycle Simulator:
+Here's a simple example to get you started with PathView:
 
 WIP
 
@@ -159,7 +159,7 @@ WIP
 Community Guidelines
 ===============================
 
-Welcome to the Fuel Cycle Simulator community! We're committed to fostering an inclusive, collaborative environment for all contributors.
+Welcome to the PathView community! We're committed to fostering an inclusive, collaborative environment for all contributors.
 
 Code of Conduct
 ----------------
@@ -218,7 +218,7 @@ Communication Channels
 Support
 ===============================
 
-If you need help with the Fuel Cycle Simulator, here are the best ways to get support:
+If you need help with PathView, here are the best ways to get support:
 
 - **Documentation**: Start with this documentation
 - **GitHub Issues**: For bugs and feature requests

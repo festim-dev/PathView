@@ -1,5 +1,5 @@
-# Fuel Cycle Simulator
-An interactive visual tool built with React Flow and a python (Flask) backend to simulate fuel cycle components.
+# PathView
+An interactive visual tool built with React Flow and a python (Flask) backend for system modelling using PathSim.
 
 # Required Installations
 Make sure the following are installed on your system:
@@ -9,7 +9,7 @@ Make sure the following are installed on your system:
 
 # Project Structure
 ```bash
-fuel-cycle-sim/
+pathview/
 
 ├── package.json          # Frontend (React) dependencies
 

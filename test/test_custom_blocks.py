@@ -1,6 +1,6 @@
 import pathsim.blocks
 from pathsim import Simulation, Connection
-from fuel_cycle_sim.custom_pathsim_blocks import Bubbler
+from pathview.custom_pathsim_blocks import Bubbler
 
 
 def test_bubbler():

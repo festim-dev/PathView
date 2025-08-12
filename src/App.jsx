@@ -1176,12 +1176,12 @@ const DnDFlow = () => {
           onClick={() => {
             // Display version information and help
             const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
-            const fcsVersion = versionInfo?.fuel_cycle_sim_version || 'Loading...';
+            const fcsVersion = versionInfo?.pathview_version || 'Loading...';
 
             const message = `Help documentation coming soon!\n\n` +
               `Version Information:\n` +
               `• PathSim: ${pathsimVersion}\n` +
-              `• Fuel Cycle Sim: ${fcsVersion}\n\n`;
+              `• PathView: ${fcsVersion}\n\n`;
 
             alert(message);
           }}

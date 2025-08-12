@@ -11,8 +11,8 @@ import inspect
 import io
 from contextlib import redirect_stdout, redirect_stderr
 
-from fuel_cycle_sim.convert_to_python import convert_graph_to_python
-from fuel_cycle_sim.pathsim_utils import make_pathsim_model, map_str_to_object
+from pathview.convert_to_python import convert_graph_to_python
+from pathview.pathsim_utils import make_pathsim_model, map_str_to_object
 from pathsim.blocks import Scope, Spectrum
 
 # Sphinx imports for docstring processing
@@ -131,15 +131,13 @@ def serve_frontend():
     if os.getenv("FLASK_ENV") == "production":
         return app.send_static_file("index.html")
     else:
-        return jsonify({"message": "Fuel Cycle Simulator API", "status": "running"})
+        return jsonify({"message": "PathView API", "status": "running"})
 
 
 # Health check endpoint for Cloud Run
 @app.route("/health", methods=["GET"])
 def health_check():
-    return jsonify(
-        {"status": "healthy", "message": "Fuel Cycle Simulator Backend is running"}
-    ), 200
+    return jsonify({"status": "healthy", "message": "PathView Backend is running"}), 200
 
 
 # Version information endpoint
@@ -151,14 +149,14 @@ def get_version():
 
         pathsim_version = getattr(pathsim, "__version__", "Unknown")
 
-        import fuel_cycle_sim
+        import pathview
 
-        fcs_version = getattr(fuel_cycle_sim, "__version__", "Unknown")
+        fcs_version = getattr(pathview, "__version__", "Unknown")
 
         return jsonify(
             {
                 "pathsim_version": pathsim_version,
-                "fuel_cycle_sim_version": fcs_version,
+                "pathview_version": fcs_version,
                 "status": "success",
             }
         ), 200
@@ -166,7 +164,7 @@ def get_version():
         return jsonify(
             {
                 "pathsim_version": "Unknown",
-                "fuel_cycle_sim_version": "Unknown",
+                "pathview_version": "Unknown",
                 "status": "error",
                 "error": str(e),
             }

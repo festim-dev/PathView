@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "fuel-cycle-sim"
+project = "pathview"
 copyright = "2025, Tasnim Zulfiqar, James Dark, Remi Delaporte-Mathurin"
 author = "Tasnim Zulfiqar, James Dark, Remi Delaporte-Mathurin"
 
