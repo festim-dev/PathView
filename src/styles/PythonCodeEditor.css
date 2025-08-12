@@ -47,6 +47,22 @@
 .editor-container {
   border-radius: 0 0 8px 8px;
   overflow: hidden;
+  position: relative;
+}
+
+.editor-container .cm-editor {
+  height: 100% !important;
+  overflow: auto !important;
+}
+
+.editor-container .cm-scroller {
+  overflow: auto !important;
+  max-height: 100% !important;
+}
+
+.editor-container .cm-content {
+  padding: 8px 0;
+  min-height: 100% !important;
 }
 
 .execution-result {
