@@ -37,8 +37,32 @@ from .custom_pathsim_blocks import (
 from flask import jsonify
 import inspect
 
-
 NAME_TO_SOLVER = {
+    "RK4": pathsim.solvers.RK4,
+    "RKBS32": pathsim.solvers.RKBS32,
+    "RKCK54": pathsim.solvers.RKCK54,
+    "RKDP54": pathsim.solvers.RKDP54,
+    "RKDP87": pathsim.solvers.RKDP87,
+    "RKF45": pathsim.solvers.RKF45,
+    "RKF78": pathsim.solvers.RKF78,
+    "RKV65": pathsim.solvers.RKV65,
+    "BDF": pathsim.solvers.BDF,
+    "EUF": pathsim.solvers.EUF,
+    "EUB": pathsim.solvers.EUB,
+    "GEAR21": pathsim.solvers.GEAR21,
+    "GEAR32": pathsim.solvers.GEAR32,
+    "GEAR43": pathsim.solvers.GEAR43,
+    "GEAR54": pathsim.solvers.GEAR54,
+    "GEAR52A": pathsim.solvers.GEAR52A,
+    "DIRK2": pathsim.solvers.DIRK2,
+    "DIRK3": pathsim.solvers.DIRK3,
+    "ESDIRK32": pathsim.solvers.ESDIRK32,
+    "ESDIRK4": pathsim.solvers.ESDIRK4,
+    "ESDIRK43": pathsim.solvers.ESDIRK43,
+    "ESDIRK54": pathsim.solvers.ESDIRK54,
+    "ESDIRK85": pathsim.solvers.ESDIRK85,
+    "SteadyState": pathsim.solvers.SteadyState,
+    "SSPRK34": pathsim.solvers.SSPRK34,
     "SSPRK22": pathsim.solvers.SSPRK22,
     "SSPRK33": pathsim.solvers.SSPRK33,
     "RKF21": pathsim.solvers.RKF21,
