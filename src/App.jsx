@@ -1,5 +1,5 @@
 // * Imports *
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, version } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -27,6 +27,19 @@ import LogDock from './components/LogDock.jsx';
 import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
 
 // * Declaring variables *
+
+// Default solver parameters
+const DEFAULT_SOLVER_PARAMS = {
+  dt: '0.01',
+  dt_min: '1e-16',
+  dt_max: '',
+  Solver: 'SSPRK22',
+  tolerance_fpi: '1e-10',
+  iterations_max: '200',
+  log: 'true',
+  simulation_duration: '10.0',
+  extra_params: '{}'
+};
 
 // Defining initial nodes and edges. In the data section, we have label, but also parameters specific to the node.
 const initialNodes = [];
@@ -78,17 +91,7 @@ const DnDFlow = () => {
 
 
   // Solver parameters state
-  const [solverParams, setSolverParams] = useState({
-    dt: '0.01',
-    dt_min: '1e-6',
-    dt_max: '1.0',
-    Solver: 'SSPRK22',
-    tolerance_fpi: '1e-6',
-    iterations_max: '100',
-    log: 'true',
-    simulation_duration: '50.0',
-    extra_params: '{}'
-  });
+  const [solverParams, setSolverParams] = useState(DEFAULT_SOLVER_PARAMS);
 
   // Global variables state
   const [globalVariables, setGlobalVariables] = useState([]);
@@ -102,6 +105,7 @@ const DnDFlow = () => {
   const [tempLabel, setTempLabel] = useState('');
   const [nodeDocumentation, setNodeDocumentation] = useState({});
   const [isDocumentationExpanded, setIsDocumentationExpanded] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(true);
 
   // Function to fetch default values for a node type (with caching)
   const fetchDefaultValues = async (nodeType) => {
@@ -305,6 +309,7 @@ const DnDFlow = () => {
   // Function to save a graph to computer with "Save As" dialog
   const saveGraph = async () => {
     const graphData = {
+      version: versionInfo ? Object.fromEntries(Object.entries(versionInfo).filter(([key]) => key !== 'status')) : 'unknown',
       nodes,
       edges,
       nodeCounter,
@@ -319,7 +324,7 @@ const DnDFlow = () => {
       try {
         // Modern approach: Use File System Access API for proper "Save As" dialog
         const fileHandle = await window.showSaveFilePicker({
-          suggestedName: 'fuel-cycle-graph.json',
+          suggestedName: 'pathview_graph.json',
           types: [{
             description: 'JSON files',
             accept: {
@@ -333,8 +338,6 @@ const DnDFlow = () => {
         await writable.write(JSON.stringify(graphData, null, 2));
         await writable.close();
 
-        // Success message
-        alert('Graph saved successfully!');
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error('Error saving file:', error);
@@ -357,8 +360,6 @@ const DnDFlow = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      alert('Graph downloaded successfully!');
     }
   };
 
@@ -414,22 +415,10 @@ const DnDFlow = () => {
           setEdges(loadedEdges || []);
           setSelectedNode(null);
           setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-          setSolverParams(loadedSolverParams ?? {
-            dt: '0.01',
-            dt_min: '1e-6',
-            dt_max: '1.0',
-            Solver: 'SSPRK22',
-            tolerance_fpi: '1e-6',
-            iterations_max: '100',
-            log: 'true',
-            simulation_duration: '50.0',
-            extra_params: '{}'
-          });
+          setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
           setGlobalVariables(loadedGlobalVariables ?? []);
           setEvents(loadedEvents ?? []);
           setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-
-          alert('Graph loaded successfully!');
         } catch (error) {
           console.error('Error parsing file:', error);
           alert('Error reading file. Please make sure it\'s a valid JSON file.');
@@ -485,22 +474,10 @@ const DnDFlow = () => {
             setEdges(loadedEdges || []);
             setSelectedNode(null);
             setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
-            setSolverParams(loadedSolverParams ?? {
-              dt: '0.01',
-              dt_min: '1e-6',
-              dt_max: '1.0',
-              Solver: 'SSPRK22',
-              tolerance_fpi: '1e-6',
-              iterations_max: '100',
-              log: 'true',
-              simulation_duration: '50.0',
-              extra_params: '{}'
-            });
+            setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
             setGlobalVariables(loadedGlobalVariables ?? []);
             setEvents(loadedEvents ?? []);
             setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
-
-            alert('Graph loaded successfully!');
           } catch (error) {
             console.error('Error parsing file:', error);
             alert('Error reading file. Please make sure it\'s a valid JSON file.');
@@ -522,17 +499,7 @@ const DnDFlow = () => {
     setEdges(initialEdges);
     setSelectedNode(null);
     setNodeCounter(0);
-    setSolverParams({
-      dt: '0.01',
-      dt_min: '1e-6',
-      dt_max: '1.0',
-      Solver: 'SSPRK22',
-      tolerance_fpi: '1e-6',
-      iterations_max: '100',
-      log: 'true',
-      simulation_duration: '50.0',
-      extra_params: '{}'
-    });
+    setSolverParams(DEFAULT_SOLVER_PARAMS);
     setGlobalVariables([]);
   };
   const downloadCsv = async () => {
@@ -629,6 +596,7 @@ const DnDFlow = () => {
         nodeCounter,
         solverParams,
         globalVariables,
+        pythonCode,
         events
       };
 
@@ -661,8 +629,6 @@ const DnDFlow = () => {
             const writable = await fileHandle.createWritable();
             await writable.write(result.script);
             await writable.close();
-
-            alert('Python script generated and saved successfully!');
           } catch (error) {
             if (error.name !== 'AbortError') {
               console.error('Error saving Python file:', error);
@@ -681,8 +647,6 @@ const DnDFlow = () => {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-
-          alert('Python script generated and downloaded to your default downloads folder!');
         }
       } else {
         alert(`Error generating Python script: ${result.error}`);
@@ -733,13 +697,12 @@ const DnDFlow = () => {
         setCsvData(result.csv_data);
         setHtmlData(result.html);
         setActiveTab('results');
-        alert('Pathsim simulation completed successfully! Check the Results tab.');
       } else {
         alert(`Error running Pathsim simulation: ${result.error}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to run Pathsim simulation. Make sure the backend is running.');
+      alert(`Failed to run Pathsim simulation. Make sure the backend is running. : ${error.message}`);
     }
   };
 
@@ -840,77 +803,6 @@ const DnDFlow = () => {
       }))
     );
   };
-  // Function to add a new node to the graph
-  const addNode = async () => {
-    // Get available node types from nodeTypes object
-    const availableTypes = Object.keys(nodeTypes);
-
-    // Create options string for the prompt
-    const typeOptions = availableTypes.map((type, index) => `${index + 1}. ${type}`).join('\n');
-
-    const userInput = prompt(
-      `Select a node type by entering the number:\n\n${typeOptions}\n\nEnter your choice (1-${availableTypes.length}):`
-    );
-
-    // If user cancels the prompt
-    if (!userInput) {
-      return;
-    }
-
-    // Parse the user input
-    const choiceIndex = parseInt(userInput) - 1;
-
-    // Validate the choice
-    if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= availableTypes.length) {
-      alert('Invalid choice. Please enter a number between 1 and ' + availableTypes.length);
-      return;
-    }
-
-    const selectedType = availableTypes[choiceIndex];
-    const newNodeId = nodeCounter.toString();
-
-    // Get default values and documentation for this node type (should be cached from preload)
-    let defaults = defaultValues[selectedType] || {};
-    let docs = nodeDocumentation[selectedType] || {
-      html: '<p>No documentation available for this node type.</p>',
-      text: 'No documentation available for this node type.'
-    };
-
-    // Fallback: fetch if not cached (shouldn't happen normally)
-    if (!defaultValues[selectedType]) {
-      defaults = await fetchDefaultValues(selectedType);
-      setDefaultValues(prev => ({
-        ...prev,
-        [selectedType]: defaults
-      }));
-    }
-
-    if (!nodeDocumentation[selectedType]) {
-      docs = await fetchNodeDocumentation(selectedType);
-      setNodeDocumentation(prev => ({
-        ...prev,
-        [selectedType]: docs
-      }));
-    }
-
-    // Create node data with label and initialize all expected fields as empty strings
-    let nodeData = { label: `${selectedType} ${newNodeId}` };
-
-    // Initialize all expected parameters as empty strings
-    Object.keys(defaults).forEach(key => {
-      nodeData[key] = '';
-    });
-
-    const newNode = {
-      id: newNodeId,
-      type: selectedType,
-      position: { x: 200 + nodes.length * 50, y: 200 },
-      data: nodeData,
-    };
-
-    setNodes((nds) => [...nds, newNode]);
-    setNodeCounter((count) => count + 1);
-  };
 
   // Function to pop context menu when right-clicking on a node
   const onNodeContextMenu = useCallback(
@@ -918,16 +810,16 @@ const DnDFlow = () => {
       // Prevent native context menu from showing
       event.preventDefault();
 
-      // Calculate position of the context menu. We want to make sure it
-      // doesn't get positioned off-screen.
+      // Get the ReactFlow pane's bounding rectangle to calculate relative position
       const pane = ref.current.getBoundingClientRect();
+
+      // Position the context menu directly at the click coordinates relative to the pane
       setMenu({
         id: node.id,
-        top: event.clientY < pane.height - 200 && event.clientY,
-        left: event.clientX < pane.width - 200 && event.clientX,
-        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
-        bottom:
-          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+        top: event.clientY - pane.top,
+        left: event.clientX - pane.left,
+        right: false,
+        bottom: false,
       });
     },
     [setMenu],
@@ -1071,6 +963,14 @@ const DnDFlow = () => {
         borderBottom: '1px solid #ccc'
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h1 style={{
+            color: 'white',
+            margin: '0 20px 0 15px',
+            fontSize: '20px',
+            fontWeight: 'bold'
+          }}>
+            PathView
+          </h1>
           <button
             style={{
               padding: '10px 20px',
@@ -1143,52 +1043,94 @@ const DnDFlow = () => {
           </button>
         </div>
 
-        {/* Help Button */}
-        <button
-          style={{
-            padding: '8px 12px',
-            margin: '5px 15px 5px 5px',
-            backgroundColor: '#4A90E2',
-            color: 'white',
-            border: 'none',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            fontSize: '18px',
-            fontWeight: '600',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 2px 6px rgba(74, 144, 226, 0.3)',
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#357ABD';
-            e.target.style.transform = 'translateY(-1px)';
-            e.target.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#4A90E2';
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 2px 6px rgba(74, 144, 226, 0.3)';
-          }}
-          onClick={() => {
-            // Display version information and help
-            const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
-            const fcsVersion = versionInfo?.pathview_version || 'Loading...';
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* GitHub Link */}
+          <a
+            href="https://github.com/festim-dev/pathview"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              padding: '8px',
+              backgroundColor: '#000000ff',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px rgba(36, 41, 46, 0.3)',
+              textDecoration: 'none',
+              // border: '1px solid #ffffff',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#1b1f23';
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 4px 12px rgba(36, 41, 46, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#000000ff';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 2px 6px rgba(36, 41, 46, 0.3)';
+            }}
+            title="View on GitHub"
+          >
+            <svg
+              width="24"
+              height="24"
+              fill="#ffffff"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+            </svg>
+          </a>
 
-            const message = `Help documentation coming soon!\n\n` +
-              `Version Information:\n` +
-              `• PathSim: ${pathsimVersion}\n` +
-              `• PathView: ${fcsVersion}\n\n`;
+          {/* Help Button */}
+          <button
+            style={{
+              padding: '8px 12px',
+              backgroundColor: '#4A90E2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              fontSize: '18px',
+              fontWeight: '600',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px rgba(74, 144, 226, 0.3)',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#357ABD';
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#4A90E2';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 2px 6px rgba(74, 144, 226, 0.3)';
+            }}
+            onClick={() => {
+              // Display version information and help
+              const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
+              const fcsVersion = versionInfo?.pathview_version || 'Loading...';
 
-            alert(message);
-          }}
-          title="Get help, documentation, and version information"
-        >
-          ?
-        </button>
+              const message = `Help documentation coming soon!\n\n` +
+                `Version Information:\n` +
+                `• PathSim: ${pathsimVersion}\n` +
+                `• PathView: ${fcsVersion}\n\n`;
+
+              alert(message);
+            }}
+            title="Get help, documentation, and version information"
+          >
+            ?
+          </button>
+        </div>
       </div>
 
       {/* Graph Editor Tab */}
@@ -1290,23 +1232,6 @@ const DnDFlow = () => {
                 <button
                   style={{
                     position: 'absolute',
-                    left: 20,
-                    top: 20,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={addNode}
-                >
-                  Add Node
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
                     right: 20,
                     top: 20,
                     zIndex: 10,
@@ -1341,7 +1266,7 @@ const DnDFlow = () => {
                 <button
                   style={{
                     position: 'absolute',
-                    left: 130,
+                    left: 20,
                     top: 20,
                     zIndex: 10,
                     padding: '8px 12px',
@@ -1353,7 +1278,7 @@ const DnDFlow = () => {
                   }}
                   onClick={resetGraph}
                 >
-                  Reset Graph
+                  New graph
                 </button>
                 <button
                   style={{
@@ -1384,34 +1309,58 @@ const DnDFlow = () => {
                     border: 'none',
                     borderRadius: 5,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                   onClick={runPathsim}
                 >
+                  <span style={{ fontSize: '14px', lineHeight: '1' }}>▶</span>
                   Run
                 </button>
 
 
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '50%',
-                    right: 20,
-                    backgroundColor: 'rgba(0, 0, 0, 0.31)',
-                    color: 'white',
-                    padding: '8px 12px',
-                    borderRadius: 4,
-                    fontSize: '12px',
-                    zIndex: 10,
-                    maxWidth: '200px',
-                  }}
-                >
-                  <strong>Keyboard Shortcuts:</strong><br />
-                  Ctrl+C: Copy selected node<br />
-                  Ctrl+V: Paste copied node<br />
-                  Ctrl+D: Duplicate selected node<br />
-                  Del/Backspace: Delete selection<br />
-                  Right-click: Context menu
-                </div>
+                {showKeyboardShortcuts && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '50%',
+                      right: 20,
+                      backgroundColor: 'rgba(0, 0, 0, 0.31)',
+                      color: 'white',
+                      padding: '8px 12px',
+                      borderRadius: 4,
+                      fontSize: '12px',
+                      zIndex: 10,
+                      maxWidth: '200px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                      <strong>Keyboard Shortcuts:</strong>
+                      <button
+                        onClick={() => setShowKeyboardShortcuts(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          padding: '0 0 0 8px',
+                          lineHeight: '1',
+                        }}
+                        title="Close shortcuts panel"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    Ctrl+C: Copy selected node<br />
+                    Ctrl+V: Paste copied node<br />
+                    Ctrl+D: Duplicate selected node<br />
+                    Del/Backspace: Delete selection<br />
+                    Right-click: Context menu
+                  </div>
+                )}
               </ReactFlow>
             </div>
           </div>
@@ -1551,7 +1500,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="0.01"
                   />
                 </div>
 
@@ -1577,7 +1525,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1e-6"
                   />
                 </div>
 
@@ -1603,7 +1550,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1.0"
                   />
                 </div>
 
@@ -1631,7 +1577,33 @@ const DnDFlow = () => {
                   >
                     <option value="SSPRK22">SSPRK22</option>
                     <option value="SSPRK33">SSPRK33</option>
+                    <option value="SSPRK34">SSPRK34</option>
+                    <option value="RK4">RK4</option>
+                    <option value="RKBS32">RKBS32</option>
+                    <option value="RKCK54">RKCK54</option>
+                    <option value="RKDP54">RKDP54</option>
+                    <option value="RKDP87">RKDP87</option>
                     <option value="RKF21">RKF21</option>
+                    <option value="RKF45">RKF45</option>
+                    <option value="RKF78">RKF78</option>
+                    <option value="RKV65">RKV65</option>
+                    <option value="BDF">BDF</option>
+                    <option value="EUF">EUF</option>
+                    <option value="EUB">EUB</option>
+                    <option value="GEAR21">GEAR21</option>
+                    <option value="GEAR32">GEAR32</option>
+                    <option value="GEAR43">GEAR43</option>
+                    <option value="GEAR54">GEAR54</option>
+                    <option value="GEAR52A">GEAR52A</option>
+                    <option value="DIRK2">DIRK2</option>
+                    <option value="DIRK3">DIRK3</option>
+                    <option value="ESDIRK32">ESDIRK32</option>
+                    <option value="ESDIRK4">ESDIRK4</option>
+                    <option value="ESDIRK43">ESDIRK43</option>
+                    <option value="ESDIRK54">ESDIRK54</option>
+                    <option value="ESDIRK85">ESDIRK85</option>
+                    <option value="STEADYSTATE">SteadyState</option>
+
                   </select>
                 </div>
 
@@ -1657,7 +1629,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="1e-6"
                   />
                 </div>
 
@@ -1683,7 +1654,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="100"
                   />
                 </div>
 
@@ -1709,7 +1679,6 @@ const DnDFlow = () => {
                       color: '#ffffff',
                       fontSize: '14px'
                     }}
-                    placeholder="50.0"
                   />
                 </div>
 
@@ -1793,11 +1762,11 @@ const DnDFlow = () => {
                     // Reset to default values
                     setSolverParams({
                       dt: '0.01',
-                      dt_min: '1e-6',
-                      dt_max: '1.0',
+                      dt_min: '1e-16',
+                      dt_max: '',
                       Solver: 'SSPRK22',
-                      tolerance_fpi: '1e-6',
-                      iterations_max: '100',
+                      tolerance_fpi: '1e-10',
+                      iterations_max: '200',
                       log: 'true',
                       simulation_duration: '50.0'
                     });
@@ -1923,6 +1892,7 @@ const DnDFlow = () => {
           </div>
         </div>
       )}
+
       <LogDock
         open={dockOpen}
         onClose={() => { setDockOpen(false); if (sseRef.current) sseRef.current.close(); }}

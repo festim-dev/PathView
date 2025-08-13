@@ -1,3 +1,23 @@
+"""
+Utilities for converting graph-based representations to PathSim simulations.
+
+This module provides functionality to convert visual graph representations of simulation
+models into executable PathSim simulations. It handles the creation of blocks, connections,
+events, and solver configurations from JSON-like graph data structures.
+
+The main workflow involves:
+1. Processing global variables and solver parameters
+2. Creating blocks from node data
+3. Establishing connections between blocks based on edges
+4. Setting up events and custom Python code execution
+5. Building the complete PathSim simulation model
+
+Key mappings are provided for:
+- Block types (map_str_to_object): Maps string identifiers to PathSim block classes
+- Event types (map_str_to_event): Maps string identifiers to PathSim event classes
+- Solver types (NAME_TO_SOLVER): Maps string identifiers to PathSim solver classes
+"""
+
 import math
 import numpy as np
 from pathsim import Simulation, Connection
@@ -37,8 +57,32 @@ from .custom_pathsim_blocks import (
 from flask import jsonify
 import inspect
 
-
 NAME_TO_SOLVER = {
+    "RK4": pathsim.solvers.RK4,
+    "RKBS32": pathsim.solvers.RKBS32,
+    "RKCK54": pathsim.solvers.RKCK54,
+    "RKDP54": pathsim.solvers.RKDP54,
+    "RKDP87": pathsim.solvers.RKDP87,
+    "RKF45": pathsim.solvers.RKF45,
+    "RKF78": pathsim.solvers.RKF78,
+    "RKV65": pathsim.solvers.RKV65,
+    "BDF": pathsim.solvers.BDF,
+    "EUF": pathsim.solvers.EUF,
+    "EUB": pathsim.solvers.EUB,
+    "GEAR21": pathsim.solvers.GEAR21,
+    "GEAR32": pathsim.solvers.GEAR32,
+    "GEAR43": pathsim.solvers.GEAR43,
+    "GEAR54": pathsim.solvers.GEAR54,
+    "GEAR52A": pathsim.solvers.GEAR52A,
+    "DIRK2": pathsim.solvers.DIRK2,
+    "DIRK3": pathsim.solvers.DIRK3,
+    "ESDIRK32": pathsim.solvers.ESDIRK32,
+    "ESDIRK4": pathsim.solvers.ESDIRK4,
+    "ESDIRK43": pathsim.solvers.ESDIRK43,
+    "ESDIRK54": pathsim.solvers.ESDIRK54,
+    "ESDIRK85": pathsim.solvers.ESDIRK85,
+    "SteadyState": pathsim.solvers.SteadyState,
+    "SSPRK34": pathsim.solvers.SSPRK34,
     "SSPRK22": pathsim.solvers.SSPRK22,
     "SSPRK33": pathsim.solvers.SSPRK33,
     "RKF21": pathsim.solvers.RKF21,
@@ -122,14 +166,48 @@ map_str_to_event = {
 
 
 def find_node_by_id(node_id: str, nodes: list[dict]) -> dict:
+    """
+    Find a node by its ID in a list of nodes.
+
+    Args:
+        node_id: The ID of the node to find.
+        nodes: A list of node dictionaries to search through.
+
+    Returns:
+        The node dictionary with the matching ID, or None if not found.
+    """
     return next((node for node in nodes if node["id"] == node_id), None)
 
 
 def find_block_by_id(block_id: str, blocks: list[Block]) -> Block:
+    """
+    Find a block by its ID in a list of blocks.
+
+    Args:
+        block_id: The ID of the block to find.
+        blocks: A list of Block objects to search through.
+
+    Returns:
+        The Block object with the matching ID, or None if not found.
+    """
     return next((block for block in blocks if block.id == block_id), None)
 
 
 def make_global_variables(global_vars):
+    """
+    Validate and execute global variable definitions to make them usable in the simulation.
+
+    Args:
+        global_vars: A list of dictionaries containing variable definitions, where each
+                    dictionary has 'name' and 'value' keys.
+
+    Returns:
+        dict: A namespace dictionary containing the global variables.
+
+    Raises:
+        ValueError: If a variable name is invalid, is a Python keyword, or if there's
+                   an error evaluating the variable value.
+    """
     # Validate and exec global variables so that they are usable later in this script.
     # Return a namespace dictionary containing the global variables
     global_namespace = globals().copy()
@@ -169,6 +247,23 @@ def make_global_variables(global_vars):
 
 
 def make_solver_params(solver_prms, eval_namespace=None):
+    """
+    Process and validate solver parameters from the graph data.
+
+    Args:
+        solver_prms: Dictionary containing solver parameters including Solver type,
+                    simulation_duration, and other solver-specific parameters.
+        eval_namespace: Optional namespace for evaluating parameter expressions.
+
+    Returns:
+        tuple: A tuple containing:
+            - solver_prms (dict): Processed solver parameters
+            - extra_params (dict): Additional parameters for the solver
+            - duration (float): Simulation duration
+
+    Raises:
+        ValueError: If invalid parameter values are provided or if solver type is unknown.
+    """
     extra_params = solver_prms.pop("extra_params", "")
     if extra_params == "":
         extra_params = {}
@@ -179,7 +274,11 @@ def make_solver_params(solver_prms, eval_namespace=None):
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
             try:
-                solver_prms[k] = eval(v, eval_namespace)
+                if v == "":
+                    # TODO get the default from pathsim._constants
+                    solver_prms[k] = None
+                else:
+                    solver_prms[k] = eval(v, eval_namespace)
             except Exception as e:
                 return jsonify(
                     {"error": f"Invalid value for {k}: {v}. Error: {str(e)}"}
@@ -267,6 +366,21 @@ def auto_event_construction(event_data: dict, eval_namespace: dict = None) -> Ev
 def get_parameters_for_event_class(
     event_class: type, event_data: dict, eval_namespace: dict = None
 ):
+    """
+    Extract and process parameters for an event class from event data.
+
+    Args:
+        event_class: The event class type to create parameters for.
+        event_data: Dictionary containing the event configuration data.
+        eval_namespace: Optional namespace for evaluating expressions and executing functions.
+
+    Returns:
+        dict: A dictionary of parameters ready to be passed to the event class constructor.
+
+    Raises:
+        ValueError: If required parameters are missing, if function code execution fails,
+                   or if parameter evaluation fails.
+    """
     parameters_for_class = inspect.signature(event_class.__init__).parameters
 
     # Create a local namespace for executing the event functions
@@ -317,6 +431,20 @@ def get_parameters_for_event_class(
 
 
 def get_parameters_for_block_class(block_class, node, eval_namespace):
+    """
+    Extract and process parameters for a block class from node data.
+
+    Args:
+        block_class: The block class type to create parameters for.
+        node: Dictionary containing the node configuration data.
+        eval_namespace: Namespace for evaluating parameter expressions.
+
+    Returns:
+        dict: A dictionary of parameters ready to be passed to the block class constructor.
+
+    Raises:
+        ValueError: If required parameters are missing or if parameter evaluation fails.
+    """
     parameters_for_class = inspect.signature(block_class.__init__).parameters
     parameters = {}
     for k, value in parameters_for_class.items():
@@ -346,6 +474,18 @@ def get_parameters_for_block_class(block_class, node, eval_namespace):
 def make_blocks(
     nodes: list[dict], eval_namespace: dict = None
 ) -> tuple[list[Block], list[Event]]:
+    """
+    Create Block objects from node data and collect any associated events.
+
+    Args:
+        nodes: List of node dictionaries containing block configuration data.
+        eval_namespace: Optional namespace for evaluating expressions.
+
+    Returns:
+        tuple: A tuple containing:
+            - blocks (list[Block]): List of created Block objects
+            - events (list[Event]): List of events created by blocks (e.g., reset events)
+    """
     blocks, events = [], []
 
     for node in nodes:
@@ -365,11 +505,16 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     Get the input index for a block based on the edge data.
 
     Args:
-        block: The block object.
+        block: The block object to get the input index for.
         edge: The edge dictionary containing source and target information.
+        block_to_input_index: Dictionary mapping blocks to their current input index count.
 
     Returns:
-        The input index for the block.
+        int: The input index for the block.
+
+    Raises:
+        AssertionError: If the target block has multiple input ports but the connection
+                       method hasn't been implemented for that block type.
     """
 
     if edge["targetHandle"] is not None:
@@ -394,11 +539,16 @@ def get_output_index(block: Block, edge: dict) -> int:
     Get the output index for a block based on the edge data.
 
     Args:
-        block: The block object.
+        block: The block object to get the output index for.
         edge: The edge dictionary containing source and target information.
 
     Returns:
-        The output index for the block.
+        int: The output index for the block.
+
+    Raises:
+        ValueError: If an invalid source handle is provided for a Splitter block.
+        AssertionError: If the source block has multiple output ports but the connection
+                       method hasn't been implemented for that block type.
     """
     if edge["sourceHandle"] is not None:
         if block._port_map_out:
@@ -428,6 +578,23 @@ def get_output_index(block: Block, edge: dict) -> int:
 
 
 def make_connections(nodes, edges, blocks) -> list[Connection]:
+    """
+    Create PathSim Connection objects from nodes, edges, and blocks data.
+
+    This function processes the graph structure to create proper connections between blocks,
+    handling special cases for scopes and different block types with multiple inputs/outputs.
+
+    Args:
+        nodes: List of node dictionaries containing block information.
+        edges: List of edge dictionaries defining connections between nodes.
+        blocks: List of Block objects that have been created from the nodes.
+
+    Returns:
+        list[Connection]: List of PathSim Connection objects linking block inputs and outputs.
+
+    Note:
+        This function also handles labeling for Scope and Spectrum blocks automatically.
+    """
     # Create connections based on the sorted edges to match beta order
     connections_pathsim = []
 
@@ -498,6 +665,21 @@ def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Ev
 
 
 def make_default_scope(nodes, blocks) -> tuple[Scope, list[Connection]]:
+    """
+    Create a default Scope block that connects to all other blocks in the simulation.
+
+    This function creates a default scope when no explicit scope exists in the graph,
+    ensuring that all block outputs are captured for visualization.
+
+    Args:
+        nodes: List of node dictionaries containing block information (used for labels).
+        blocks: List of Block objects to connect to the default scope.
+
+    Returns:
+        tuple: A tuple containing:
+            - scope_default (Scope): The created default Scope block
+            - connections_pathsim (list[Connection]): List of connections from blocks to the scope
+    """
     scope_default = Scope(
         labels=[node["data"]["label"] for node in nodes],
     )
@@ -549,6 +731,31 @@ def make_var_name(node: dict) -> str:
 
 
 def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
+    """
+    Create a complete PathSim simulation model from graph data.
+
+    This is the main function that orchestrates the creation of a PathSim simulation
+    from a graph representation. It processes nodes, edges, solver parameters, global
+    variables, events, and custom Python code to build a complete simulation model.
+
+    Args:
+        graph_data: Dictionary containing the complete graph representation with keys:
+            - nodes: List of node dictionaries representing blocks
+            - edges: List of edge dictionaries representing connections
+            - solverParams: Dictionary of solver configuration parameters
+            - globalVariables: Dictionary of global variable definitions
+            - events: List of event dictionaries (optional)
+            - pythonCode: Custom Python code to execute (optional)
+
+    Returns:
+        tuple: A tuple containing:
+            - simulation (Simulation): The configured PathSim Simulation object
+            - duration (float): The simulation duration
+
+    Raises:
+        ValueError: If there are errors in processing any component of the graph data.
+        Exception: If custom Python code execution fails.
+    """
     nodes = graph_data.get("nodes", [])
     edges = graph_data.get("edges", [])
     solver_prms = graph_data.get("solverParams", {})

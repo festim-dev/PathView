@@ -1,4 +1,8 @@
 {
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
   "nodes": [
     {
       "id": "1",
@@ -10,7 +14,8 @@
       "data": {
         "label": "integrator x(t)",
         "initial_value": "x0",
-        "reset_times": ""
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 200,
@@ -30,7 +35,8 @@
         "label": "scope 2",
         "labels": "",
         "sampling_rate": "",
-        "t_wait": ""
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 120,
@@ -48,7 +54,8 @@
       },
       "data": {
         "label": "adder 3",
-        "operations": ""
+        "operations": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 64,
@@ -67,7 +74,8 @@
       "data": {
         "label": "integrator v(t)",
         "initial_value": "v0",
-        "reset_times": ""
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 200,
@@ -85,7 +93,8 @@
       },
       "data": {
         "label": "Amp 1",
-        "gain": "-c/m"
+        "gain": "-c/m",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 90,
@@ -103,7 +112,8 @@
       },
       "data": {
         "label": "Amp 2",
-        "gain": "-k/m"
+        "gain": "-k/m",
+        "nodeColor": "#DDE6ED"
       },
       "measured": {
         "width": 90,
@@ -310,5 +320,7 @@
       "value": "1.5",
       "nameError": false
     }
-  ]
+  ],
+  "events": [],
+  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
 }

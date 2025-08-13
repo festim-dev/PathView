@@ -20,26 +20,6 @@ An interactive visual tool for modeling and simulating nuclear fuel cycle compon
    :alt: Node.js 18+
 
 
-===============================
-Statement of Need
-===============================
-
-System modeling is a critical aspect of nuclear engineering that requires sophisticated tools to analyze material flows, reactor performance, and waste management strategies. PathView addresses the need for:
-
-**Accessibility**
-   Traditional system simulation tools are often complex, proprietary, or require extensive training. This tool provides an intuitive visual interface that makes system modeling accessible to students, researchers, and professionals.
-
-**Interactivity**
-   Static models and command-line tools limit exploration and understanding. Our interactive visual approach allows users to build, modify, and experiment with system scenarios in real-time.
-
-**Educational Value**
-   The visual nature of the tool makes it ideal for teaching system concepts, allowing students to see the connections between different components and understand material flows.
-
-**Research Flexibility**
-   Researchers need tools that can be easily modified and extended. The open-source nature and modular architecture enable customization for specific research needs.
-
-**Modern Technology Stack**
-   Built with modern web technologies (React, Python) that ensure maintainability, extensibility, and cross-platform compatibility.
 
 ===============================
 Installation Guide
@@ -56,10 +36,6 @@ Before installing PathView, ensure your system meets the following requirements:
    - pip for Python package management
    - Git (for development)
 
-**Supported Operating Systems:**
-   - Linux (Ubuntu 20.04+, CentOS 8+)
-   - macOS 10.15+
-   - Windows 10+
 
 Installation Steps
 ------------------
@@ -92,7 +68,15 @@ Installation Steps
       
       # On Windows:
       venv\Scripts\activate
+   
+   Alternatively, you can use Conda:
+   .. code-block:: bash
 
+      conda create -n pathview python=3.8
+      conda activate pathview
+      pip install --upgrade pip
+      pip install -e .
+   
 4. **Install Backend Dependencies**
    
    .. code-block:: bash
@@ -110,56 +94,72 @@ Installation Steps
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
 
-Troubleshooting
----------------
-
-**Common Issues:**
-
-- **Node.js version conflicts**: Use nvm to manage Node.js versions
-- **Python path issues**: Ensure Python 3.8+ is in your PATH
-- **Port conflicts**: Check if ports 5173 or 8000 are already in use
-- **Permission errors**: Use appropriate permissions for installation directories
-
 ===============================
 Example Usage
 ===============================
 
-Quick Start Example
--------------------
-
 Here's a simple example to get you started with PathView:
 
-WIP
+1. **Start the Application**
+   
+   After installation, launch PathView:
+   
+   .. code-block:: bash
+   
+      npm run start:both
+   
+   Navigate to http://localhost:5173 in your browser.
 
+2. **Load Example Files**
+   
+   PathView includes several pre-built example graphs in the `example_graphs/ <https://github.com/festim-dev/pathview/tree/main/example_graphs>`_ directory that demonstrate different functionality:
+   
+   - ``harmonic_oscillator.json`` - Simple oscillator simulation
+   - ``pid.json`` - PID controller example
+   - ``festim_two_walls.json`` - Two-wall diffusion model
+   - ``linear_feedback.json`` - Linear feedback system
+   - ``spectrum.json`` - Spectral analysis example
+   
+   To load an example:
+   
+   - Use the file import functionality in the application
+   - Select any ``.json`` file from the ``example_graphs/`` directory
+   - The graph will load with pre-configured nodes and connections
+   - Click the Run button to run the example
 
-Use Cases
----------
+3. **Create Your Own Graphs**
+   
+   - Drag and drop nodes from the sidebar
+   - Connect nodes by dragging from output handles to input handles
+   - Configure node parameters in the properties panel
+   - Use the simulation controls to run your model
 
-**Educational Scenarios**
-   - Simple fuel cycle for classroom demonstrations
-   - Impact of tritium breeding ratio for fusion reactors
-
-**Research Applications**
-   - Advanced reactor fuel cycle analysis
-   - Multi-recycling scenarios
-   - Waste minimization strategies
-
-**Planning and Analysis**
-   - Regional fuel cycle infrastructure planning
-   - Economic optimization studies
-   - Material flow tracking
 
 ===============================
 Roadmap
 ===============================
 
-WIP
+**Core Functionality & Solvers**
+   - Support more PathSim solvers
+   - User-defined block class (ie. users writing their own Python classes for blocks)
+   - Support for user plugins (eg. Chem.Eng., fuel cycle blocks, thermodynamic models, etc.)
+
+**Graph Management & Import/Export**
+   - Export graph as Subsystem and load it back
+
+**User Interface & Experience**
+   - Improved UI/UX
+   - Capability to rotate/flip nodes
+   - Enhanced visualization options
+   - More styling options for nodes and edges
+
+**Documentation & Examples**
+   - More example scenarios
+   - Annotations and comments on graph
 
 ===============================
 Community Guidelines
 ===============================
-
-Welcome to the PathView community! We're committed to fostering an inclusive, collaborative environment for all contributors.
 
 Code of Conduct
 ----------------
@@ -171,7 +171,7 @@ Contributing Guidelines
 
 **Getting Started**
    1. Fork the repository
-   2. Create a feature branch (``git checkout -b feature/awesome-feature``)
+   2. Create a feature branch (``git checkout -b awesome-feature``)
    3. Make your changes
    4. Add tests for new functionality if needed
    5. Ensure all tests pass
