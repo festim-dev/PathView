@@ -47,8 +47,12 @@ my_simulation = Simulation(
     events=events,
     Solver=pathsim.solvers.{{ solverParams["Solver"] }},
     dt={{ solverParams["dt"] }},
+    {%- if solverParams["dt_max"] != '' -%}
     dt_max={{ solverParams["dt_max"] }},
+    {%- endif -%}
+    {%- if solverParams["dt_min"] != '' -%}
     dt_min={{ solverParams["dt_min"] }},
+    {%- endif -%}
     iterations_max={{ solverParams["iterations_max"] }},
     log={{ solverParams["log"].capitalize() }},
     tolerance_fpi={{ solverParams["tolerance_fpi"] }},
