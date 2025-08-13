@@ -34,7 +34,7 @@ bibliography: paper.bib
 - Configure solver parameters
 - Easily extend functionality through a modular architecture.
 
-In addition to mirroring nearly all of `PathSim`'s capabilities, `PathView` uses `Jinja2` templates to generate fully executable Python scripts from graphical models, enabling seamless transition between GUI-based and code-based workflows.
+In addition to mirroring nearly all of `PathSim`'s capabilities, `PathView` uses `Jinja2` [@jinja] templates to generate fully executable Python scripts from graphical models, enabling seamless transition between GUI-based and code-based workflows.
 
 # Statement of need
 
@@ -48,7 +48,6 @@ Many established simulation platforms, such as MathWorks Simulink [@simulink] or
    
 - ``harmonic_oscillator.json`` - Simple oscillator simulation
 - ``pid.json`` - PID controller example
-- ``festim_two_walls.json`` - Two-wall hydrogen diffusion model integrating the external FESTIM hydrogen tranport code [@delaporte-mathurin_festim_2024]
 - ``linear_feedback.json`` - Linear feedback system
 - ``pendulum.json`` - Pendulum example
 - ``spectrum.json`` - Spectral analysis example
@@ -59,6 +58,8 @@ Many established simulation platforms, such as MathWorks Simulink [@simulink] or
 ![Graph editor tab (harmonic oscillator demo).\label{fig:example}](example.png){ width=100% }
 
 ![Results tab with interactive graph (harmonic oscillator demo).\label{fig:example_results}](example_results.png){ width=100% }
+
+We also provide an example demonstrating the integration of external tools in``festim_two_walls.json``: a two-wall hydrogen diffusion model integrating the FESTIM hydrogen tranport code [@delaporte-mathurin_festim_2024].
 
 # Features
 
