@@ -42,15 +42,19 @@ In addition to mirroring nearly all of `PathSim`'s capabilities, `PathView` uses
 Many established simulation platforms, such as MathWorks Simulink [@simulink] or Aspen Plus [@aspen], provide graphical user interfaces to enhance usability, model comprehension, and collaboration. Until now, such a visual modelling environment was missing for `PathSim`.
 `PathView` fills this gap by providing a modern, interactive, and extensible GUI, reducing the barrier to entry for new users and improving productivity for experienced modellers.
 
-# Example
+# Examples
 
-`PathView` includes several pre-built example graphs in the [example_graphs](https://github.com/festim-dev/pathview/tree/main/example_graphs) directory that demonstrate different functionality:
+`PathView` includes several pre-built example graphs in the [example_graphs](https://github.com/festim-dev/pathview/tree/main/example_graphs) directory that demonstrate different functionalities:
    
 - ``harmonic_oscillator.json`` - Simple oscillator simulation
 - ``pid.json`` - PID controller example
-- ``festim_two_walls.json`` - Two-wall diffusion model
+- ``festim_two_walls.json`` - Two-wall hydrogen diffusion model integrating the external FESTIM hydrogen tranport code [@delaporte-mathurin_festim_2024]
 - ``linear_feedback.json`` - Linear feedback system
+- ``pendulum.json`` - Pendulum example
 - ``spectrum.json`` - Spectral analysis example
+- ``bouncing_ball.json`` - Example showcasing event detection
+- ``thermostat.json`` - Thermostat demo with event detection
+- ``stick_slip.json`` - Example showcasing the use of the switch block
 
 ![Graph editor tab (harmonic oscillator demo).\label{fig:example}](example.png){ width=100% }
 
@@ -58,7 +62,7 @@ Many established simulation platforms, such as MathWorks Simulink [@simulink] or
 
 # Features
 
-- **Node creation and connection**: Choose from 58 different simulation node types, configure parameters, and connect them visually.
+- **Node creation and connection**: Choose from 60+ different simulation node types, configure parameters, and connect them visually.
 - **Integrated simulation**: Run `PathSim` simulations directly from the GUI.
 - **Interactive visualisation**: Embedded `plotly` plots for interactive data exploration. Export results data to CSV or export graph to HTML.
 - **Advanced global variables**: Define global variables, including via an integrated Python editor for complex expressions.
