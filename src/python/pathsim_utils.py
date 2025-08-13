@@ -132,6 +132,8 @@ map_str_to_object = {
     "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
     "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
     "fir": pathsim.blocks.FIR,
+    "interface": pathsim.subsystem.Interface,
+    "switch": pathsim.blocks.Switch,
 }
 
 math_blocks = {
