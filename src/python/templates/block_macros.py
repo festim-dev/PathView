@@ -42,11 +42,15 @@ connections = [
 
 {% macro create_event(event) -%}
 {% if "func_evt" in event %}
+{% if event["func_evt_desc"].startswith("def") %}
 {{ event["func_evt_desc"] }}
+{% endif %}
 {% endif %}
 
 {% if "func_act" in event %}
+{% if event["func_act_desc"].startswith("def") %}
 {{ event["func_act_desc"] }}
+{% endif %}
 {% endif %}
 
 {{ event["name"] }} = {{ event["module_name"] }}.{{ event["class_name"] }}(
