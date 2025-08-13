@@ -44,11 +44,17 @@ Many established simulation platforms, such as MathWorks Simulink [@simulink] or
 
 # Example
 
-A demonstration video is provided in the online documentation.
+`PathView` includes several pre-built example graphs in the [example_graphs](https://github.com/festim-dev/pathview/tree/main/example_graphs) directory that demonstrate different functionality:
+   
+- ``harmonic_oscillator.json`` - Simple oscillator simulation
+- ``pid.json`` - PID controller example
+- ``festim_two_walls.json`` - Two-wall diffusion model
+- ``linear_feedback.json`` - Linear feedback system
+- ``spectrum.json`` - Spectral analysis example
 
-![Graph editor tab.\label{fig:example}](example.png){ width=80% }
+![Graph editor tab (harmonic oscillator demo_.\label{fig:example}](example.png){ width=80% }
 
-![Results tab with interactive plotly graph.\label{fig:example_results}](example_results.png){ width=80% }
+![Results tab with interactive graph (harmonic oscillator demo_.\label{fig:example_results}](example_results.png){ width=80% }
 
 # Features
 
@@ -56,7 +62,7 @@ A demonstration video is provided in the online documentation.
 - **Node creation and connection**: Choose from 58 different simulation node types, configure parameters, and connect them visually.
 - **Custom styling**: Change node colours for improved readability.
 - **Integrated simulation**: Run `PathSim` simulations directly from the GUI.
-- **Interactive visualisation**: Embedded `plotly` plots for interactive data exploration.
+- **Interactive visualisation**: Embedded `plotly` plots for interactive data exploration. Export results data to CSV or export graph to HTML.
 - **Advanced global variables**: Define global variables, including via an integrated Python editor for complex expressions.
 - **Flexible I/O**: Save and load models in JSON format; export to Python scripts for advanced or automated use.
 - **Modular and extensible**: Designed for easy integration of new node types and custom functionality.
