@@ -354,7 +354,7 @@ const DnDFlow = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'fuel-cycle-graph.json';
+      a.download = 'graph.json';
 
       document.body.appendChild(a);
       a.click();
