@@ -7,8 +7,8 @@ tags:
 authors:
   - name: Remi Delaporte-Mathurin
     orcid: 0000-0003-1064-8882
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 1 # (Multiple affiliations must be quoted)
+    corresponding: true
+    affiliation: 1
   - name: Tasnim Zulfiqar
     affiliation: 1
   - name: James Dark
@@ -52,20 +52,19 @@ Many established simulation platforms, such as MathWorks Simulink [@simulink] or
 - ``linear_feedback.json`` - Linear feedback system
 - ``spectrum.json`` - Spectral analysis example
 
-![Graph editor tab (harmonic oscillator demo_.\label{fig:example}](example.png){ width=80% }
+![Graph editor tab (harmonic oscillator demo).\label{fig:example}](example.png){ width=100% }
 
-![Results tab with interactive graph (harmonic oscillator demo_.\label{fig:example_results}](example_results.png){ width=80% }
+![Results tab with interactive graph (harmonic oscillator demo).\label{fig:example_results}](example_results.png){ width=100% }
 
 # Features
 
-
 - **Node creation and connection**: Choose from 58 different simulation node types, configure parameters, and connect them visually.
-- **Custom styling**: Change node colours for improved readability.
 - **Integrated simulation**: Run `PathSim` simulations directly from the GUI.
 - **Interactive visualisation**: Embedded `plotly` plots for interactive data exploration. Export results data to CSV or export graph to HTML.
 - **Advanced global variables**: Define global variables, including via an integrated Python editor for complex expressions.
 - **Flexible I/O**: Save and load models in JSON format; export to Python scripts for advanced or automated use.
 - **Modular and extensible**: Designed for easy integration of new node types and custom functionality.
+- **Custom styling**: Change node colours for improved readability.
 
 
 # References
