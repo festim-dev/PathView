@@ -160,18 +160,34 @@ def make_events_data(data: dict) -> list[dict]:
         event["expected_arguments"] = signature(event_class).parameters
 
         if "func_evt" in event:
-            # replace the name of the function by something unique
-            func_evt = event["func_evt"]
-            func_evt = func_evt.replace("def func_evt", f"def {event['name']}_func_evt")
-            event["func_evt"] = f"{event['name']}_func_evt"
-            event["func_evt_desc"] = func_evt
-        if "func_act" in event:
-            # replace the name of the function by something unique
-            func_act = event["func_act"]
-            func_act = func_act.replace("def func_act", f"def {event['name']}_func_act")
-            event["func_act"] = f"{event['name']}_func_act"
-            event["func_act_desc"] = func_act
+            # if the whole function in defined in the event, make sure it has a unique identifier
+            if event["func_evt"].startswith("def"):
+                # replace the name of the function by something unique
+                func_evt = event["func_evt"]
+                func_evt = func_evt.replace(
+                    "def func_evt", f"def {event['name']}_func_evt"
+                )
+                event["func_evt"] = f"{event['name']}_func_evt"
+                event["func_evt_desc"] = func_evt
+            # otherwise assume it was defined in the global namespace
+            # and just copy the function identifier
+            else:
+                event["func_evt_desc"] = event["func_evt"]
 
+        if "func_act" in event:
+            # if the whole function in defined in the event, make sure it has a unique identifier
+            if event["func_act"].startswith("def"):
+                # replace the name of the function by something unique
+                func_act = event["func_act"]
+                func_act = func_act.replace(
+                    "def func_act", f"def {event['name']}_func_act"
+                )
+                event["func_act"] = f"{event['name']}_func_act"
+                event["func_act_desc"] = func_act
+            # otherwise assume it was defined in the global namespace
+            # and just copy the function identifier
+            else:
+                event["func_act_desc"] = event["func_act"]
     return data["events"]
 
 
