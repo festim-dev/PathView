@@ -524,7 +524,7 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
             return edge["targetHandle"]
 
     # TODO maybe we could directly use the targetHandle as a port alias for these:
-    if type(block) in (Function, ODE):
+    if type(block) in (Function, ODE, pathsim.blocks.Switch):
         return int(edge["targetHandle"].replace("target-", ""))
     else:
         # make sure that the target block has only one input port (ie. that targetHandle is None)
