@@ -132,6 +132,8 @@ map_str_to_object = {
     "butterworthbandpass": pathsim.blocks.ButterworthBandpassFilter,
     "butterworthbandstop": pathsim.blocks.ButterworthBandstopFilter,
     "fir": pathsim.blocks.FIR,
+    "interface": pathsim.subsystem.Interface,
+    "switch": pathsim.blocks.Switch,
 }
 
 math_blocks = {
@@ -522,7 +524,7 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
             return edge["targetHandle"]
 
     # TODO maybe we could directly use the targetHandle as a port alias for these:
-    if type(block) in (Function, ODE):
+    if type(block) in (Function, ODE, pathsim.blocks.Switch):
         return int(edge["targetHandle"].replace("target-", ""))
     else:
         # make sure that the target block has only one input port (ie. that targetHandle is None)
@@ -661,6 +663,7 @@ def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Ev
 
         event = auto_event_construction(event_data, eval_namespace)
         events.append(event)
+        eval_namespace[event_data["name"]] = event
     return events
 
 

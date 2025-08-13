@@ -14,6 +14,7 @@ import { Splitter2Node, Splitter3Node } from './components/nodes/Splitters';
 import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
 import { DynamicHandleNode } from './components/nodes/DynamicHandleNode';
+import SwitchNode from './components/nodes/SwitchNode';
 
 // Node types mapping
 export const nodeTypes = {
@@ -59,6 +60,8 @@ export const nodeTypes = {
   butterworthbandstop: DefaultNode,
   fir: DefaultNode,
   ode: DynamicHandleNode,
+  interface: DynamicHandleNode,
+  switch: SwitchNode,
 };
 
 export const nodeMathTypes = {
@@ -87,7 +90,7 @@ Object.keys(nodeMathTypes).forEach(type => {
   }
 });
 
-export const nodeDynamicHandles = ['ode', 'function'];
+export const nodeDynamicHandles = ['ode', 'function', 'interface'];
 
 // Node categories for better organization
 export const nodeCategories = {
@@ -116,7 +119,7 @@ export const nodeCategories = {
     description: 'Fuel cycle specific nodes'
   },
   'Others': {
-    nodes: ['samplehold', 'comparator'],
+    nodes: ['samplehold', 'comparator', 'switch', 'interface'],
     description: 'Miscellaneous nodes'
   },
   'Output': {
@@ -184,6 +187,10 @@ export const getNodeDisplayName = (nodeType) => {
     'butterworthbandpass': 'Butterworth Band-Pass Filter',
     'butterworthbandstop': 'Butterworth Band-Stop Filter',
     'fir': 'FIR Filter',
+    'switch': 'Switch',
+    'samplehold': 'Sample Hold',
+    'comparator': 'Comparator',
+    'interface': 'Interface',
   };
 
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);

@@ -46,7 +46,7 @@ const EventsTab = ({ events, setEvents }) => {
       ...eventDefaults[initialEventType]
     };
   });
-  
+
   // State to track if we're editing an existing event
   const [editingEventId, setEditingEventId] = useState(null);
 
@@ -79,13 +79,13 @@ const EventsTab = ({ events, setEvents }) => {
   const addEvent = () => {
     if (currentEvent.name) {
       // Validate required fields based on event type
-      
+
       // For Schedule, func_act is required
       if (['Schedule', 'ScheduleList'].includes(currentEvent.type) && !currentEvent.func_act) {
         alert('func_act is required for Schedule events');
         return;
       }
-      
+
       // For other event types, both func_evt and func_act are typically required
       if (!['Schedule', 'ScheduleList'].includes(currentEvent.type) && (!currentEvent.func_evt || !currentEvent.func_act)) {
         alert('Both func_evt and func_act are required for this event type');
@@ -93,7 +93,7 @@ const EventsTab = ({ events, setEvents }) => {
       }
 
       setEvents(prev => [...prev, { ...currentEvent, id: Date.now() }]);
-      
+
       // Reset to defaults for current type
       const resetDefaults = eventDefaults[currentEvent.type] || {};
       setCurrentEvent({
@@ -111,23 +111,23 @@ const EventsTab = ({ events, setEvents }) => {
 
   const saveEditedEvent = () => {
     if (currentEvent.name) {
-      
+
       // For Schedule, func_act is required
       if (currentEvent.type === 'Schedule' && !currentEvent.func_act) {
         alert('func_act is required for Schedule events');
         return;
       }
-      
+
       // For other event types, both func_evt and func_act are typically required
       if (currentEvent.type !== 'Schedule' && (!currentEvent.func_evt || !currentEvent.func_act)) {
         alert('Both func_evt and func_act are required for this event type');
         return;
       }
 
-      setEvents(prev => prev.map(event => 
+      setEvents(prev => prev.map(event =>
         event.id === editingEventId ? { ...currentEvent } : event
       ));
-      
+
       // Reset form and exit edit mode
       cancelEdit();
     }
@@ -179,7 +179,7 @@ const EventsTab = ({ events, setEvents }) => {
           <h2 style={{ color: '#ffffff', marginBottom: '20px' }}>
             {editingEventId ? 'Edit Event' : 'Add New Event'}
           </h2>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ width: '100%', maxWidth: '400px' }}>
               <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
@@ -203,7 +203,7 @@ const EventsTab = ({ events, setEvents }) => {
             </div>
 
             <div style={{ width: '100%', maxWidth: '400px' }}>
-              <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px'}}>
+              <label style={{ color: '#ffffff', display: 'block', marginBottom: '8px' }}>
                 Event Type:
               </label>
               <select
@@ -241,15 +241,15 @@ const EventsTab = ({ events, setEvents }) => {
                 const defaultValue = typeDefaults[key];
                 const placeholder = defaultValue !== undefined && defaultValue !== null ?
                   String(defaultValue) : '';
-                
+
                 // Check if this is a function parameter (contains 'func' in the name)
                 const isFunctionParam = key.toLowerCase().includes('func');
 
                 return (
                   <div key={key} style={{ width: '100%', maxWidth: isFunctionParam ? '600px' : '400px' }}>
-                    <label style={{ 
-                      color: '#ffffff', 
-                      display: 'block', 
+                    <label style={{
+                      color: '#ffffff',
+                      display: 'block',
                       marginBottom: '8px',
                       fontSize: '14px',
                       fontWeight: '500',
@@ -354,7 +354,7 @@ const EventsTab = ({ events, setEvents }) => {
         {/* Events List */}
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h2 style={{ color: '#ffffff', marginBottom: '20px', textAlign: 'center' }}>Defined Events ({events.length})</h2>
-          
+
           {events.length === 0 ? (
             <div style={{
               backgroundColor: '#2a2a3f',
@@ -385,9 +385,9 @@ const EventsTab = ({ events, setEvents }) => {
                         {event.name} ({event.type})
                       </h3>
                       {editingEventId === event.id && (
-                        <span style={{ 
-                          color: '#007bff', 
-                          fontSize: '12px', 
+                        <span style={{
+                          color: '#007bff',
+                          fontSize: '12px',
                           fontStyle: 'italic',
                           marginTop: '4px',
                           display: 'block'
@@ -434,12 +434,12 @@ const EventsTab = ({ events, setEvents }) => {
                       .filter(([key]) => key !== 'id' && key !== 'name' && key !== 'type')
                       .map(([key, value]) => {
                         const isFunctionParam = key.toLowerCase().includes('func');
-                        
+
                         return (
                           <div key={key}>
-                            <h4 style={{ 
-                              color: '#ccc', 
-                              margin: '0 0 8px 0', 
+                            <h4 style={{
+                              color: '#ccc',
+                              margin: '0 0 8px 0',
                               fontSize: '14px',
                               textTransform: 'capitalize'
                             }}>
