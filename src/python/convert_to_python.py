@@ -163,7 +163,7 @@ def make_events_data(data: dict) -> list[dict]:
             # if the whole function in defined in the event, make sure it has a unique identifier
             if event["func_evt"].startswith("def"):
                 # replace the name of the function by something unique
-                func_evt = event["func_evt_desc"]
+                func_evt = event["func_evt"]
                 func_evt = func_evt.replace(
                     "def func_evt", f"def {event['name']}_func_evt"
                 )
@@ -178,7 +178,7 @@ def make_events_data(data: dict) -> list[dict]:
             # if the whole function in defined in the event, make sure it has a unique identifier
             if event["func_act"].startswith("def"):
                 # replace the name of the function by something unique
-                func_act = event["func_act_desc"]
+                func_act = event["func_act"]
                 func_act = func_act.replace(
                     "def func_act", f"def {event['name']}_func_act"
                 )
