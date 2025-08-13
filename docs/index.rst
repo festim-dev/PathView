@@ -28,17 +28,10 @@ PathView is a powerful, user-friendly tool designed for modeling and simulating 
 
 - **Visual Node-Based Interface**: Drag-and-drop nodes to build complex models
 - **Real-Time Simulation**: Execute simulations and see results immediately
-- **Extensible Architecture**: Support for custom nodes and plugins
+.. - **Extensible Architecture**: Support for custom nodes and plugins
 - **Multiple Solvers**: Various numerical methods for different problem types
 - **Import/Export Capabilities**: Save and share your models easily
 - **Cross-Platform**: Runs on Windows, macOS, and Linux
-
-**Who is PathView For?**
-
-- Researchers in nuclear engineering and fuel cycle analysis
-- Control systems engineers
-- Students learning dynamic systems modeling
-- Anyone needing visual simulation tools
 
 Quick Start
 ===========
@@ -49,19 +42,10 @@ Quick Start
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
    installation
    usage
    contributing
    roadmap
    support
-
-===============================
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

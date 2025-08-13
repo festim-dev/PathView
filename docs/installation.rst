@@ -47,6 +47,7 @@ Installation Steps
       venv\Scripts\activate
    
    Alternatively, you can use Conda:
+
    .. code-block:: bash
 
       conda create -n pathview python=3.8
@@ -68,5 +69,6 @@ Installation Steps
       npm run start:both
 
    The application should be available at:
+
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
