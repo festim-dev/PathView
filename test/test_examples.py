@@ -38,7 +38,7 @@ def test_example(filename):
     "filename", all_examples_files, ids=[f.stem for f in all_examples_files]
 )
 def test_python_scripts(filename):
-    """Test the nested template functionality."""
+    """Test the converted python scripts for example simulations."""
 
     if "festim" in filename.stem.lower():
         try:
