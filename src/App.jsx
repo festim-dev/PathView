@@ -963,6 +963,14 @@ const DnDFlow = () => {
         borderBottom: '1px solid #ccc'
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h1 style={{
+            color: 'white',
+            margin: '0 20px 0 15px',
+            fontSize: '20px',
+            fontWeight: 'bold'
+          }}>
+            PathView
+          </h1>
           <button
             style={{
               padding: '10px 20px',
@@ -1884,6 +1892,7 @@ const DnDFlow = () => {
           </div>
         </div>
       )}
+
       <LogDock
         open={dockOpen}
         onClose={() => { setDockOpen(false); if (sseRef.current) sseRef.current.close(); }}
