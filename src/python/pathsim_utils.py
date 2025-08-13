@@ -663,6 +663,7 @@ def make_events(events_data: list[dict], eval_namespace: dict = None) -> list[Ev
 
         event = auto_event_construction(event_data, eval_namespace)
         events.append(event)
+        eval_namespace[event_data["name"]] = event
     return events
 
 
