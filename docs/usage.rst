@@ -44,3 +44,58 @@ Here's a simple example to get you started with PathView:
 Step by step guide
 ------------------
 
+1. **Start the Application**
+   
+   After installation, launch PathView:
+   
+   .. code-block:: bash
+   
+      npm run start:both
+   
+   Navigate to http://localhost:5173 in your browser.
+
+2. **Add nodes**
+In the left sidebar, drag and drop:
+
+- under Sources: Sinusoidal source
+- under Processing: Delay
+- under Output: Scope
+
+
+3. **Connect Nodes**
+
+   - Connect the Sinusoidal source to the Delay
+   - Connect the Sinusoidal source to the Scope
+   - Connect the Delay to the Scope
+
+4. **Run and visualise results**
+    
+    - Click the Run button
+    - The graph will display the sinusoidal signal and its delayed version
+
+5. **Configure Nodes**
+   
+   - Select the Delay node and set the ``tau`` parameter to ``0.1``
+   - Select the Sinusoidal source and set the ``frequency`` to ``0.7 Hz``
+   - Click the Run button again to see the updated results
+
+6. **Save Your Graph**
+
+   - Click the Save File button
+   - Choose a location and filename for your graph
+   - Click Save to export your graph as a JSON file
+
+7. **Export graph to python script**
+
+   - Click the Save to Python button
+   - Choose a location and filename for your Python script
+   - Click Save to export your graph as a Python script
+
+Global variables
+----------------
+
+Solver parameters
+-----------------
+
+Visualisation and post-processing
+---------------------------------
