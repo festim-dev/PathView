@@ -46,14 +46,14 @@ Many established simulation platforms, such as MathWorks Simulink [@simulink] or
 
 `PathView` includes several pre-built example graphs in the [example_graphs](https://github.com/festim-dev/pathview/tree/main/example_graphs) directory that demonstrate different functionalities:
    
-- ``harmonic_oscillator.json`` - Simple oscillator simulation
+- ``harmonic_oscillator.json`` - Simple oscillator simulation (see \autoref{fig:example} and \autoref{fig:example_results})
 - ``pid.json`` - PID controller example
 - ``linear_feedback.json`` - Linear feedback system
 - ``pendulum.json`` - Pendulum example
 - ``spectrum.json`` - Spectral analysis example
 - ``bouncing_ball.json`` - Example showcasing event detection
 - ``thermostat.json`` - Thermostat demo with event detection
-- ``stick_slip.json`` - Example showcasing the use of the switch block
+- ``stick_slip.json`` - Example showcasing the use of the ``Switch`` block
 
 ![Graph editor tab (harmonic oscillator demo).\label{fig:example}](example.png){ width=100% }
 
