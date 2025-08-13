@@ -38,7 +38,7 @@ In addition to mirroring nearly all of `PathSim`'s capabilities, `PathView` uses
 
 # Statement of need
 
-`PathSim` is a powerful and flexible simulation framework for modelling complex systems. However, building large-scale or intricate models solely through Python scripting can be cumbersome and error-prone, particularly for new users or for projects that benefit from visual inspection of system layout.
+`PathSim` is a powerful and flexible simulation framework for modelling complex systems. However, building large-scale or intricate models solely through Python scripting can be cumbersome and error-prone, particularly for new users or for projects that benefit from visual inspection of system layout. This is for example the case for nuclear fusion fuel cycle applications [@meschini_modeling_2023; @meschini_impact_2025].
 Many established simulation platforms, such as MathWorks Simulink [@simulink] or Aspen Plus [@aspen], provide graphical user interfaces to enhance usability, model comprehension, and collaboration. Until now, such a visual modelling environment was missing for `PathSim`.
 `PathView` fills this gap by providing a modern, interactive, and extensible GUI, reducing the barrier to entry for new users and improving productivity for experienced modellers.
 
