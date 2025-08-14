@@ -26,6 +26,14 @@ import LogDock from './components/LogDock.jsx';
 
 import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
 
+//return refactor (WIP)
+import { styles } from './styles/UI.js';
+import TopBar from './components/TopBar.jsx';
+import GraphView from './components/GraphView.jsx';
+import EdgeDetails from './components/EdgeDetails.jsx';
+import SolverPanel from './components/SolverPanel.jsx';
+import ResultsPanel from './components/ResultsPanel.jsx';
+
 // * Declaring variables *
 
 // Default solver parameters
@@ -952,420 +960,44 @@ const DnDFlow = () => {
 
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+
       {/* Tab Navigation */}
-      <div style={{
-        height: '50px',
-        backgroundColor: '#2c2c2c',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        zIndex: 15,
-        borderBottom: '1px solid #ccc'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h1 style={{
-            color: 'white',
-            margin: '0 20px 0 15px',
-            fontSize: '20px',
-            fontWeight: 'bold'
-          }}>
-            PathView
-          </h1>
-          <button
-            style={{
-              padding: '10px 20px',
-              margin: '5px',
-              backgroundColor: activeTab === 'graph' ? '#78A083' : '#444',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveTab('graph')}
-          >
-            Graph Editor
-          </button>
-          <button
-            style={{
-              padding: '10px 20px',
-              margin: '5px',
-              backgroundColor: activeTab === 'events' ? '#78A083' : '#444',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveTab('events')}
-          >
-            Events
-          </button>
-          <button
-            style={{
-              padding: '10px 20px',
-              margin: '5px',
-              backgroundColor: activeTab === 'solver' ? '#78A083' : '#444',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveTab('solver')}
-          >
-            Solver Parameters
-          </button>
-          <button
-            style={{
-              padding: '10px 20px',
-              margin: '5px',
-              backgroundColor: activeTab === 'globals' ? '#78A083' : '#444',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveTab('globals')}
-          >
-            Global Variables
-          </button>
-          <button
-            style={{
-              padding: '10px 20px',
-              margin: '5px',
-              backgroundColor: activeTab === 'results' ? '#78A083' : '#444',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveTab('results')}
-          >
-            Results
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* GitHub Link */}
-          <a
-            href="https://github.com/festim-dev/pathview"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              padding: '8px',
-              backgroundColor: '#000000ff',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 6px rgba(36, 41, 46, 0.3)',
-              textDecoration: 'none',
-              // border: '1px solid #ffffff',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#1b1f23';
-              e.target.style.transform = 'translateY(-1px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(36, 41, 46, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#000000ff';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 2px 6px rgba(36, 41, 46, 0.3)';
-            }}
-            title="View on GitHub"
-          >
-            <svg
-              width="24"
-              height="24"
-              fill="#ffffff"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-            </svg>
-          </a>
-
-          {/* Help Button */}
-          <button
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#4A90E2',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              fontSize: '18px',
-              fontWeight: '600',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 6px rgba(74, 144, 226, 0.3)',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#357ABD';
-              e.target.style.transform = 'translateY(-1px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#4A90E2';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 2px 6px rgba(74, 144, 226, 0.3)';
-            }}
-            onClick={() => {
-              // Display version information and help
-              const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
-              const fcsVersion = versionInfo?.pathview_version || 'Loading...';
-
-              const message = `Version Information:\n` +
-                `• PathSim: ${pathsimVersion}\n` +
-                `• PathView: ${fcsVersion}\n\n`;
-
-              // Open the documentation URL in a new tab
-              window.open('https://festim-dev.github.io/PathView/usage.html', '_blank');
-
-              alert(message);
-            }}
-            title="Get help, documentation, and version information"
-          >
-            ?
-          </button>
-        </div>
-      </div>
+      <TopBar activeTab={activeTab} setActiveTab={setActiveTab} versionInfo={versionInfo} />
 
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
-        <div style={{
-          display: 'flex', flex: 1,
-          height: 'calc(100vh - 50px)', // Subtract the tab bar height
-          overflow: 'hidden'
-        }}>
-          {/* Sidebar */}
-          <div style={{
-            width: '250px',
-            height: '100%',
-            borderRight: '1px solid #ccc'
-          }}>
+        <div style={{ display: 'flex', flex: 1, height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
+          <div style={{ width: 250, height: '100%', borderRight: '1px solid #ccc' }}>
             <Sidebar />
           </div>
 
-          {/* Main Graph Area */}
-          <div className="dndflow" style={{ flex: 1, position: 'relative' }}>
-            <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
-              <ReactFlow
-                ref={ref}
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onNodeClick={onNodeClick}
-                onEdgeClick={onEdgeClick}
-                onPaneClick={onPaneClick}
-                onNodeContextMenu={onNodeContextMenu}
-                nodeTypes={nodeTypes}
-                onDrop={onDrop}
-                onDragStart={onDragStart}
-                onDragOver={onDragOver}
-                fitView
-              >
-                <Controls />
-                <MiniMap />
-                <Background variant="dots" gap={12} size={1} />
-
-                {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
-                {copyFeedback && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 20,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      backgroundColor: '#78A083',
-                      color: 'white',
-                      padding: '8px 16px',
-                      borderRadius: 4,
-                      zIndex: 1000,
-                      fontSize: '14px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    }}
-                  >
-                    {copyFeedback}
-                  </div>
-                )}
-                <button
-                  style={{
-                    position: 'absolute',
-                    left: 20,
-                    top: 70,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: selectedEdge ? '#e74c3c' : '#cccccc',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: selectedEdge ? 'pointer' : 'not-allowed',
-                  }}
-                  onClick={deleteSelectedEdge}
-                  disabled={!selectedEdge}
-                >
-                  Delete Edge
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
-                    left: 20,
-                    top: 120,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: selectedNode ? '#e74c3c' : '#cccccc',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: selectedNode ? 'pointer' : 'not-allowed',
-                  }}
-                  onClick={deleteSelectedNode}
-                  disabled={!selectedNode}
-                >
-                  Delete Node
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
-                    right: 20,
-                    top: 20,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={saveGraph}
-                >
-                  Save File
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
-                    right: 140,
-                    top: 20,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={loadGraph}
-                >
-                  Load File
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
-                    left: 20,
-                    top: 20,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={resetGraph}
-                >
-                  New graph
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
-                    right: 20,
-                    top: 80,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={saveToPython}
-                >
-                  Save to <br />Python
-                </button>
-                <button
-                  style={{
-                    position: 'absolute',
-                    right: 20,
-                    top: 150,
-                    zIndex: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                  onClick={runPathsim}
-                >
-                  <span style={{ fontSize: '14px', lineHeight: '1' }}>▶</span>
-                  Run
-                </button>
-
-
-                {showKeyboardShortcuts && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: '50%',
-                      right: 20,
-                      backgroundColor: 'rgba(0, 0, 0, 0.31)',
-                      color: 'white',
-                      padding: '8px 12px',
-                      borderRadius: 4,
-                      fontSize: '12px',
-                      zIndex: 10,
-                      maxWidth: '200px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                      <strong>Keyboard Shortcuts:</strong>
-                      <button
-                        onClick={() => setShowKeyboardShortcuts(false)}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          padding: '0 0 0 8px',
-                          lineHeight: '1',
-                        }}
-                        title="Close shortcuts panel"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    Ctrl+C: Copy selected node<br />
-                    Ctrl+V: Paste copied node<br />
-                    Ctrl+D: Duplicate selected node<br />
-                    Del/Backspace: Delete selection<br />
-                    Right-click: Context menu
-                  </div>
-                )}
-              </ReactFlow>
-            </div>
-          </div>
+          <GraphView
+            refEl={ref}
+            reactFlowWrapperRef={reactFlowWrapper}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onEdgeClick={onEdgeClick}
+            onPaneClick={onPaneClick}
+            onNodeContextMenu={onNodeContextMenu}
+            nodeTypes={nodeTypes}
+            onDrop={onDrop}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            menu={menu}
+            duplicateNode={duplicateNode}
+            copyFeedback={copyFeedback}
+            ui={{
+              selectedNode, selectedEdge,
+              deleteSelectedNode, deleteSelectedEdge,
+              saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
+              showKeyboardShortcuts, setShowKeyboardShortcuts
+            }}
+          />
+          {/* Node Sidebar */}
           <NodeSidebar
             selectedNode={selectedNode}
             defaultValues={defaultValues}
@@ -1379,72 +1011,12 @@ const DnDFlow = () => {
             isDocumentationExpanded={isDocumentationExpanded}
             setIsDocumentationExpanded={setIsDocumentationExpanded}
           />
-          {selectedEdge && (
-            <div
-              className="sidebar-scrollable"
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 20,
-                height: '100vh',
-                width: '300px',
-                background: '#2c2c54',
-                color: '#ffffff',
-                borderLeft: '1px solid #ccc',
-                boxShadow: '-4px 0 8px rgba(0,0,0,0.1)',
-                zIndex: 10,
-                overflowY: 'auto',
-                overflowX: 'hidden'
-              }}
-            >
-              <div style={{ padding: '20px' }}>
-                <h3>Selected Edge</h3>
-                <div style={{ marginBottom: '10px' }}>
-                  <strong>ID:</strong> {selectedEdge.id}
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                  <strong>Source:</strong> {selectedEdge.source}
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                  <strong>Target:</strong> {selectedEdge.target}
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                  <strong>Type:</strong> {selectedEdge.type}
-                </div>
-
-                <br />
-                <button
-                  style={{
-                    marginTop: 10,
-                    marginRight: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setSelectedEdge(null)}
-                >
-                  Close
-                </button>
-                <button
-                  style={{
-                    marginTop: 10,
-                    padding: '8px 12px',
-                    backgroundColor: '#e74c3c',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                  }}
-                  onClick={deleteSelectedEdge}
-                >
-                  Delete Edge
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Edge Details */}
+          <EdgeDetails
+            selectedEdge={selectedEdge}
+            onClose={() => setSelectedEdge(null)}
+            onDelete={deleteSelectedEdge}
+          />
         </div>
       )}
 
@@ -1453,369 +1025,11 @@ const DnDFlow = () => {
 
       {/* Solver Parameters Tab */}
       {activeTab === 'solver' && (
-        <div style={{
-          width: '100%',
-          height: 'calc(100vh - 50px)',
-          paddingTop: '50px',
-          backgroundColor: '#1e1e2f',
-          overflow: 'auto',
-        }}>
-          <div style={{
-            padding: '40px',
-            maxWidth: '800px',
-            margin: '0 auto',
-          }}>
-            <h1 style={{ color: '#ffffff', marginBottom: '30px', textAlign: 'center' }}>
-              Solver Parameters
-            </h1>
-            <div style={{
-              backgroundColor: '#2c2c54',
-              padding: '30px',
-              borderRadius: '10px',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-            }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '20px',
-                marginBottom: '20px'
-              }}>
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Time Step (dt):
-                  </label>
-                  <input
-                    type="text"
-                    value={solverParams.dt}
-                    onChange={(e) => setSolverParams({ ...solverParams, dt: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Minimum Time Step (dt_min):
-                  </label>
-                  <input
-                    type="text"
-                    value={solverParams.dt_min}
-                    onChange={(e) => setSolverParams({ ...solverParams, dt_min: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Maximum Time Step (dt_max):
-                  </label>
-                  <input
-                    type="text"
-                    value={solverParams.dt_max}
-                    onChange={(e) => setSolverParams({ ...solverParams, dt_max: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Solver Type:
-                  </label>
-                  <select
-                    value={solverParams.Solver}
-                    onChange={(e) => setSolverParams({ ...solverParams, Solver: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  >
-                    <option value="SSPRK22">SSPRK22</option>
-                    <option value="SSPRK33">SSPRK33</option>
-                    <option value="SSPRK34">SSPRK34</option>
-                    <option value="RK4">RK4</option>
-                    <option value="RKBS32">RKBS32</option>
-                    <option value="RKCK54">RKCK54</option>
-                    <option value="RKDP54">RKDP54</option>
-                    <option value="RKDP87">RKDP87</option>
-                    <option value="RKF21">RKF21</option>
-                    <option value="RKF45">RKF45</option>
-                    <option value="RKF78">RKF78</option>
-                    <option value="RKV65">RKV65</option>
-                    <option value="BDF">BDF</option>
-                    <option value="EUF">EUF</option>
-                    <option value="EUB">EUB</option>
-                    <option value="GEAR21">GEAR21</option>
-                    <option value="GEAR32">GEAR32</option>
-                    <option value="GEAR43">GEAR43</option>
-                    <option value="GEAR54">GEAR54</option>
-                    <option value="GEAR52A">GEAR52A</option>
-                    <option value="DIRK2">DIRK2</option>
-                    <option value="DIRK3">DIRK3</option>
-                    <option value="ESDIRK32">ESDIRK32</option>
-                    <option value="ESDIRK4">ESDIRK4</option>
-                    <option value="ESDIRK43">ESDIRK43</option>
-                    <option value="ESDIRK54">ESDIRK54</option>
-                    <option value="ESDIRK85">ESDIRK85</option>
-                    <option value="STEADYSTATE">SteadyState</option>
-
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    FPI Tolerance:
-                  </label>
-                  <input
-                    type="text"
-                    value={solverParams.tolerance_fpi}
-                    onChange={(e) => setSolverParams({ ...solverParams, tolerance_fpi: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Maximum Iterations:
-                  </label>
-                  <input
-                    type="text"
-                    value={solverParams.iterations_max}
-                    onChange={(e) => setSolverParams({ ...solverParams, iterations_max: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Simulation Duration:
-                  </label>
-                  <input
-                    type="text"
-                    value={solverParams.simulation_duration}
-                    onChange={(e) => setSolverParams({ ...solverParams, simulation_duration: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginBottom: '8px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={solverParams.log === 'true'}
-                      onChange={(e) => setSolverParams({ ...solverParams, log: e.target.checked ? 'true' : 'false' })}
-                      style={{
-                        marginRight: '10px',
-                        transform: 'scale(1.2)',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    Enable Logging
-                  </label>
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{
-                    color: '#ffffff',
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 'bold'
-                  }}>
-                    Extra Parameters (JSON):
-                  </label>
-                  <textarea
-                    value={solverParams.extra_params}
-                    onChange={(e) => setSolverParams({ ...solverParams, extra_params: e.target.value })}
-                    style={{
-                      width: '95%',
-                      padding: '10px',
-                      borderRadius: '5px',
-                      border: '1px solid #555',
-                      backgroundColor: '#1e1e2f',
-                      color: '#ffffff',
-                      fontSize: '14px',
-                      minHeight: '80px',
-                      fontFamily: 'monospace',
-                      resize: 'vertical'
-                    }}
-                    placeholder='{"tolerance_lte_abs": 1e-8, "tolerance_lte_rel": 1e-6}'
-                  />
-                  <div style={{
-                    color: '#cccccc',
-                    fontSize: '12px',
-                    marginTop: '5px',
-                    fontStyle: 'italic'
-                  }}>
-                    Additional solver parameters as JSON dictionary (e.g., tolerances, custom settings)
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                textAlign: 'center',
-                marginTop: '30px'
-              }}>
-                <button
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#78A083',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    marginRight: '15px'
-                  }}
-                  onClick={() => {
-                    // Reset to default values
-                    setSolverParams({
-                      dt: '0.01',
-                      dt_min: '1e-16',
-                      dt_max: '',
-                      Solver: 'SSPRK22',
-                      tolerance_fpi: '1e-10',
-                      iterations_max: '200',
-                      log: 'true',
-                      simulation_duration: '50.0'
-                    });
-                  }}
-                >
-                  Reset to Defaults
-                </button>
-                <button
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}
-                  onClick={() => setActiveTab('graph')}
-                >
-                  Back to Graph Editor
-                </button>
-              </div>
-            </div>
-
-            <div style={{
-              marginTop: '30px',
-              padding: '20px',
-              backgroundColor: '#2c2c54',
-              borderRadius: '8px',
-              border: '1px solid #555'
-            }}>
-              <h3 style={{ color: '#ffffff', marginBottom: '15px' }}>Parameter Descriptions:</h3>
-              <ul style={{ color: '#cccccc', lineHeight: '1.6' }}>
-                <li><strong>dt:</strong> Base time step for simulation</li>
-                <li><strong>dt_min:</strong> Minimum allowed time step</li>
-                <li><strong>dt_max:</strong> Maximum allowed time step</li>
-                <li><strong>Solver:</strong> Numerical integration method</li>
-                <li><strong>tolerance_fpi:</strong> Tolerance for fixed point iterations</li>
-                <li><strong>iterations_max:</strong> Maximum number of iterations per time step</li>
-                <li><strong>simulation_duration:</strong> Total duration of the simulation (in time units)</li>
-                <li><strong>log:</strong> Enable/disable logging during simulation</li>
-                <li><strong>extra_params:</strong> Additional solver parameters as JSON dictionary (e.g., tolerance_lte_abs, tolerance_lte_rel for numerical solvers)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <SolverPanel
+          solverParams={solverParams}
+          setSolverParams={setSolverParams}
+          setActiveTab={setActiveTab}
+        />
       )}
 
       {/* Global Variables Tab */}
@@ -1831,70 +1045,14 @@ const DnDFlow = () => {
 
       {/* Results Tab */}
       {activeTab === 'results' && (
-        <div style={{
-          width: '100%',
-          height: 'calc(100vh - 50px)',
-          paddingTop: '50px',
-          backgroundColor: '#f5f5f5',
-          overflow: 'auto',
-        }}>
-          <div style={{
-            padding: '20px',
-            textAlign: 'center',
-          }}>
-            {simulationResults ? (
-              <>
-                <div style={{ textAlign: 'right', padding: '0 20px 10px 20px' }}>
-                  <button
-                    style={{
-                      backgroundColor: '#78A083',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 5,
-                      cursor: 'pointer',
-                      marginRight: '10px',
-                    }}
-                    onClick={downloadHtml}
-                  >
-                    Download HTML
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: '#78A083',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 5,
-                      cursor: 'pointer',
-                    }}
-                    onClick={downloadCsv}
-                  >
-                    Download CSV
-                  </button>
-                </div>
-                <Plot
-                  data={JSON.parse(simulationResults).data}
-                  layout={{
-                    ...JSON.parse(simulationResults).layout,
-                    autosize: true,
-                  }}
-                  config={{
-                    responsive: true,
-                    displayModeBar: true,
-                    modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
-                  }}
-                  style={{ width: '100%', height: '600px' }}
-                />
-
-              </>
-            ) : (
-              <p style={{ color: '#666', fontSize: '18px' }}>
-                No simulation results yet. Run a simulation from the Graph Editor tab to see results here.
-              </p>
-            )}
-          </div>
-        </div>
+        <ResultsPanel
+          simulationResults={simulationResults}
+          downloadHtml={downloadHtml}
+          downloadCsv={downloadCsv}
+        />
       )}
 
+      {/* Log Dock */}
       <LogDock
         open={dockOpen}
         onClose={() => { setDockOpen(false); if (sseRef.current) sseRef.current.close(); }}
