@@ -1119,10 +1119,12 @@ const DnDFlow = () => {
               const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
               const fcsVersion = versionInfo?.pathview_version || 'Loading...';
 
-              const message = `Help documentation coming soon!\n\n` +
-                `Version Information:\n` +
+              const message = `Version Information:\n` +
                 `• PathSim: ${pathsimVersion}\n` +
                 `• PathView: ${fcsVersion}\n\n`;
+
+              // Open the documentation URL in a new tab
+              window.open('https://festim-dev.github.io/PathView/usage.html', '_blank');
 
               alert(message);
             }}
