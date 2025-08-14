@@ -1119,8 +1119,7 @@ const DnDFlow = () => {
               const pathsimVersion = versionInfo?.pathsim_version || 'Loading...';
               const fcsVersion = versionInfo?.pathview_version || 'Loading...';
 
-              const message = `Help documentation coming soon!\n\n` +
-                `Version Information:\n` +
+              const message = `Version Information:\n` +
                 `• PathSim: ${pathsimVersion}\n` +
                 `• PathView: ${fcsVersion}\n\n`;
 
