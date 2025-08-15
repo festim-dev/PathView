@@ -54,7 +54,6 @@ from .custom_pathsim_blocks import (
     FestimWall,
     Integrator,
 )
-from flask import jsonify
 import inspect
 
 NAME_TO_SOLVER = {
@@ -275,32 +274,25 @@ def make_solver_params(solver_prms, eval_namespace=None):
 
     for k, v in solver_prms.items():
         if k not in ["Solver", "log"]:
-            try:
-                if v == "":
-                    # TODO get the default from pathsim._constants
-                    solver_prms[k] = None
-                else:
-                    solver_prms[k] = eval(v, eval_namespace)
-            except Exception as e:
-                return jsonify(
-                    {"error": f"Invalid value for {k}: {v}. Error: {str(e)}"}
-                ), 400
+            if v == "":
+                # TODO get the default from pathsim._constants
+                solver_prms[k] = None
+            else:
+                solver_prms[k] = eval(v, eval_namespace)
         elif k == "log":
             if v == "true":
                 solver_prms[k] = True
             elif v == "false":
                 solver_prms[k] = False
             else:
-                return jsonify(
-                    {"error": f"Invalid value for {k}: {v}. Must be 'true' or 'false'."}
-                ), 400
+                raise ValueError(
+                    f"Invalid value for {k}: {v}. Must be 'true' or 'false'."
+                )
         elif k == "Solver":
             if v not in NAME_TO_SOLVER:
-                return jsonify(
-                    {
-                        "error": f"Invalid solver: {v}. Must be one of {list(NAME_TO_SOLVER.keys())}."
-                    }
-                ), 400
+                raise ValueError(
+                    f"Invalid solver: {v}. Must be one of {list(NAME_TO_SOLVER.keys())}."
+                )
             solver_prms[k] = NAME_TO_SOLVER[v]
 
     # remove solver duration from solver parameters
@@ -777,7 +769,7 @@ def make_pathsim_model(graph_data: dict) -> tuple[Simulation, float]:
         try:
             exec(python_code, eval_namespace)
         except Exception as e:
-            return jsonify({"error": f"Error executing Python code: {str(e)}"}), 400
+            raise ValueError(f"Error executing custom Python code: {str(e)}")
 
     solver_prms, extra_params, duration = make_solver_params(
         solver_prms, eval_namespace
