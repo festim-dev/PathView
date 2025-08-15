@@ -1,62 +1,54 @@
-/* It seems like these styles were here by default, I commented them out to not interfere with the current design. */
-/* #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-} */
-
-/* This is the code for customizing the controls icons */
+/* For customizing the controls icons */
 .react-flow__controls {
-  padding: 6px;             
-  display: flex;            
+  padding: 6px;
+  display: flex;
 }
 
 .react-flow__controls-button {
   background-color: #007bff !important;
-  color: white !important; 
+  color: white !important;
   border: none;
 }
 
 .react-flow__controls-button:hover {
   background-color: #0056b3 !important;
 }
-/*  
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+/* App container */
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Top bar */
+.top-bar {
+  height: 50px;
+  background: #2c2c2c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 15;
+  border-bottom: 1px solid #ccc;
 }
 
-.card {
-  padding: 2em;
+/* Tab button base */
+.tab-btn {
+  padding: 10px 20px;
+  margin: 5px;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.read-the-docs {
-  color: #888;
-} */
+/* Tab button active state */
+.tab-btn.active {
+  background-color: #78A083;
+}
+
 
 /* Context menu styles */
 .context-menu {
@@ -101,11 +93,11 @@
   line-height: 1.4;
 }
 
-.documentation-content h1, 
-.documentation-content h2, 
-.documentation-content h3, 
-.documentation-content h4, 
-.documentation-content h5, 
+.documentation-content h1,
+.documentation-content h2,
+.documentation-content h3,
+.documentation-content h4,
+.documentation-content h5,
 .documentation-content h6 {
   color: #ffffff;
   margin: 1em 0 0.5em 0;
@@ -148,7 +140,7 @@
   color: #e8e8e8;
 }
 
-.documentation-content ul, 
+.documentation-content ul,
 .documentation-content ol {
   margin: 0.5em 0;
   padding-left: 1.5em;
@@ -172,7 +164,7 @@
   margin: 0.5em 0;
 }
 
-.documentation-content th, 
+.documentation-content th,
 .documentation-content td {
   border: 1px solid #555;
   padding: 0.4em;
@@ -280,6 +272,7 @@
 .sidebar-scrollable {
   scroll-behavior: smooth;
 }
+
 /* Sidebar and drag-and-drop styles */
 .dndflow {
   display: flex;

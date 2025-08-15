@@ -1,4 +1,4 @@
-import { styles } from '../styles/UI.js';
+import '../styles/App.css';
 
 const TABS = [
     { id: 'graph', label: 'Graph Editor' },
@@ -10,17 +10,18 @@ const TABS = [
 
 export default function TopBar({ activeTab, setActiveTab, versionInfo }) {
     return (
-        <div style={styles.topBar}>
+        <div className="top-bar">
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h1 style={{ color: '#fff', margin: '0 20px 0 15px', fontSize: 20, fontWeight: 'bold' }}>PathView</h1>
                 {TABS.map(t => (
                     <button
                         key={t.id}
-                        style={styles.tabBtn(activeTab === t.id)}
+                        className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
                         onClick={() => setActiveTab(t.id)}
                     >
                         {t.label}
                     </button>
+
                 ))}
             </div>
 

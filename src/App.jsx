@@ -1,33 +1,22 @@
 // * Imports *
 import { useState, useCallback, useEffect, useRef, version } from 'react';
 import {
-  ReactFlow,
   ReactFlowProvider,
   useReactFlow,
-  MiniMap,
-  Controls,
-  Background,
   useNodesState,
   useEdgesState,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './styles/App.css';
-import Plot from 'react-plotly.js';
 import { getApiEndpoint } from './config.js';
 import Sidebar from './components/Sidebar';
 import NodeSidebar from './components/NodeSidebar';
 import { DnDProvider, useDnD } from './components/DnDContext.jsx';
-import ContextMenu from './components/ContextMenu.jsx';
 import EventsTab from './components/EventsTab.jsx';
 import GlobalVariablesTab from './components/GlobalVariablesTab.jsx';
 import { makeEdge } from './components/CustomEdge';
 import { nodeTypes, nodeDynamicHandles } from './nodeConfig.js';
 import LogDock from './components/LogDock.jsx';
-
-import { createFunctionNode } from './components/nodes/FunctionNode.jsx';
-
-//return refactor (WIP)
-import { styles } from './styles/UI.js';
 import TopBar from './components/TopBar.jsx';
 import GraphView from './components/GraphView.jsx';
 import EdgeDetails from './components/EdgeDetails.jsx';
