@@ -66,6 +66,7 @@ const DnDFlow = () => {
 
   // for the log dock
   const [dockOpen, setDockOpen] = useState(false);
+  const onToggleLogs = useCallback(() => setDockOpen(o => !o), []);
   const [logLines, setLogLines] = useState([]);
   const sseRef = useRef(null);
   const append = (line) => setLogLines((prev) => [...prev, line]);
@@ -983,8 +984,16 @@ const DnDFlow = () => {
               selectedNode, selectedEdge,
               deleteSelectedNode, deleteSelectedEdge,
               saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
-              showKeyboardShortcuts, setShowKeyboardShortcuts
+              dockOpen, setDockOpen, onToggleLogs,
+              showKeyboardShortcuts, setShowKeyboardShortcuts,
             }}
+          />
+          {/* Log Dock */}
+          <LogDock
+            open={dockOpen}
+            onClose={() => setDockOpen(false)}
+            lines={logLines}
+            progress={null}
           />
           {/* Node Sidebar */}
           <NodeSidebar
@@ -1041,13 +1050,7 @@ const DnDFlow = () => {
         />
       )}
 
-      {/* Log Dock */}
-      <LogDock
-        open={dockOpen}
-        onClose={() => { setDockOpen(false); if (sseRef.current) sseRef.current.close(); }}
-        lines={logLines}
-        progress={null}
-      />
+
     </div>
   );
 }

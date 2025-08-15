@@ -48,7 +48,8 @@ export default function GraphView(props) {
 function FloatingButtons({
     selectedNode, selectedEdge,
     deleteSelectedNode, deleteSelectedEdge,
-    saveGraph, loadGraph, resetGraph, saveToPython, runPathsim
+    saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
+    dockOpen, onToggleLogs
 }) {
     return (
         <>
@@ -177,6 +178,23 @@ function FloatingButtons({
             >
                 <span style={{ fontSize: '14px', lineHeight: '1' }}>▶</span>
                 Run
+            </button>
+            <button
+                style={{
+                    position: 'absolute',
+                    right: 20,
+                    top: 200,
+                    zIndex: 10,
+                    padding: '8px 12px',
+                    backgroundColor: '#444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer'
+                }}
+                onClick={onToggleLogs}
+            >
+                {dockOpen ? 'Hide Logs' : 'Show Logs'}
             </button>
         </>
     );
