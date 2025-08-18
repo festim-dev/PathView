@@ -37,8 +37,8 @@ const NodeSidebar = ({
       style={{
         position: 'absolute',
         right: 0,
-        top: 50,
-        height: 'calc(100vh - 50px)',
+        top: 0,
+        height: '100%',
         width: '300px',
         background: '#1e1e2f',
         color: '#ffffff',
