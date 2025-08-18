@@ -50,7 +50,8 @@ function FloatingButtons({
     deleteSelectedNode, deleteSelectedEdge,
     saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
     shareGraphURL,
-    dockOpen, onToggleLogs
+    dockOpen, onToggleLogs,
+    sidebarVisible, setSidebarVisible
 }) {
     return (
         <>
@@ -142,6 +143,51 @@ function FloatingButtons({
             >
                 New graph
             </button>
+
+            {/* Sidebar Toggle Button - strudel-flow style */}
+            <button
+                onClick={() => setSidebarVisible(!sidebarVisible)}
+                className="sidebar-trigger"
+                style={{
+                    position: 'absolute',
+                    left: 15,
+                    top: 20,
+                    zIndex: 1000,
+                    width: '20px',
+                    height: '20px',
+                    backgroundColor: 'transparent',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    // transition: 'all 0.2s ease',
+                    padding: '0'
+                }}
+                title="Toggle Sidebar"
+            >
+                {/* PanelLeft icon - similar to lucide-react */}
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                        color: '#ffffff',
+                        transition: 'color 0.2s ease'
+                    }}
+                >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                </svg>
+            </button>
+
             <button
                 style={{
                     position: 'absolute',

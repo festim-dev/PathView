@@ -1071,7 +1071,7 @@ const DnDFlow = () => {
               position: 'relative',
               width: sidebarVisible ? '250px' : '0px',
               height: '100%',
-              transition: 'width 0.8s ease',
+              transition: 'width 0.5s ease',
               overflow: 'hidden'
             }}
           >
@@ -1082,7 +1082,7 @@ const DnDFlow = () => {
                 top: '50px', // Account for top bar height
                 width: '250px',
                 height: 'calc(100vh - 50px)',
-                transition: 'left 0.8s ease',
+                transition: 'left 0.5s ease',
                 zIndex: 10,
                 borderRight: '1px solid #ccc',
                 backgroundColor: '#1e1e2f'
@@ -1094,54 +1094,6 @@ const DnDFlow = () => {
 
           {/* Main content area that moves with sidebar */}
           <div style={{ position: 'relative', flex: 1, height: '100%' }}>
-            {/* Sidebar Toggle Button - positioned within main content area */}
-            <button
-              onClick={() => setSidebarVisible(!sidebarVisible)}
-              className="sidebar-trigger"
-              style={{
-                position: 'absolute',
-                top: '20px',
-                left: '10px',
-                zIndex: 1000,
-                width: '28px',
-                height: '28px',
-                backgroundColor: 'transparent',
-                color: '#666',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease',
-                padding: '0'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#f1f5f9';
-                e.target.style.color = '#1e293b';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = '#666';
-              }}
-              title="Toggle Sidebar"
-            >
-              {/* PanelLeft icon - similar to lucide-react */}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="9" y1="3" x2="9" y2="21" />
-              </svg>
-            </button>
-
             <GraphView
               refEl={ref}
               reactFlowWrapperRef={reactFlowWrapper}
@@ -1168,6 +1120,7 @@ const DnDFlow = () => {
                 shareGraphURL,
                 dockOpen, setDockOpen, onToggleLogs,
                 showKeyboardShortcuts, setShowKeyboardShortcuts,
+                sidebarVisible, setSidebarVisible,
               }}
             />
 
