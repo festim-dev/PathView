@@ -57,7 +57,7 @@ function FloatingButtons({
             <button
                 style={{
                     position: 'absolute',
-                    left: 20,
+                    left: 50,
                     top: 70,
                     zIndex: 10,
                     padding: '8px 12px',
@@ -75,7 +75,7 @@ function FloatingButtons({
             <button
                 style={{
                     position: 'absolute',
-                    left: 20,
+                    left: 50,
                     top: 120,
                     zIndex: 10,
                     padding: '8px 12px',
@@ -127,7 +127,7 @@ function FloatingButtons({
             <button
                 style={{
                     position: 'absolute',
-                    left: 20,
+                    left: 50,
                     top: 20,
                     zIndex: 10,
                     padding: '8px 12px',

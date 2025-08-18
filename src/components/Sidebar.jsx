@@ -110,7 +110,9 @@ export default () => {
                     cursor: 'grab',
                     fontSize: '13px',
                     transition: 'all 0.2s ease',
-                    display: 'block'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
                   }}
                   onMouseEnter={(e) => {
                     const currentBg = window.getComputedStyle(e.target).backgroundColor;
@@ -136,7 +138,13 @@ export default () => {
                     e.target.style.cursor = 'grab';
                   }}
                 >
-                  {getNodeDisplayName(nodeType)}
+                  <span>{getNodeDisplayName(nodeType)}</span>
+                  <span style={{
+                    fontSize: '12px',
+                    color: '#888',
+                  }}>
+                    ⋮⋮
+                  </span>
                 </div>
               ))}
             </div>
