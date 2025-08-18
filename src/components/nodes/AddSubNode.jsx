@@ -1,15 +1,16 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Handle, useUpdateNodeInternals } from '@xyflow/react';
+import CustomHandle from './CustomHandle';
 
 export default function AddSubNode({ id, data }) {
     const updateNodeInternals = useUpdateNodeInternals();
     const [inputHandleCount, setInputHandleCount] = useState(parseInt(data.inputCount) || 2);
-    
+
     // Handle operations string, removing surrounding quotes if they exist
-    let operations = data.operations || '++'; // Default to two positive inputs
-    if (operations.length >= 2 && 
+    let operations = data.operations || Array(inputHandleCount).fill('+'); // Default to positive inputs the length of inputHandleCount
+    if (operations.length >= 2 &&
         ((operations[0] === '"' && operations[operations.length - 1] === '"') ||
-         (operations[0] === "'" && operations[operations.length - 1] === "'"))) {
+            (operations[0] === "'" && operations[operations.length - 1] === "'"))) {
         operations = operations.slice(1, -1);
     }
 
@@ -54,7 +55,7 @@ export default function AddSubNode({ id, data }) {
                 const y = 50 + 50 * Math.sin(angle); // y position as percentage
 
                 // Get the operation for this input (default to '+' if not specified)
-                const operation = operations[index] || '+';
+                const operation = operations[index] || '?';
 
                 // Calculate label position at a smaller radius that scales with node size
                 // Smaller nodes get smaller label radius to avoid overlapping with center
@@ -64,7 +65,7 @@ export default function AddSubNode({ id, data }) {
 
                 return (
                     <React.Fragment key={`target-${index}`}>
-                        <Handle
+                        <CustomHandle
                             type="target"
                             position="left"
                             id={`target-${index}`}
