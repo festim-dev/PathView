@@ -12,14 +12,15 @@
     "start:both": "concurrently \"npm run dev\" \"npm run start:backend\""
   },
   "dependencies": {
+    "@codemirror/lang-python": "^6.2.1",
+    "@uiw/codemirror-theme-vscode": "^4.24.2",
+    "@uiw/react-codemirror": "^4.24.2",
     "@xyflow/react": "^12.8.1",
+    "lz-string": "^1.5.0",
     "plotly.js": "^3.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-plotly.js": "^2.6.0",
-    "@uiw/react-codemirror": "^4.24.2",
-    "@uiw/codemirror-theme-vscode": "^4.24.2",
-    "@codemirror/lang-python": "^6.2.1"
+    "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
