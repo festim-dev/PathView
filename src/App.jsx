@@ -110,6 +110,7 @@ const DnDFlow = () => {
   const [shareUrlFeedback, setShareUrlFeedback] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareableURL, setShareableURL] = useState('');
+  const [urlMetadata, setUrlMetadata] = useState(null);
 
   // Load graph data from URL on component mount
   useEffect(() => {
@@ -581,12 +582,19 @@ const DnDFlow = () => {
     };
 
     try {
-      const url = generateShareableURL(graphData);
-      if (url) {
-        setShareableURL(url);
+      const urlResult = generateShareableURL(graphData);
+      if (urlResult) {
+        setShareableURL(urlResult.url);
+        setUrlMetadata({
+          length: urlResult.length,
+          isSafe: urlResult.isSafe,
+          maxLength: urlResult.maxLength
+        });
         setShowShareModal(true);
-        // Update browser URL as well
-        updateURLWithGraphData(graphData, true);
+        // Only update browser URL if it's safe length
+        if (urlResult.isSafe) {
+          updateURLWithGraphData(graphData, true);
+        }
       } else {
         setShareUrlFeedback('Error generating share URL');
         setTimeout(() => setShareUrlFeedback(''), 3000);
@@ -1219,6 +1227,7 @@ const DnDFlow = () => {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         shareableURL={shareableURL}
+        urlMetadata={urlMetadata}
       />
 
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ShareModal = ({ isOpen, onClose, shareableURL }) => {
+const ShareModal = ({ isOpen, onClose, shareableURL, urlMetadata }) => {
     const [copyFeedback, setCopyFeedback] = useState('');
 
     const handleCopy = async () => {
@@ -34,6 +34,8 @@ const ShareModal = ({ isOpen, onClose, shareableURL }) => {
     }, [isOpen]);
 
     if (!isOpen) return null;
+
+    const isLongURL = urlMetadata && !urlMetadata.isSafe;
 
     return (
         <div
@@ -84,11 +86,33 @@ const ShareModal = ({ isOpen, onClose, shareableURL }) => {
                 {/* Header */}
                 <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-
+                        <span style={{ fontSize: 18 }}>🔗</span>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                            Share Your Patterns
+                        </h3>
                     </div>
                     <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
                         Copy this URL to share your workflow with others.
                     </p>
+                    
+                    {/* URL Length Warning */}
+                    {isLongURL && (
+                        <div style={{
+                            marginTop: 12,
+                            padding: '8px 12px',
+                            backgroundColor: '#fff3cd',
+                            border: '1px solid #ffeeba',
+                            borderRadius: 4,
+                            fontSize: 13
+                        }}>
+                            <div style={{ color: '#856404', fontWeight: 500, marginBottom: 4 }}>
+                                ⚠️ Large URL Warning
+                            </div>
+                            <div style={{ color: '#856404' }}>
+                                This URL is {urlMetadata?.length || 0} characters long. Some servers may reject URLs longer than {urlMetadata?.maxLength || 4000} characters. Consider using the "Save File" option for complex graphs.
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* URL input and copy button */}
