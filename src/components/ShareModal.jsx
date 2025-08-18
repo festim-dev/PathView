@@ -94,7 +94,7 @@ const ShareModal = ({ isOpen, onClose, shareableURL, urlMetadata }) => {
                     <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
                         Copy this URL to share your workflow with others.
                     </p>
-                    
+
                     {/* URL Length Warning */}
                     {isLongURL && (
                         <div style={{
