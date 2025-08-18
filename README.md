@@ -19,6 +19,16 @@ pathview/
 
 │   ├── backend.py        # Python backend API
 
+│   ├── components/       # JSx components
+
+│   ├── python/           # python package source
+
+│   ├── main.jsx
+
+│   ├── App.jsx           # main App
+
+│   ├── nodeConfig.js     # file to configure all the nodes
+
 ```
 
 # Installation and Setup
