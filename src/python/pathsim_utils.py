@@ -105,6 +105,7 @@ map_str_to_object = {
     "splitter2": Splitter2,
     "splitter3": Splitter3,
     "adder": Adder,
+    "addsub": Adder,
     "adder_reverse": Adder,
     "multiplier": Multiplier,
     "process": Process,
@@ -446,7 +447,7 @@ def get_parameters_for_block_class(block_class, node, eval_namespace):
             continue
         # Skip 'operations' for Adder, as it is handled separately
         # https://github.com/festim-dev/pathview/issues/73
-        if k in ["operations"]:
+        if k in ["operations"] and node["type"] != "addsub":
             continue
         user_input = node["data"][k]
         if user_input == "":
@@ -518,6 +519,9 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     # TODO maybe we could directly use the targetHandle as a port alias for these:
     if type(block) in (Function, ODE, pathsim.blocks.Switch):
         return int(edge["targetHandle"].replace("target-", ""))
+    if isinstance(block, Adder):
+        if block.operations:
+            return int(edge["targetHandle"].replace("target-", ""))
     else:
         # make sure that the target block has only one input port (ie. that targetHandle is None)
         assert edge["targetHandle"] is None, (

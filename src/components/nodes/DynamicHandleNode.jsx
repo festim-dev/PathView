@@ -1,31 +1,31 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Handle, useUpdateNodeInternals } from '@xyflow/react';
- 
+
 export function DynamicHandleNode({ id, data }) {
   const updateNodeInternals = useUpdateNodeInternals();
   const [inputHandleCount, setInputHandleCount] = useState(parseInt(data.inputCount) || 0);
   const [outputHandleCount, setOutputHandleCount] = useState(parseInt(data.outputCount) || 0);
-  
+
   useEffect(() => {
     let shouldUpdate = false;
-    
+
     if (data.inputCount !== undefined && parseInt(data.inputCount) !== inputHandleCount) {
       setInputHandleCount(parseInt(data.inputCount) || 0);
       shouldUpdate = true;
     }
-    
+
     if (data.outputCount !== undefined && parseInt(data.outputCount) !== outputHandleCount) {
       setOutputHandleCount(parseInt(data.outputCount) || 0);
       shouldUpdate = true;
     }
-    
+
     if (shouldUpdate) {
       updateNodeInternals(id);
     }
   }, [data.inputCount, data.outputCount, inputHandleCount, outputHandleCount, id, updateNodeInternals]);
-  
 
- 
+
+
   return (
     <div
       style={{
@@ -53,7 +53,7 @@ export function DynamicHandleNode({ id, data }) {
               type="target"
               position="left"
               id={`target-${index}`}
-              style={{ 
+              style={{
                 background: '#555',
                 top: `${topPercentage}%`
               }}
@@ -61,7 +61,7 @@ export function DynamicHandleNode({ id, data }) {
             {/* Input label for multiple inputs */}
             {inputHandleCount > 1 && (
               <div
-              style={{
+                style={{
                   position: 'absolute',
                   left: '8px',
                   top: `${topPercentage}%`,
@@ -70,15 +70,15 @@ export function DynamicHandleNode({ id, data }) {
                   fontWeight: 'normal',
                   color: '#666',
                   pointerEvents: 'none',
-              }}
+                }}
               >
-              {index + 1}
+                {index + 1}
               </div>
             )}
           </React.Fragment>
         );
       })}
-      
+
       {/* Output Handles (right side) */}
       {Array.from({ length: outputHandleCount }).map((_, index) => {
         const topPercentage = outputHandleCount === 1 ? 50 : ((index + 1) / (outputHandleCount + 1)) * 100;
@@ -89,7 +89,7 @@ export function DynamicHandleNode({ id, data }) {
               type="source"
               position="right"
               id={`source-${index}`}
-              style={{ 
+              style={{
                 background: '#555',
                 top: `${topPercentage}%`
               }}
@@ -97,7 +97,7 @@ export function DynamicHandleNode({ id, data }) {
             {/* Output label for multiple outputs */}
             {outputHandleCount > 1 && (
               <div
-              style={{
+                style={{
                   position: 'absolute',
                   right: '8px',
                   top: `${topPercentage}%`,
@@ -106,9 +106,9 @@ export function DynamicHandleNode({ id, data }) {
                   fontWeight: 'normal',
                   color: '#666',
                   pointerEvents: 'none',
-              }}
+                }}
               >
-              {index + 1}
+                {index + 1}
               </div>
             )}
           </React.Fragment>
@@ -116,9 +116,9 @@ export function DynamicHandleNode({ id, data }) {
       })}
 
       {/* Main content */}
-      <div style={{ 
-        textAlign: 'center', 
-        wordWrap: 'break-word', 
+      <div style={{
+        textAlign: 'center',
+        wordWrap: 'break-word',
         maxWidth: '100%',
         display: 'flex',
         flexDirection: 'column',

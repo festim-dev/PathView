@@ -5,6 +5,7 @@ import SourceNode from './components/nodes/ConstantNode';
 import { AmplifierNode, AmplifierNodeReverse } from './components/nodes/AmplifierNode';
 import IntegratorNode from './components/nodes/IntegratorNode';
 import AdderNode from './components/nodes/AdderNode';
+import AddSubNode from './components/nodes/AddSubNode';
 import ScopeNode from './components/nodes/ScopeNode';
 import StepSourceNode from './components/nodes/StepSourceNode';
 import { createFunctionNode } from './components/nodes/FunctionNode';
@@ -37,6 +38,7 @@ export const nodeTypes = {
   amplifier_reverse: AmplifierNodeReverse,
   integrator: IntegratorNode,
   adder: AdderNode,
+  addsub: AddSubNode,
   multiplier: MultiplierNode,
   scope: ScopeNode,
   function: DynamicHandleNode,
@@ -90,7 +92,7 @@ Object.keys(nodeMathTypes).forEach(type => {
   }
 });
 
-export const nodeDynamicHandles = ['ode', 'function', 'interface'];
+export const nodeDynamicHandles = ['ode', 'function', 'interface', 'addsub'];
 
 // Node categories for better organization
 export const nodeCategories = {
@@ -103,7 +105,7 @@ export const nodeCategories = {
     description: 'Signal processing and transformation nodes'
   },
   'Math': {
-    nodes: ['adder', 'multiplier', 'splitter2', 'splitter3'].concat(Object.keys(nodeMathTypes)),
+    nodes: ['adder', 'addsub', 'multiplier', 'splitter2', 'splitter3'].concat(Object.keys(nodeMathTypes)),
     description: 'Mathematical operation nodes'
   },
   'Control': {
@@ -153,6 +155,7 @@ export const getNodeDisplayName = (nodeType) => {
     'integrator': 'Integrator',
     'function': 'Function',
     'adder': 'Adder',
+    'addsub': 'Adder/Subtractor',
     'ode': 'ODE',
     'multiplier': 'Multiplier',
     'splitter2': 'Splitter (1→2)',
