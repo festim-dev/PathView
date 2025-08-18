@@ -49,6 +49,7 @@ function FloatingButtons({
     selectedNode, selectedEdge,
     deleteSelectedNode, deleteSelectedEdge,
     saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
+    shareGraphURL,
     dockOpen, onToggleLogs
 }) {
     return (
@@ -162,7 +163,27 @@ function FloatingButtons({
                 style={{
                     position: 'absolute',
                     right: 20,
-                    top: 150,
+                    top: 143,
+                    zIndex: 10,
+                    padding: '8px 8px',
+                    backgroundColor: '#78A083',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 5,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                }}
+                onClick={shareGraphURL}
+            >
+                🔗
+            </button>
+            <button
+                style={{
+                    position: 'absolute',
+                    right: 20,
+                    top: 185,
                     zIndex: 10,
                     padding: '8px 12px',
                     backgroundColor: '#78A083',
@@ -183,7 +204,7 @@ function FloatingButtons({
                 style={{
                     position: 'absolute',
                     right: 20,
-                    top: 200,
+                    top: 230,
                     zIndex: 10,
                     padding: '8px 12px',
                     backgroundColor: '#444',

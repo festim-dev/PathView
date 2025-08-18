@@ -9,6 +9,12 @@ import {
 import '@xyflow/react/dist/style.css';
 import './styles/App.css';
 import { getApiEndpoint } from './config.js';
+import {
+  getGraphDataFromURL,
+  generateShareableURL,
+  updateURLWithGraphData,
+  clearGraphDataFromURL
+} from './utils/urlSharing.js';
 import Sidebar from './components/Sidebar';
 import NodeSidebar from './components/NodeSidebar';
 import { DnDProvider, useDnD } from './components/DnDContext.jsx';
@@ -22,6 +28,7 @@ import GraphView from './components/GraphView.jsx';
 import EdgeDetails from './components/EdgeDetails.jsx';
 import SolverPanel from './components/SolverPanel.jsx';
 import ResultsPanel from './components/ResultsPanel.jsx';
+import ShareModal from './components/ShareModal.jsx';
 
 // * Declaring variables *
 
@@ -98,6 +105,62 @@ const DnDFlow = () => {
 
   // Python code editor state
   const [pythonCode, setPythonCode] = useState("# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
+
+  // State for URL sharing feedback
+  const [shareUrlFeedback, setShareUrlFeedback] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareableURL, setShareableURL] = useState('');
+
+  // Load graph data from URL on component mount
+  useEffect(() => {
+    const loadGraphFromURL = () => {
+      const urlGraphData = getGraphDataFromURL();
+      if (urlGraphData) {
+        try {
+          // Validate that it's a valid graph file
+          if (!urlGraphData.nodes || !Array.isArray(urlGraphData.nodes)) {
+            console.warn("Invalid graph data in URL");
+            return;
+          }
+
+          // Load the graph data and ensure nodeColor exists on all nodes
+          const {
+            nodes: loadedNodes,
+            edges: loadedEdges,
+            nodeCounter: loadedNodeCounter,
+            solverParams: loadedSolverParams,
+            globalVariables: loadedGlobalVariables,
+            events: loadedEvents,
+            pythonCode: loadedPythonCode
+          } = urlGraphData;
+
+          // Ensure all loaded nodes have a nodeColor property
+          const nodesWithColors = (loadedNodes || []).map(node => ({
+            ...node,
+            data: {
+              ...node.data,
+              nodeColor: node.data.nodeColor || '#DDE6ED'
+            }
+          }));
+
+          setNodes(nodesWithColors);
+          setEdges(loadedEdges || []);
+          setSelectedNode(null);
+          setNodeCounter(loadedNodeCounter ?? loadedNodes.length);
+          setSolverParams(loadedSolverParams ?? DEFAULT_SOLVER_PARAMS);
+          setGlobalVariables(loadedGlobalVariables ?? []);
+          setEvents(loadedEvents ?? []);
+          setPythonCode(loadedPythonCode ?? "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n");
+
+          console.log('Graph loaded from URL successfully');
+        } catch (error) {
+          console.error('Error loading graph from URL:', error);
+        }
+      }
+    };
+
+    loadGraphFromURL();
+  }, []); // Empty dependency array means this runs once on mount
 
   const [defaultValues, setDefaultValues] = useState({});
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -500,7 +563,41 @@ const DnDFlow = () => {
     setNodeCounter(0);
     setSolverParams(DEFAULT_SOLVER_PARAMS);
     setGlobalVariables([]);
+    // Clear URL when resetting graph
+    clearGraphDataFromURL();
   };
+
+  // Share current graph via URL
+  const shareGraphURL = async () => {
+    const graphData = {
+      version: versionInfo ? Object.fromEntries(Object.entries(versionInfo).filter(([key]) => key !== 'status')) : 'unknown',
+      nodes,
+      edges,
+      nodeCounter,
+      solverParams,
+      globalVariables,
+      events,
+      pythonCode
+    };
+
+    try {
+      const url = generateShareableURL(graphData);
+      if (url) {
+        setShareableURL(url);
+        setShowShareModal(true);
+        // Update browser URL as well
+        updateURLWithGraphData(graphData, true);
+      } else {
+        setShareUrlFeedback('Error generating share URL');
+        setTimeout(() => setShareUrlFeedback(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error sharing graph URL:', error);
+      setShareUrlFeedback('Error generating share URL');
+      setTimeout(() => setShareUrlFeedback(''), 3000);
+    }
+  };
+
   const downloadCsv = async () => {
     if (!csvData) return;
 
@@ -1050,6 +1147,7 @@ const DnDFlow = () => {
               selectedNode, selectedEdge,
               deleteSelectedNode, deleteSelectedEdge,
               saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
+              shareGraphURL,
               dockOpen, setDockOpen, onToggleLogs,
               showKeyboardShortcuts, setShowKeyboardShortcuts,
             }}
@@ -1116,6 +1214,12 @@ const DnDFlow = () => {
         />
       )}
 
+      {/* Share URL Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        shareableURL={shareableURL}
+      />
 
     </div>
   );

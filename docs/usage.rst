@@ -201,3 +201,37 @@ Export to python
 For advanced users, PathView allows you to export your graph as a Python script. This feature is useful for integrating your simulation into larger Python projects or for further analysis using Python libraries.
 
 This is useful for instance for performing parametric studies or sensitivity analysis, where you can easily modify parameters in the Python script and rerun the simulation.
+
+Sharing Graphs via URL
+----------------------
+
+PathView supports sharing complete graph configurations through URLs, making collaboration and graph distribution easy.
+
+**How to share a graph:**
+
+1. Create and configure your graph with all necessary nodes, connections, and parameters
+2. Click the "🔗 Share URL" button in the floating action buttons (top-right area)
+3. The complete graph URL is automatically copied to your clipboard
+4. Share this URL with others - when they visit it, your exact graph configuration will load automatically
+
+**What's included in shared URLs:**
+
+- All node positions and configurations
+- Edge connections and data flow
+- Solver parameters and simulation settings
+- Global variables and their values
+- Event definitions
+- Custom Python code
+
+**Best practices:**
+
+- URLs work best for moderately-sized graphs. For very complex graphs with many nodes, consider using the file save/load functionality instead
+- URLs contain all graph data encoded in base64, so they can become quite long
+- The shared graph state is completely self-contained - no server storage required
+
+**Example use cases:**
+
+- Sharing example configurations with students or colleagues
+- Creating bookmarks for frequently-used graph templates
+- Collaborating on model development
+- Including interactive models in documentation or presentations
