@@ -1000,16 +1000,16 @@ const DnDFlow = () => {
               {sidebarVisible ? (
                 // Hide sidebar icon (sidebar with left arrow)
                 <>
-                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" opacity="0.3"/>
-                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <path d="M6 12L4 10M6 12L4 14M6 12H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" opacity="0.3" />
+                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  <path d="M6 12L4 10M6 12L4 14M6 12H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </>
               ) : (
                 // Show sidebar icon (sidebar with right arrow)
                 <>
-                  <rect x="2" y="3" width="6" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <path d="M5 12L7 10M5 12L7 14M5 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="2" y="3" width="6" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  <path d="M5 12L7 10M5 12L7 14M5 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </>
               )}
             </svg>
@@ -1017,9 +1017,9 @@ const DnDFlow = () => {
 
           {/* Sidebar */}
           {sidebarVisible && (
-            <div style={{ 
-              width: 250, 
-              height: '100%', 
+            <div style={{
+              width: 250,
+              height: '100%',
               borderRight: '1px solid #ccc',
               transition: 'width 0.3s ease'
             }}>
