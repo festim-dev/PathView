@@ -48,6 +48,7 @@ const DnDFlow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   const [activeTab, setActiveTab] = useState('graph');
   const [simulationResults, setSimulationResults] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
@@ -957,9 +958,74 @@ const DnDFlow = () => {
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
         <div style={{ display: 'flex', flex: 1, height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
-          <div style={{ width: 250, height: '100%', borderRight: '1px solid #ccc' }}>
-            <Sidebar />
-          </div>
+          {/* Sidebar Toggle Button */}
+          <button
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+            style={{
+              position: 'absolute',
+              top: '60px',
+              left: sidebarVisible ? '240px' : '10px',
+              zIndex: 1000,
+              backgroundColor: '#2c2c54',
+              color: '#ffffff',
+              border: '1px solid #555',
+              borderRadius: '4px',
+              width: '32px',
+              height: '32px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'left 0.3s ease',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              padding: '4px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#3c3c64';
+              e.target.style.borderColor = '#78A083';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#2c2c54';
+              e.target.style.borderColor = '#555';
+            }}
+            title={sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {sidebarVisible ? (
+                // Hide sidebar icon (sidebar with left arrow)
+                <>
+                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" opacity="0.3"/>
+                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <path d="M6 12L4 10M6 12L4 14M6 12H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </>
+              ) : (
+                // Show sidebar icon (sidebar with right arrow)
+                <>
+                  <rect x="2" y="3" width="6" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <path d="M5 12L7 10M5 12L7 14M5 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </>
+              )}
+            </svg>
+          </button>
+
+          {/* Sidebar */}
+          {sidebarVisible && (
+            <div style={{ 
+              width: 250, 
+              height: '100%', 
+              borderRight: '1px solid #ccc',
+              transition: 'width 0.3s ease'
+            }}>
+              <Sidebar />
+            </div>
+          )}
 
           <GraphView
             refEl={ref}
