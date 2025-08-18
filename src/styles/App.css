@@ -432,3 +432,48 @@ aside::-webkit-scrollbar-thumb {
 aside::-webkit-scrollbar-thumb:hover {
   background: #666;
 }
+
+/* Sidebar transition styles - inspired by strudel-flow */
+.sidebar-container {
+  transition: width 0.8s ease;
+}
+
+.sidebar-container[data-sidebar-state="collapsed"] {
+  width: 0 !important;
+}
+
+.sidebar-container[data-sidebar-state="expanded"] {
+  width: 250px !important;
+}
+
+/* Sidebar trigger button - strudel-flow style */
+.sidebar-trigger {
+  /* Ghost button variant */
+  background-color: transparent !important;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative;
+}
+
+.sidebar-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sidebar-trigger svg {
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+
+.sidebar-trigger:hover svg {
+  color: #ffffff !important;
+}
+
+.sidebar-trigger:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.sidebar-trigger:active {
+  scale: 0.95;
+}

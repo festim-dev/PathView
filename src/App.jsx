@@ -1063,130 +1063,97 @@ const DnDFlow = () => {
       {/* Graph Editor Tab */}
       {activeTab === 'graph' && (
         <div style={{ display: 'flex', flex: 1, height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
-          {/* Sidebar Toggle Button */}
-          <button
-            onClick={() => setSidebarVisible(!sidebarVisible)}
-            style={{
-              position: 'absolute',
-              top: '60px',
-              left: sidebarVisible ? '240px' : '10px',
-              zIndex: 1000,
-              backgroundColor: '#2c2c54',
-              color: '#ffffff',
-              border: '1px solid #555',
-              borderRadius: '4px',
-              width: '32px',
-              height: '32px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'left 0.3s ease',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              padding: '4px'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#3c3c64';
-              e.target.style.borderColor = '#78A083';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#2c2c54';
-              e.target.style.borderColor = '#555';
-            }}
-            title={sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {sidebarVisible ? (
-                // Hide sidebar icon (sidebar with left arrow)
-                <>
-                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" opacity="0.3" />
-                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                  <path d="M6 12L4 10M6 12L4 14M6 12H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </>
-              ) : (
-                // Show sidebar icon (sidebar with right arrow)
-                <>
-                  <rect x="2" y="3" width="6" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                  <rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                  <path d="M5 12L7 10M5 12L7 14M5 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </>
-              )}
-            </svg>
-          </button>
-
           {/* Sidebar */}
-          {sidebarVisible && (
-            <div style={{
-              width: 250,
+          <div
+            data-sidebar-state={sidebarVisible ? 'expanded' : 'collapsed'}
+            className="sidebar-container"
+            style={{
+              position: 'relative',
+              width: sidebarVisible ? '250px' : '0px',
               height: '100%',
-              borderRight: '1px solid #ccc',
-              transition: 'width 0.3s ease'
-            }}>
+              transition: 'width 0.5s ease',
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              style={{
+                position: 'fixed',
+                left: sidebarVisible ? '0px' : '-250px',
+                top: '50px', // Account for top bar height
+                width: '250px',
+                height: 'calc(100vh - 50px)',
+                transition: 'left 0.5s ease',
+                zIndex: 10,
+                borderRight: '1px solid #ccc',
+                backgroundColor: '#1e1e2f'
+              }}
+            >
               <Sidebar />
             </div>
-          )}
+          </div>
 
-          <GraphView
-            refEl={ref}
-            reactFlowWrapperRef={reactFlowWrapper}
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onEdgeClick={onEdgeClick}
-            onPaneClick={onPaneClick}
-            onNodeContextMenu={onNodeContextMenu}
-            nodeTypes={nodeTypes}
-            onDrop={onDrop}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            menu={menu}
-            duplicateNode={duplicateNode}
-            copyFeedback={copyFeedback}
-            ui={{
-              selectedNode, selectedEdge,
-              deleteSelectedNode, deleteSelectedEdge,
-              saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
-              shareGraphURL,
-              dockOpen, setDockOpen, onToggleLogs,
-              showKeyboardShortcuts, setShowKeyboardShortcuts,
-            }}
-          />
-          {/* Log Dock */}
-          <LogDock
-            open={dockOpen}
-            onClose={() => setDockOpen(false)}
-            lines={logLines}
-            progress={null}
-          />
-          {/* Node Sidebar */}
-          <NodeSidebar
-            selectedNode={selectedNode}
-            defaultValues={defaultValues}
-            setNodes={setNodes}
-            setSelectedNode={setSelectedNode}
-            isEditingLabel={isEditingLabel}
-            setIsEditingLabel={setIsEditingLabel}
-            tempLabel={tempLabel}
-            setTempLabel={setTempLabel}
-            nodeDocumentation={nodeDocumentation}
-            isDocumentationExpanded={isDocumentationExpanded}
-            setIsDocumentationExpanded={setIsDocumentationExpanded}
-          />
-          {/* Edge Details */}
-          <EdgeDetails
-            selectedEdge={selectedEdge}
-            onClose={() => setSelectedEdge(null)}
-            onDelete={deleteSelectedEdge}
-          />
+          {/* Main content area that moves with sidebar */}
+          <div style={{ position: 'relative', flex: 1, height: '100%' }}>
+            <GraphView
+              refEl={ref}
+              reactFlowWrapperRef={reactFlowWrapper}
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={onNodeClick}
+              onEdgeClick={onEdgeClick}
+              onPaneClick={onPaneClick}
+              onNodeContextMenu={onNodeContextMenu}
+              nodeTypes={nodeTypes}
+              onDrop={onDrop}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              menu={menu}
+              duplicateNode={duplicateNode}
+              copyFeedback={copyFeedback}
+              ui={{
+                selectedNode, selectedEdge,
+                deleteSelectedNode, deleteSelectedEdge,
+                saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
+                shareGraphURL,
+                dockOpen, setDockOpen, onToggleLogs,
+                showKeyboardShortcuts, setShowKeyboardShortcuts,
+                sidebarVisible, setSidebarVisible,
+              }}
+            />
+
+            {/* Log Dock */}
+            <LogDock
+              open={dockOpen}
+              onClose={() => setDockOpen(false)}
+              lines={logLines}
+              progress={null}
+            />
+
+            {/* Node Sidebar */}
+            <NodeSidebar
+              selectedNode={selectedNode}
+              defaultValues={defaultValues}
+              setNodes={setNodes}
+              setSelectedNode={setSelectedNode}
+              isEditingLabel={isEditingLabel}
+              setIsEditingLabel={setIsEditingLabel}
+              tempLabel={tempLabel}
+              setTempLabel={setTempLabel}
+              nodeDocumentation={nodeDocumentation}
+              isDocumentationExpanded={isDocumentationExpanded}
+              setIsDocumentationExpanded={setIsDocumentationExpanded}
+            />
+
+            {/* Edge Details */}
+            <EdgeDetails
+              selectedEdge={selectedEdge}
+              onClose={() => setSelectedEdge(null)}
+              onDelete={deleteSelectedEdge}
+            />
+          </div>
         </div>
       )}
 
@@ -1194,33 +1161,39 @@ const DnDFlow = () => {
       {activeTab === 'events' && <EventsTab events={events} setEvents={setEvents} />}
 
       {/* Solver Parameters Tab */}
-      {activeTab === 'solver' && (
-        <SolverPanel
-          solverParams={solverParams}
-          setSolverParams={setSolverParams}
-          setActiveTab={setActiveTab}
-        />
-      )}
+      {
+        activeTab === 'solver' && (
+          <SolverPanel
+            solverParams={solverParams}
+            setSolverParams={setSolverParams}
+            setActiveTab={setActiveTab}
+          />
+        )
+      }
 
       {/* Global Variables Tab */}
-      {activeTab === 'globals' && (
-        <GlobalVariablesTab
-          globalVariables={globalVariables}
-          setGlobalVariables={setGlobalVariables}
-          setActiveTab={setActiveTab}
-          pythonCode={pythonCode}
-          setPythonCode={setPythonCode}
-        />
-      )}
+      {
+        activeTab === 'globals' && (
+          <GlobalVariablesTab
+            globalVariables={globalVariables}
+            setGlobalVariables={setGlobalVariables}
+            setActiveTab={setActiveTab}
+            pythonCode={pythonCode}
+            setPythonCode={setPythonCode}
+          />
+        )
+      }
 
       {/* Results Tab */}
-      {activeTab === 'results' && (
-        <ResultsPanel
-          simulationResults={simulationResults}
-          downloadHtml={downloadHtml}
-          downloadCsv={downloadCsv}
-        />
-      )}
+      {
+        activeTab === 'results' && (
+          <ResultsPanel
+            simulationResults={simulationResults}
+            downloadHtml={downloadHtml}
+            downloadCsv={downloadCsv}
+          />
+        )
+      }
 
       {/* Share URL Modal */}
       <ShareModal
@@ -1230,7 +1203,7 @@ const DnDFlow = () => {
         urlMetadata={urlMetadata}
       />
 
-    </div>
+    </div >
   );
 }
 
