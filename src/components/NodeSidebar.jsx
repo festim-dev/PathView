@@ -11,7 +11,7 @@ const makeVarName = (node) => {
   if (!isValidPythonIdentifier(varName)) {
     // add var_ prefix if it doesn't start with a letter or underscore
     varName = `var_${varName}`;
-}
+  }
 
   return varName;
 }
@@ -120,7 +120,7 @@ const NodeSidebar = ({
             {selectedNode.data.label}
           </h3>
         )}
-        <h4 style={{ 
+        <h4 style={{
           margin: '12px 0 8px 0',
           fontSize: '14px',
           fontWeight: '600',
@@ -130,7 +130,7 @@ const NodeSidebar = ({
           borderBottom: '1px solid #343556',
           paddingBottom: '8px'
         }}>TYPE: {selectedNode.type}</h4>
-        <h4 style={{ 
+        <h4 style={{
           margin: '12px 0 8px 0',
           fontSize: '14px',
           fontWeight: '600',
@@ -140,7 +140,7 @@ const NodeSidebar = ({
           borderBottom: '1px solid #343556',
           paddingBottom: '8px'
         }}>ID: {selectedNode.id}</h4>
-        <h4 style={{ 
+        <h4 style={{
           margin: '12px 0 8px 0',
           fontSize: '14px',
           fontWeight: '600',
@@ -213,13 +213,13 @@ const NodeSidebar = ({
         })()}
 
         {/* Color Picker Section */}
-        <div style={{ 
+        <div style={{
           marginTop: '20px',
           marginBottom: '20px',
           borderTop: '1px solid #555',
           paddingTop: '15px'
         }}>
-          <h4 style={{ 
+          <h4 style={{
             margin: '0 0 12px 0',
             fontSize: '14px',
             fontWeight: '600',
@@ -227,7 +227,7 @@ const NodeSidebar = ({
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
           }}>Node Color</h4>
-          
+
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -261,7 +261,7 @@ const NodeSidebar = ({
                 padding: '0'
               }}
             />
-            
+
             <input
               type="text"
               value={selectedNode.data.nodeColor || '#DDE6ED'}
@@ -292,9 +292,9 @@ const NodeSidebar = ({
               }}
             />
           </div>
-          
+
           {/* Color preset buttons */}
-          <div style={{ 
+          <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '8px',
@@ -354,14 +354,14 @@ const NodeSidebar = ({
         >
           Close
         </button>
-        
+
         {/* Documentation Section */}
-        <div style={{ 
+        <div style={{
           marginTop: '20px',
           borderTop: '1px solid #555',
           paddingTop: '15px'
         }}>
-          <div 
+          <div
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -391,9 +391,9 @@ const NodeSidebar = ({
               ▶
             </span>
           </div>
-          
+
           {isDocumentationExpanded && (
-            <div 
+            <div
               className="documentation-content"
               style={{
                 backgroundColor: '#2a2a3e',
