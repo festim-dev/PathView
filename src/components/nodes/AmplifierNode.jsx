@@ -15,16 +15,29 @@ export function AmplifierNode({ data }) {
         position: 'relative',
         cursor: 'pointer',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
+      {/* Amplifier symbol */}
       <div style={{ 
-        fontSize: '12px',
-        textAlign: 'center',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        marginBottom: '2px',
       }}>
-        {data.label || 'AMP'}
+        ×{data.gain || 'K'}
       </div>
+      
+      {/* Optional label */}
+      {data.label && (
+        <div style={{ 
+          fontSize: '10px',
+          textAlign: 'center',
+        }}>
+          {data.label}
+        </div>
+      )}
 
       <Handle type="target" position="left" style={{ background: '#555' }} />
       <Handle type="source" position="right" style={{ background: '#555' }} />
@@ -46,16 +59,29 @@ export function AmplifierNodeReverse({ data }) {
         position: 'relative',
         cursor: 'pointer',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
+      {/* Amplifier symbol with reverse indicator */}
       <div style={{ 
-        fontSize: '12px',
-        textAlign: 'center',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        marginBottom: '2px',
       }}>
-        {data.label || 'AMP_R'}
+        ×{data.gain || 'K'}
       </div>
+      
+      {/* Optional label */}
+      {data.label && (
+        <div style={{ 
+          fontSize: '10px',
+          textAlign: 'center',
+        }}>
+          {data.label}
+        </div>
+      )}
 
       <Handle type="target" position="right" style={{ background: '#555' }} />
       <Handle type="source" position="left" style={{ background: '#555' }} />
