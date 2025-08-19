@@ -8,7 +8,7 @@ export default function DefaultNode({ data }) {
         width: 180,
         background: data.nodeColor || '#DDE6ED',
         color: 'black',
-        borderRadius: 0,
+        borderRadius: 8,
         padding: 10,
         fontWeight: 'bold',
         position: 'relative',
