@@ -6,29 +6,25 @@ export function AmplifierNode({ data }) {
     <div
       style={{
         width: 90,
-        height: 80,
+        height: 60,
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
+        borderRadius: 8,
+        padding: 8,
         fontWeight: 'bold',
         position: 'relative',
         cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-
-      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon points="0,0 100,50 0,100" fill={data.nodeColor || "#DDE6ED"} />
-      </svg>
       <div style={{ 
         fontSize: '12px',
         textAlign: 'center',
-        background: 'transparent',
-        transform: 'translate(-80%, -50%)',
-        top: '50%',
-        left: '50%',
-        position: 'absolute',
       }}>
-          {data.label}
+        {data.label || 'AMP'}
       </div>
-
 
       <Handle type="target" position="left" style={{ background: '#555' }} />
       <Handle type="source" position="right" style={{ background: '#555' }} />
@@ -41,29 +37,25 @@ export function AmplifierNodeReverse({ data }) {
     <div
       style={{
         width: 90,
-        height: 80,
+        height: 60,
+        background: data.nodeColor || '#DDE6ED',
         color: 'black',
+        borderRadius: 8,
+        padding: 8,
         fontWeight: 'bold',
         position: 'relative',
         cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-
-      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon points="0,50 100,100 100,0" fill={data.nodeColor || "#DDE6ED"} />
-      </svg>
       <div style={{ 
         fontSize: '12px',
         textAlign: 'center',
-        background: 'transparent',
-        transform: 'translate(-50%, -50%)',
-        top: '50%',
-        left: '50%',
-        position: 'absolute',
       }}>
-          {data.label}
+        {data.label || 'AMP_R'}
       </div>
-
 
       <Handle type="target" position="right" style={{ background: '#555' }} />
       <Handle type="source" position="left" style={{ background: '#555' }} />
