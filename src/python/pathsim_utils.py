@@ -522,13 +522,13 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     if isinstance(block, Adder):
         if block.operations:
             return int(edge["targetHandle"].replace("target-", ""))
-    else:
-        # make sure that the target block has only one input port (ie. that targetHandle is None)
-        assert edge["targetHandle"] is None, (
-            f"Target block {block.id} has multiple input ports, "
-            "but connection method hasn't been implemented."
-        )
-        return block_to_input_index[block]
+            
+    # make sure that the target block has only one input port (ie. that targetHandle is None)
+    assert edge["targetHandle"] is None, (
+        f"Target block {block.id} has multiple input ports, "
+        "but connection method hasn't been implemented."
+    )
+    return block_to_input_index[block]
 
 
 # TODO here we could only pass edge and not block
@@ -566,13 +566,13 @@ def get_output_index(block: Block, edge: dict) -> int:
         # Function and ODE outputs are always in order, so we can use the handle directly
         assert edge["sourceHandle"], edge
         return int(edge["sourceHandle"].replace("source-", ""))
-    else:
-        # make sure that the source block has only one output port (ie. that sourceHandle is None)
-        assert edge["sourceHandle"] is None, (
-            f"Source block {block.id} has multiple output ports, "
-            "but connection method hasn't been implemented."
-        )
-        return 0
+    
+    # make sure that the source block has only one output port (ie. that sourceHandle is None)
+    assert edge["sourceHandle"] is None, (
+        f"Source block {block.id} has multiple output ports, "
+        "but connection method hasn't been implemented."
+    )
+    return 0
 
 
 def make_connections(nodes, edges, blocks) -> list[Connection]:
