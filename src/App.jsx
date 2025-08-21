@@ -720,7 +720,7 @@ const DnDFlow = () => {
           try {
             // Modern approach: Use File System Access API for proper "Save As" dialog
             const fileHandle = await window.showSaveFilePicker({
-              suggestedName: 'fuel_cycle_script.py',
+              suggestedName: 'pathsim_script.py',
               types: [{
                 description: 'Python files',
                 accept: {
@@ -746,7 +746,7 @@ const DnDFlow = () => {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'fuel_cycle_script.py';
+          a.download = 'pathsim_script.py';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
