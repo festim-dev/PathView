@@ -335,6 +335,77 @@ def make_csv_payload(scopes):
     return csv_payload
 
 
+def make_plot(simulation):
+    scopes = [block for block in simulation.blocks if isinstance(block, Scope)]
+    spectra = [block for block in simulation.blocks if isinstance(block, Spectrum)]
+    print(f"Found {len(scopes)} scopes and {len(spectra)} spectra")
+
+    # FIXME right now only the scopes are converted to CSV
+    # extra work is needed since spectra and scopes don't share the same x axis
+    csv_payload = make_csv_payload(scopes)
+
+    # Share x only if there are only scopes or only spectra
+    shared_x = len(scopes) * len(spectra) == 0
+    n_rows = len(scopes) + len(spectra)
+
+    if n_rows == 0:
+        # No scopes or spectra to plot
+        return jsonify(
+            {
+                "success": True,
+                "plot": "{}",
+                "html": "<p>No scopes or spectra to display</p>",
+                "csv_data": csv_payload,
+                "message": "Pathsim simulation completed successfully",
+            }
+        )
+
+    absolute_vertical_spacing = 0.05
+    relative_vertical_spacing = absolute_vertical_spacing / n_rows
+    fig = make_subplots(
+        rows=n_rows,
+        cols=1,
+        shared_xaxes=shared_x,
+        subplot_titles=[scope.label for scope in scopes]
+        + [spec.label for spec in spectra],
+        vertical_spacing=relative_vertical_spacing,
+    )
+
+    # make scope plots
+    for i, scope in enumerate(scopes):
+        sim_time, data = scope.read()
+
+        for p, d in enumerate(data):
+            lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
+            if isinstance(scope, Spectrum):
+                d = abs(d)
+            fig.add_trace(
+                go.Scatter(x=sim_time, y=d, mode="lines", name=lb),
+                row=i + 1,
+                col=1,
+            )
+
+        fig.update_xaxes(title_text="Time", row=len(scopes), col=1)
+
+    # make spectrum plots
+    for i, spec in enumerate(spectra):
+        freq, data = spec.read()
+
+        for p, d in enumerate(data):
+            lb = spec.labels[p] if p < len(spec.labels) else f"port {p}"
+            d = abs(d)
+            fig.add_trace(
+                go.Scatter(x=freq, y=d, mode="lines", name=lb),
+                row=len(scopes) + i + 1,
+                col=1,
+            )
+        fig.update_xaxes(title_text="Frequency", row=len(scopes) + i + 1, col=1)
+
+    fig.update_layout(height=500 * (len(scopes) + len(spectra)), hovermode="x unified")
+
+    return fig, csv_payload
+
+
 # Function to convert graph to pathsim and run simulation
 @app.route("/run-pathsim", methods=["POST"])
 def run_pathsim():
@@ -354,92 +425,42 @@ def run_pathsim():
         my_simulation.run(duration)
 
         # Generate the plot
-        scopes = [block for block in my_simulation.blocks if isinstance(block, Scope)]
-        spectra = [
-            block for block in my_simulation.blocks if isinstance(block, Spectrum)
-        ]
+        try:
+            fig, csv_payload = make_plot(my_simulation)
+            print("Created plot figure")
 
-        # FIXME right now only the scopes are converted to CSV
-        # extra work is needed since spectra and scopes don't share the same x axis
-        csv_payload = make_csv_payload(scopes)
+            # Convert plot to JSON
+            try:
+                plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+                plot_html = fig.to_html()
+                print("Converted plot to JSON and HTML")
+            except Exception as plot_error:
+                print(f"Error converting plot to JSON: {str(plot_error)}")
+                return jsonify(
+                    {
+                        "success": False,
+                        "error": f"Plot generation error: {str(plot_error)}",
+                    }
+                ), 500
 
-        # Share x only if there are only scopes or only spectra
-        shared_x = len(scopes) * len(spectra) == 0
-        n_rows = len(scopes) + len(spectra)
-
-        if n_rows == 0:
-            # No scopes or spectra to plot
             return jsonify(
                 {
                     "success": True,
-                    "plot": "{}",
-                    "html": "<p>No scopes or spectra to display</p>",
+                    "plot": plot_data,
+                    "html": plot_html,
                     "csv_data": csv_payload,
                     "message": "Pathsim simulation completed successfully",
                 }
             )
 
-        absolute_vertical_spacing = 0.05
-        relative_vertical_spacing = absolute_vertical_spacing / n_rows
-        fig = make_subplots(
-            rows=n_rows,
-            cols=1,
-            shared_xaxes=shared_x,
-            subplot_titles=[scope.label for scope in scopes]
-            + [spec.label for spec in spectra],
-            vertical_spacing=relative_vertical_spacing,
-        )
-
-        # make scope plots
-        for i, scope in enumerate(scopes):
-            sim_time, data = scope.read()
-
-            for p, d in enumerate(data):
-                lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
-                if isinstance(scope, Spectrum):
-                    d = abs(d)
-                fig.add_trace(
-                    go.Scatter(x=sim_time, y=d, mode="lines", name=lb), row=i + 1, col=1
-                )
-
-            fig.update_xaxes(title_text="Time", row=len(scopes), col=1)
-
-        # make spectrum plots
-        for i, spec in enumerate(spectra):
-            freq, data = spec.read()
-
-            for p, d in enumerate(data):
-                lb = spec.labels[p] if p < len(spec.labels) else f"port {p}"
-                d = abs(d)
-                fig.add_trace(
-                    go.Scatter(x=freq, y=d, mode="lines", name=lb),
-                    row=len(scopes) + i + 1,
-                    col=1,
-                )
-            fig.update_xaxes(title_text="Frequency", row=len(scopes) + i + 1, col=1)
-
-        fig.update_layout(
-            height=500 * (len(scopes) + len(spectra)), hovermode="x unified"
-        )
-
-        # Convert plot to JSON
-        try:
-            plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            plot_html = fig.to_html()
-        except Exception as plot_error:
+        except Exception as plot_creation_error:
+            print(f"Error during plot creation: {str(plot_creation_error)}")
             return jsonify(
-                {"success": False, "error": f"Plot generation error: {str(plot_error)}"}
+                {
+                    "success": False,
+                    "error": f"Plot creation error: {str(plot_creation_error)}",
+                }
             ), 500
-
-        return jsonify(
-            {
-                "success": True,
-                "plot": plot_data,
-                "html": plot_html,
-                "csv_data": csv_payload,
-                "message": "Pathsim simulation completed successfully",
-            }
-        )
 
     except Exception as e:
         # Log the full error for debugging
