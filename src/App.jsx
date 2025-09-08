@@ -791,7 +791,25 @@ const DnDFlow = () => {
         body: JSON.stringify({ graph: graphData }),
       });
 
-      const result = await response.json();
+      // Check if response is ok first
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Check if response has content
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error('Server returned empty response');
+      }
+
+      // Try to parse JSON
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', responseText);
+        throw new Error(`Invalid JSON response: ${jsonError.message}`);
+      }
 
       if (sseRef.current) { sseRef.current.close(); sseRef.current = null; }
 
@@ -805,8 +823,29 @@ const DnDFlow = () => {
         alert(`Error running Pathsim simulation: ${result.error}`);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert(`Failed to run Pathsim simulation. Make sure the backend is running. : ${error.message}`);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response || 'No response object'
+      });
+
+      if (sseRef.current) {
+        sseRef.current.close();
+        sseRef.current = null;
+      }
+
+      // Provide more specific error messages
+      let errorMessage = 'Failed to run Pathsim simulation. Make sure the backend is running.';
+
+      if (error.message.includes('JSON')) {
+        errorMessage = 'Server response was not valid JSON. This might be due to a server error or network issue.';
+      } else if (error.message.includes('HTTP')) {
+        errorMessage = `Server error: ${error.message}`;
+      } else if (error.message.includes('empty response')) {
+        errorMessage = 'Server returned empty response. The simulation might have failed silently.';
+      }
+
+      alert(`${errorMessage} : ${error.message}`);
     }
   };
 

@@ -20,7 +20,6 @@ from docutils.core import publish_parts
 
 # imports for logging progress
 from flask import Response, stream_with_context
-import time
 import logging
 from queue import Queue, Empty
 
@@ -94,9 +93,18 @@ def logs_stream():
     def gen():
         yield "retry: 500\n\n"
         while True:
-            line = log_queue.get()
-            for chunk in line.replace("\r", "\n").splitlines():
-                yield f"data: {chunk}\n\n"
+            try:
+                # Use a timeout to prevent indefinite blocking
+                line = log_queue.get(timeout=30)
+                for chunk in line.replace("\r", "\n").splitlines():
+                    yield f"data: {chunk}\n\n"
+            except Empty:
+                # Send a heartbeat to keep connection alive
+                yield "data: \n\n"
+            except Exception as e:
+                # Log the error and break the loop to close the connection
+                yield f"data: Error in log stream: {str(e)}\n\n"
+                break
 
     return Response(gen(), mimetype="text/event-stream")
 
@@ -358,6 +366,19 @@ def run_pathsim():
         # Share x only if there are only scopes or only spectra
         shared_x = len(scopes) * len(spectra) == 0
         n_rows = len(scopes) + len(spectra)
+
+        if n_rows == 0:
+            # No scopes or spectra to plot
+            return jsonify(
+                {
+                    "success": True,
+                    "plot": "{}",
+                    "html": "<p>No scopes or spectra to display</p>",
+                    "csv_data": csv_payload,
+                    "message": "Pathsim simulation completed successfully",
+                }
+            )
+
         absolute_vertical_spacing = 0.05
         relative_vertical_spacing = absolute_vertical_spacing / n_rows
         fig = make_subplots(
@@ -371,27 +392,27 @@ def run_pathsim():
 
         # make scope plots
         for i, scope in enumerate(scopes):
-            time, data = scope.read()
+            sim_time, data = scope.read()
 
             for p, d in enumerate(data):
                 lb = scope.labels[p] if p < len(scope.labels) else f"port {p}"
                 if isinstance(scope, Spectrum):
                     d = abs(d)
                 fig.add_trace(
-                    go.Scatter(x=time, y=d, mode="lines", name=lb), row=i + 1, col=1
+                    go.Scatter(x=sim_time, y=d, mode="lines", name=lb), row=i + 1, col=1
                 )
 
             fig.update_xaxes(title_text="Time", row=len(scopes), col=1)
 
         # make spectrum plots
         for i, spec in enumerate(spectra):
-            time, data = spec.read()
+            freq, data = spec.read()
 
             for p, d in enumerate(data):
                 lb = spec.labels[p] if p < len(spec.labels) else f"port {p}"
                 d = abs(d)
                 fig.add_trace(
-                    go.Scatter(x=time, y=d, mode="lines", name=lb),
+                    go.Scatter(x=freq, y=d, mode="lines", name=lb),
                     row=len(scopes) + i + 1,
                     col=1,
                 )
@@ -402,8 +423,13 @@ def run_pathsim():
         )
 
         # Convert plot to JSON
-        plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-        plot_html = fig.to_html()
+        try:
+            plot_data = plotly_json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            plot_html = fig.to_html()
+        except Exception as plot_error:
+            return jsonify(
+                {"success": False, "error": f"Plot generation error: {str(plot_error)}"}
+            ), 500
 
         return jsonify(
             {
@@ -416,6 +442,11 @@ def run_pathsim():
         )
 
     except Exception as e:
+        # Log the full error for debugging
+        import traceback
+
+        error_details = traceback.format_exc()
+        print(f"Error in run_pathsim: {error_details}")
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
@@ -501,6 +532,25 @@ def catch_all(path):
         return app.send_static_file("index.html")
     else:
         return jsonify({"error": "Route not found"}), 404
+
+
+# Global error handler to ensure all errors return JSON
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Global exception handler to ensure JSON responses."""
+    import traceback
+
+    error_details = traceback.format_exc()
+    print(f"Unhandled exception: {error_details}")
+
+    # For HTTP exceptions, return the original response
+    if hasattr(e, "code"):
+        return jsonify(
+            {"success": False, "error": f"HTTP {e.code}: {str(e)}"}
+        ), getattr(e, "code", 500)
+
+    # For all other exceptions, return a generic JSON error
+    return jsonify({"success": False, "error": f"Internal server error: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
