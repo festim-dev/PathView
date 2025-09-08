@@ -828,15 +828,15 @@ const DnDFlow = () => {
         stack: error.stack,
         response: error.response || 'No response object'
       });
-      
-      if (sseRef.current) { 
-        sseRef.current.close(); 
-        sseRef.current = null; 
+
+      if (sseRef.current) {
+        sseRef.current.close();
+        sseRef.current = null;
       }
-      
+
       // Provide more specific error messages
       let errorMessage = 'Failed to run Pathsim simulation. Make sure the backend is running.';
-      
+
       if (error.message.includes('JSON')) {
         errorMessage = 'Server response was not valid JSON. This might be due to a server error or network issue.';
       } else if (error.message.includes('HTTP')) {
@@ -844,7 +844,7 @@ const DnDFlow = () => {
       } else if (error.message.includes('empty response')) {
         errorMessage = 'Server returned empty response. The simulation might have failed silently.';
       }
-      
+
       alert(`${errorMessage} : ${error.message}`);
     }
   };

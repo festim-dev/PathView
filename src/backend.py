@@ -534,6 +534,25 @@ def catch_all(path):
         return jsonify({"error": "Route not found"}), 404
 
 
+# Global error handler to ensure all errors return JSON
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Global exception handler to ensure JSON responses."""
+    import traceback
+
+    error_details = traceback.format_exc()
+    print(f"Unhandled exception: {error_details}")
+
+    # For HTTP exceptions, return the original response
+    if hasattr(e, "code"):
+        return jsonify(
+            {"success": False, "error": f"HTTP {e.code}: {str(e)}"}
+        ), getattr(e, "code", 500)
+
+    # For all other exceptions, return a generic JSON error
+    return jsonify({"success": False, "error": f"Internal server error: {str(e)}"}), 500
+
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     app.run(host="0.0.0.0", port=port, debug=os.getenv("FLASK_ENV") != "production")
