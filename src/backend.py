@@ -539,15 +539,16 @@ def catch_all(path):
 def handle_exception(e):
     """Global exception handler to ensure JSON responses."""
     import traceback
+    from werkzeug.exceptions import HTTPException
 
     error_details = traceback.format_exc()
     print(f"Unhandled exception: {error_details}")
 
-    # For HTTP exceptions, return the original response
-    if hasattr(e, "code"):
+    # For HTTP exceptions, return a cleaner response
+    if isinstance(e, HTTPException):
         return jsonify(
-            {"success": False, "error": f"HTTP {e.code}: {str(e)}"}
-        ), getattr(e, "code", 500)
+            {"success": False, "error": f"{e.name}: {e.description}"}
+        ), e.code
 
     # For all other exceptions, return a generic JSON error
     return jsonify({"success": False, "error": f"Internal server error: {str(e)}"}), 500
