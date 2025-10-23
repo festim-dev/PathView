@@ -1,0 +1,19 @@
+@reference "../index.css";
+
+@layer components {
+  .variables ul,
+  .functions ul {
+    @apply list-none p-0 my-1.25 mx-0;
+  }
+
+  .variables li,
+  .functions li {
+    @apply bg-[#2d2d30] py-1.25 px-2.5 my-0.5 mx-0 rounded-[3px];
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+
+  .variables code,
+  .functions code {
+    @apply text-[#9cdcfe] bg-transparent;
+  }
+}

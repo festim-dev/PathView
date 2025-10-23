@@ -1,0 +1,35 @@
+@reference "../index.css";
+
+/* 
+Selectors for react flow's own DOM classes
+i.e. these are used specifically for styling the library directly 
+*/
+
+@layer components {
+  /* For customizing the controls icons */
+  .react-flow__controls {
+    @apply flex p-1.5;
+  }
+
+  .reactflow-wrapper {
+    @apply flex-1;
+  }
+
+  .react-flow__controls-button {
+    @apply bg-[#007bff]! text-white border-none;
+
+  }
+
+  .react-flow__controls-button:hover {
+    @apply bg-[#0056b3];
+  }
+
+  .react-flow__node:hover > div {
+    @apply border-2! border-[#78A083]!;
+    @apply shadow-[0_0_8px_#78a08366];
+  }
+
+  .react-flow__node > div {
+    @apply border-2! border-[#ccc]!;
+  }
+}

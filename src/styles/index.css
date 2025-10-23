@@ -1,68 +1,86 @@
-:root {
+@import "tailwindcss";
+
+@layer base {
+  :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  @apply leading-normal font-normal text-white/87 bg-[#242424];
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+  }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+  a {
+    @apply font-medium text-[#646cff];
+    text-decoration: inherit;
   }
   a:hover {
-    color: #747bff;
+    @apply text-[#535bf2]
+  }
+
+  body {
+    @apply m-0 flex place-items-center min-w-[320px] min-h-screen;
+  }
+
+  h1 {
+    @apply text-[3.2em] leading-[1.1];
+  }
+  /* When are these buttons used? */
+  button {
+    @apply rounded-[8px] border border-transparent py-[0.6em] px-[1.2em] bg-[#1a1a1a];
+    @apply text-[1em] font-medium;
+    @apply transition-colors duration-[250] cursor-pointer;
+  }
+
+  button:hover {
+    @apply border-[#646cff];
+  }
+
+  button:focus, button:focus-visible {
+    /* I don't think -webkit-focus-ring-color works on Firefox */
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+
+  aside {
+    @apply text-white text-[14px];
+  }
+
+  aside .description {
+    @apply mb-5 p-2.5 bg-[#2c2c2c] rounded-[5px] text-white text-center text-xs;
+  }
+
+  /* Scrollbar styling for sidebar */
+  aside::-webkit-scrollbar {
+    width: 6px; 
+  }
+
+  aside::-webkit-scrollbar-track {
+    background: #2c2c54;
+    border-radius: 3px;
+  }
+
+  aside::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+  }
+
+  aside::-webkit-scrollbar-thumb:hover {
+    background: #666;
+  }
+}
+
+/* Convert entirely to Tailwind later */
+@media (prefers-color-scheme: light) {
+  :root {
+    @apply text-[#213547] bg-white;
+  }
+  a:hover {
+    @apply text-[#747bff];
   }
   button {
-    background-color: #f9f9f9;
+    @apply bg-[#f9f9f9]
   }
 }
