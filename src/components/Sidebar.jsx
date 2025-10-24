@@ -16,13 +16,13 @@ export default () => {
 
   const onDragStart = (event, nodeType) => {
     setType(nodeType);
-    e.target.style.cursor = "grabbing";
+    event.target.style.cursor = "grabbing";
     event.target.classList.add("drag");
     event.dataTransfer.effectAllowed = "move";
   };
 
   const onDragEnd = (event) => {
-    e.target.style.cursor = "grab";
+    event.target.style.cursor = "grab";
     event.target.classList.remove("drag");
   };
 
