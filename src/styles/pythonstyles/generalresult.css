@@ -1,0 +1,15 @@
+@reference "../index.css";
+
+@layer components {
+  .result-header {
+    @apply mb-2.5 font-bold;
+  }
+
+  .output pre {
+    @apply bg-[#2d2d30] p-10 rounded-sm my-1.25 mx-0 whitespace-pre-wrap wrap-break-word;
+  }
+
+  .error-message pre {
+    @apply bg-[#3a1e1e] text-[#ff9999] p-2.5 rounded-sm my-1.25 mx-0 whitespace-pre-wrap wrap-break-word;
+  }
+}

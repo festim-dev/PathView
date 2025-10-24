@@ -1,0 +1,43 @@
+@reference "../index.css";
+
+/* 
+Need to rewrite to remove all the !importants
+!important is not scalable, esp for components and future work on subassemblies  
+*/
+@layer components {
+  /* Sidebar and drag-and-drop styles */
+  .dndflow {
+    @apply flex h-full 
+  }
+
+  .dndnode {
+    @apply h-3.75 p-4 mb-2.5 border border-[#555] rounded-[5px] bg-[#444];
+    @apply flex items-center justify-center cursor-grab;
+    @apply text-white font-medium;
+    @apply transition-[background-color] duration-200 ease-in-out;
+  }
+
+  .dndnode.category {
+    @apply border-l-4!
+  }
+
+  /* Override any inherited styles that might hide text */
+  .dndnode * {
+    @apply text-inherit!
+  } 
+
+  .dndnode:active {
+    @apply text-white!
+  }
+
+  /* Improve readability */
+  .dndnode:hover {
+    @apply text-white! bg-[#78A083]!
+  }
+
+  /* Not working for now */
+  /* .dndnode.drag {
+    @apply invisible
+  } */
+
+}

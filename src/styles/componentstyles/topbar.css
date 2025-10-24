@@ -1,0 +1,7 @@
+@reference "../index.css";
+@layer component {
+  .top-bar {
+    @apply h-12.5 bg-[#2c2c2c] flex items-center justify-between z-15;
+    @apply border-b border-[#ccc];
+  }
+}

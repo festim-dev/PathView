@@ -1,0 +1,20 @@
+@reference "../index.css";
+
+@layer components {
+  .context-menu {
+    @apply absolute bg-[#494947] border border-[#ccc] rounded-[4px] py-1 px-0 z-1000 min-w-30;
+    @apply shadow-[0_2px_10px_rgba(0,0,0,0.1)];
+  }
+
+  .context-menu button {
+    @apply block w-max py-2 px-4 border-none bg-transparent text-left cursor-pointer text-sm;
+  }
+
+  .context-menu button:hover {
+    @apply bg-[#f0f0f06c];
+  }
+
+  .context-menu p {
+    @apply m-[0.5em] text-xs text-[#666];
+  }
+}

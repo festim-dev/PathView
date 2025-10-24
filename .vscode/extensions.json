@@ -1,0 +1,11 @@
+// These extensions are quite useful I recommend them
+//
+// Also if you get apply warnings the only thing that seems to have worked
+// is to create a settings.json file in this directory and associate 
+// "*.css" with "postcss"
+{
+    "recommendations":[
+      "bradlc.vscode-tailwindcss", // Tailwind CSS IntelliSense
+      "csstools.postcss" // PostCSS Language Support
+    ]
+}
