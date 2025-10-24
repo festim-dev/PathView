@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 *.pyc
 venv/
-
+build
 docs/_build
 
 # python 
