@@ -10,6 +10,7 @@ App.css is for the app component only
 @import "./componentstyles/contextmenu.css";
 @import "./componentstyles/topbar.css";
 @import "./componentstyles/tabbtn.css";
+@import "./componentstyles/nodes/node.css";
 
 @layer components {
   /* App container */

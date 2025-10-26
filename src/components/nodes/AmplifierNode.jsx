@@ -4,24 +4,18 @@ import NodeWrapper from './NodeWrapper';
 
 export function AmplifierNode({ data }) {
   return (
-    <NodeWrapper data={data}>
-      <div
-        style={{
-          width: 90,
-          height: 60,
-          background: data.nodeColor || "#DDE6ED",
-          color: "black",
-          borderRadius: 8,
-          padding: 8,
-          fontWeight: "bold",
-          position: "relative",
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+    <NodeWrapper
+      data={data}
+      style={{
+        width: 90,
+        height: 60,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      
         {/* Amplifier symbol */}
         <div
           style={{
@@ -47,7 +41,6 @@ export function AmplifierNode({ data }) {
 
         <Handle type="target" position="left" style={{ background: "#555" }} />
         <Handle type="source" position="right" style={{ background: "#555" }} />
-      </div>
     </NodeWrapper>
   );
 }
