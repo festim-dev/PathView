@@ -7,8 +7,6 @@ export function AmplifierNode({ data }) {
     <NodeWrapper
       data={data}
       style={{
-        width: 90,
-        height: 60,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -28,7 +26,7 @@ export function AmplifierNode({ data }) {
         </div>
 
         {/* Optional label */}
-        {data.label && (
+        {/* {data.label && (
           <div
             style={{
               fontSize: "10px",
@@ -37,7 +35,7 @@ export function AmplifierNode({ data }) {
           >
             {data.label}
           </div>
-        )}
+        )} */}
 
         <Handle type="target" position="left" style={{ background: "#555" }} />
         <Handle type="source" position="right" style={{ background: "#555" }} />

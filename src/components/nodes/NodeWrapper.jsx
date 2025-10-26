@@ -3,13 +3,17 @@ export default function NodeWrapper({ data, children, className, style }) {
         background: data.nodeColor ?? '#DDE6ED'
     }
     return (
-        <div
-        className={`node ${className}`}
+      <div
+        className={`node${className ? ' ' + className.trim(): ''}`}
         style={{
-            ...defaultStyle, ...style
+          ...defaultStyle,
+          ...style,
         }}
-        >
-        {children}
+      >
+        <div className="mb-1 text-xs">
+            {data.label}
         </div>
+        {children}
+      </div>
     );
 }
