@@ -35,9 +35,8 @@ Need to rewrite to remove all the !importants
     @apply text-white! bg-[#78A083]!
   }
 
-  /* Not working for now */
-  /* .dndnode.drag {
+  .dndnode.drag {
     @apply invisible
-  } */
+  }
 
 }
