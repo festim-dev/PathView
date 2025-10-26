@@ -1,3 +1,5 @@
+import NodeTop from "./NodeTop";
+
 export default function NodeWrapper({ data, children, className, style }) {
     const defaultStyle = {
         background: data.nodeColor ?? '#DDE6ED'
@@ -10,9 +12,7 @@ export default function NodeWrapper({ data, children, className, style }) {
           ...style,
         }}
       >
-        <div className="mb-1 text-xs">
-            {data.label}
-        </div>
+        <NodeTop data={data}/>
         {children}
       </div>
     );

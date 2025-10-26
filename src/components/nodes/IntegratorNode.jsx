@@ -1,5 +1,5 @@
 import { Handle, useNodeConnections } from '@xyflow/react';
-import NodeWrapper from './NodeWrapper';
+import NodeWrapper from './nodecomponents/NodeWrapper';
 
 
 export default function IntegratorNode({ data }) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle } from '@xyflow/react';
-import NodeWrapper from './NodeWrapper';
+import NodeWrapper from './nodecomponents/NodeWrapper';
 
 export function AmplifierNode({ data }) {
   return (

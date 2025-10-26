@@ -1,5 +1,5 @@
 import { Handle } from '@xyflow/react';
-import NodeWrapper from './NodeWrapper';
+import NodeWrapper from './nodecomponents/NodeWrapper';
 
 export default function DefaultNode({ data }) {
   return (
