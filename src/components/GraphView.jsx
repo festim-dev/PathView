@@ -1,5 +1,6 @@
 import { ReactFlow, Controls, MiniMap, Background } from '@xyflow/react';
 import ContextMenu from './ContextMenu';
+import { NodeActionsCtx } from './nodes/nodecomponents/NodeActionsContext';
 
 export default function GraphView(props) {
     const {
@@ -11,37 +12,59 @@ export default function GraphView(props) {
     } = props;
 
     return (
-        <div className="dndflow" style={{ flex: 1, position: 'relative' }}>
-            <div className="reactflow-wrapper" ref={reactFlowWrapperRef} style={{ width: '100%', height: '100%' }}>
-                <ReactFlow
-                    ref={refEl}
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    onNodeClick={onNodeClick}
-                    onEdgeClick={onEdgeClick}
-                    onPaneClick={onPaneClick}
-                    onNodeContextMenu={onNodeContextMenu}
-                    nodeTypes={nodeTypes}
-                    onDrop={onDrop}
-                    onDragStart={onDragStart}
-                    onDragOver={onDragOver}
-                    fitView
-                >
-                    <Controls />
-                    <MiniMap />
-                    <Background variant="dots" gap={12} size={1} />
+      <div className="dndflow" style={{ flex: 1, position: "relative" }}>
+        <div
+          className="reactflow-wrapper"
+          ref={reactFlowWrapperRef}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <NodeActionsCtx.Provider value={
+            {
+              deleteSelectedNode: ui.deleteSelectedNode, 
+              duplicateNode:      duplicateNode
+            }
+          }
+          >
+            <ReactFlow
+              ref={refEl}
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={onNodeClick}
+              onEdgeClick={onEdgeClick}
+              onPaneClick={onPaneClick}
+              onNodeContextMenu={onNodeContextMenu}
+              nodeTypes={nodeTypes}
+              onDrop={onDrop}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              fitView
+            >
+              <Controls />
+              <MiniMap />
+              <Background variant="dots" gap={12} size={1} />
 
-                    {menu && <ContextMenu onClick={onPaneClick} onDuplicate={duplicateNode} {...menu} />}
+              {menu && (
+                <ContextMenu
+                  onClick={onPaneClick}
+                  onDuplicate={duplicateNode}
+                  {...menu}
+                />
+              )}
 
-                    <FloatingButtons {...ui} />
-                    <CopyToast copyFeedback={copyFeedback} />
-                    {ui.showKeyboardShortcuts && <KeyboardShortcuts onClose={() => ui.setShowKeyboardShortcuts(false)} />}
-                </ReactFlow>
-            </div>
+              <FloatingButtons {...ui} />
+              <CopyToast copyFeedback={copyFeedback} />
+              {ui.showKeyboardShortcuts && (
+                <KeyboardShortcuts
+                  onClose={() => ui.setShowKeyboardShortcuts(false)}
+                />
+              )}
+            </ReactFlow>
+          </NodeActionsCtx.Provider>
         </div>
+      </div>
     );
 }
 
