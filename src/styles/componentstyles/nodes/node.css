@@ -1,0 +1,8 @@
+@reference "../../index.css";
+
+@layer components {
+    .node {
+        @apply relative px-4 py-2.5 rounded-[8px] bg-[#DDE6ED] cursor-pointer;
+        @apply text-black font-bold;
+    }
+}
