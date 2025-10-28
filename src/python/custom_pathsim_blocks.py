@@ -410,11 +410,10 @@ import numpy as np
 from scipy.integrate import solve_bvp
 from scipy import constants as const
 
-R = 8.314  # J/(mol·K), Universal gas constant
+R = 8.314  # J/(mol·K), Universal gas constant  TODO read from const
 
 
 def solve(params):
-
     def solve_tritium_extraction(dimensionless_params, y_T2_in):
         """
         Solves the BVP for tritium extraction in a bubble column.
@@ -528,8 +527,6 @@ def solve(params):
     g = params["g"]
     T = params["T"]
 
-    R = params.get("R", R)  # Ideal gas constant, J/(mol.K)
-
     # Calculate the superficial flow velocities
     A = np.pi * (D / 2) ** 2  # m^2, Cross-sectional area of the column
     u_g0 = Q_g / A  # m/s, superficial gas inlet velocity
@@ -597,20 +594,23 @@ def solve(params):
 
         T_in = n_T_in_liquid + n_T_in_gas
         T_out = n_T_out_liquid + n_T_out_gas
+        print("\n")
+        print(f"Solver c_T_outlet: {c_T_outlet:.4e} mol/m^3")
+        print(f"Solver P_T2_outlet: {P_T2_out:.4e} Pa")
 
         print(
-            f"Tritum in (liquid phase): {n_T_in_liquid:.4e} Tritons/s"
-            f", Tritium in (gas phase): {n_T_in_gas:.4e} Tritons/s"
+            f"Tritum in (liquid phase): {n_T_in_liquid / N_A:.4e} mol Tritons/s"
+            f", Tritium in (gas phase): {n_T_in_gas / N_A:.4e} mol Tritons/s"
         )
 
         print(
-            f"Tritium out (liquid phase): {n_T_out_liquid:.4e} Tritons/s"
-            f", Tritium out (gas phase): {n_T_out_gas:.4e} Tritons/s"
+            f"Tritium out (liquid phase): {n_T_out_liquid / N_A:.4e} mol Tritons/s"
+            f", Tritium out (gas phase): {n_T_out_gas / N_A:.4e} mol Tritons/s"
         )
 
         print(
-            f"Total Tritium in: {T_in:.4e} Tritons/s"
-            f", Total Tritium out: {T_out:.4e} Tritons/s"
+            f"Total Tritium in: {T_in / N_A:.4e} mol Tritons/s"
+            f", Total Tritium out: {T_out / N_A:.4e} mol Tritons/s"
         )
 
         results = {
@@ -622,6 +622,8 @@ def solve(params):
             "P_T2_outlet_gas [Pa]": P_T2_out,
             "total_gas_P_outlet [Pa]": P_outlet,
             "gas_vol_flow [m^3/s]": Q_g,
+            "tritium_out_liquid [mol/s]": n_T_out_liquid / N_A,
+            "tritium_out_gas [mol/s]": n_T_out_gas / N_A,
         }
 
     else:
@@ -639,7 +641,24 @@ class GLC(Function):
     """
 
     def __init__(
-        self, P_0, L, u_l, u_g0, ε_g, ε_l, E_g, E_l, a, h_l, ρ_l, K_s, D, T, g=9.81
+        self,
+        P_0,
+        L,
+        u_l,
+        u_g0,
+        ε_g,
+        ε_l,
+        E_g,
+        E_l,
+        a,
+        h_l,
+        ρ_l,
+        K_s,
+        Q_l,
+        Q_g,
+        D,
+        T,
+        g=9.81,
     ):
         self.params = {
             "P_0": P_0,
@@ -654,6 +673,8 @@ class GLC(Function):
             "h_l": h_l,
             "ρ_l": ρ_l,
             "K_s": K_s,
+            "Q_l": Q_l,
+            "Q_g": Q_g,
             "g": g,
             "D": D,
             "T": T,
@@ -670,4 +691,10 @@ class GLC(Function):
         c_T_outlet = res["c_T_outlet [mol/m^3]"]
         P_T2_outlet = res["P_T2_outlet_gas [Pa]"]
 
-        return c_T_outlet, P_T2_outlet
+        n_T_out_liquid = res["tritium_out_liquid [mol/s]"]
+        n_T_out_gas = res["tritium_out_gas [mol/s]"]
+        print(
+            f"GLC block: c_T_outlet = {c_T_outlet:.4e} mol/m^3, P_T2_outlet = {P_T2_outlet:.4e} Pa"
+        )
+
+        return n_T_out_liquid, n_T_out_gas
