@@ -408,11 +408,13 @@ class FestimWall(Block):
 
 import numpy as np
 from scipy.integrate import solve_bvp
+from scipy import constants as const
 
 R = 8.314  # J/(mol·K), Universal gas constant
 
 
 def solve(params):
+
     def solve_tritium_extraction(dimensionless_params, y_T2_in):
         """
         Solves the BVP for tritium extraction in a bubble column.
@@ -443,13 +445,13 @@ def solve(params):
             """
             x_T, dx_T_dxi, y_T2, dy_T2_dxi = S
 
-            # Dimensionless driving force theta. This is equation (12) in the paper.
+            # Dimensionless driving force theta. Eq. 8.8
             theta = x_T - np.sqrt(np.maximum(0, (1 - psi * xi) * y_T2 / nu))
 
             # Equation for d(S[0])/d(xi) = d(x_T)/d(xi)
             dS0_dxi = dx_T_dxi
 
-            # Equation for d(S[1])/d(xi) = d^2(x_T)/d(xi)^2 from eq (10)
+            # Equation for d(S[1])/d(xi) = d^2(x_T)/d(xi)^2
             dS1_dxi = Bo_l * (phi_l * theta - dx_T_dxi)
 
             # Equation for d(S[2])/d(xi) = d(y_T2)/d(xi)
@@ -460,9 +462,9 @@ def solve(params):
             denominator = 1 - psi * xi
             denominator = np.where(np.isclose(denominator, 0), 1e-9, denominator)
 
-            term1 = (1 + 2 * psi / Bo_g) * dy_T2_dxi
-            term2 = phi_g * theta
-            dS3_dxi = (Bo_g / denominator) * (term1 - term2)
+            term1 = (1 + 2 * psi / Bo_g) * dy_T2_dxi  # Part of Eq. 9.3.3 (fourth line)
+            term2 = phi_g * theta  # Part of Eq. 9.3.3 (fourth line)
+            dS3_dxi = (Bo_g / denominator) * (term1 - term2)  # Eq. 9.3.3 (fourth line)
 
             return np.vstack((dS0_dxi, dS1_dxi, dS2_dxi, dS3_dxi))
 
@@ -476,16 +478,16 @@ def solve(params):
             # Based on equations (16) and (17) in the paper.
 
             # At xi = 0: dx_T/d(xi) = 0
-            res1 = Sa[1]
+            res1 = Sa[1]  # Eq. 10.1
 
             # At xi = 1: x_T(1) = 1 - (1/Bo_l) * dx_T/d(xi)|_1
-            res2 = Sb[0] - (1 - (1 / Bo_l) * Sb[1])
+            res2 = Sb[0] - (1 - (1 / Bo_l) * Sb[1])  # Eq. 10.2
 
             # At xi = 0: y_T2(0) = y_T2(0-) + (1/Bo_g) * dy_T2/d(xi)|_0
-            res3 = Sa[2] - (y_T2_in + (1 / Bo_g) * Sa[3])
+            res3 = Sa[2] - (y_T2_in + (1 / Bo_g) * Sa[3])  # Eq. 10.3
 
             # At xi = 1: dy_T2/d(xi) = 0
-            res4 = Sb[3]
+            res4 = Sb[3]  # Eq. 10.4
 
             return np.array([res1, res2, res3, res4])
 
@@ -504,51 +506,53 @@ def solve(params):
 
     # Unpack parameters
     c_T_inlet = params["c_T_inlet"]
-    y_T2_in = params["y_T2_in"]
+    P_T2_in = params["P_T2_in"]
     P_0 = params["P_0"]
-    L = params["L"]
-    u_l = params["u_l"]
-    u_g0 = params["u_g0"]
-    ε_g = params["ε_g"]
-    ε_l = params["ε_l"]
-    E_g = params["E_g"]
-    E_l = params["E_l"]
-    a = params["a"]
-    h_l = params["h_l"]
     ρ_l = params["ρ_l"]
     K_s = params["K_s"]
-    g = params["g"]
+
+    L = params["L"]
     D = params["D"]
+    ε_g = params["ε_g"]
+
+    Q_l = params["Q_l"]
+    Q_g = params["Q_g"]
+
+    a = params["a"]
+
+    E_g = params["E_g"]
+    E_l = params["E_l"]
+
+    h_l = params["h_l"]
+
+    g = params["g"]
     T = params["T"]
 
-    # Calculate some other parameters
+    R = params.get("R", R)  # Ideal gas constant, J/(mol.K)
 
+    # Calculate the superficial flow velocities
     A = np.pi * (D / 2) ** 2  # m^2, Cross-sectional area of the column
-    A_l = A * ε_l  # m^2, Cross-sectional area of the liquid phase
-    A_g = A * ε_g  # m^2, Cross-sectional area of the gas phase
-
-    Q_l = u_l * A_l  # m^3/s, Volumetric flow rate of liquid phase
+    u_g0 = Q_g / A  # m/s, superficial gas inlet velocity
+    u_l = Q_l / A  # m/s, superficial liquid inlet velocity
 
     # Calculate dimensionless values
-    # Eq 13 in the paper
-    Bo_l = u_l * L / ((1 - ε_g) * E_l)  # Bodenstein number, liquid phase
-    Φ_l = a * h_l * L / u_l  # Mass transfer parameter, liquid phase
-    # Eq 14 in the paper
-    Bo_g = (
-        u_g0 * L / (ε_g * E_g)
-    )  # Bodenstein number, gas phase (assumed near plug-flow condition)
-    Φ_g = (
-        1 / 2 * (R * T * c_T_inlet / P_0) * a * h_l * L / u_g0
-    )  # Mass transfer parameter, gas phase
-    # Eq 15 in the paper
-    ψ = (ρ_l * g * (1 - ε_g) * L) / P_0  # Hydrostatic pressure ratio
-    ν = (c_T_inlet / K_s) ** 2 / P_0  # Tritium partial pressure ratio
+    ε_l = 1 - ε_g  # Liquid phase fraction
+    ψ = (ρ_l * g * ε_l * L) / P_0  # Hydrostatic pressure ratio (Eq. 8.3)
+    ν = (c_T_inlet / K_s) ** 2 / P_0  # Tritium partial pressure ratio (Eq. 8.5)
+    Bo_l = u_l * L / (ε_l * E_l)  # Bodenstein number, liquid phase (Eq. 8.9)
+    phi_l = a * h_l * L / u_l  # Transfer units parameter, liquid phase (Eq. 8.11)
+    Bo_g = u_g0 * L / (ε_g * E_g)  # Bodenstein number, gas phase (Eq. 8.10)
+    phi_g = (
+        0.5 * (R * T * c_T_inlet / P_0) * (a * h_l * L / u_g0)
+    )  # Transfer units parameter, gas phase (Eq. 8.12)
+
+    y_T2_in = P_T2_in / P_0  # Inlet tritium molar fraction in gas phase
 
     dimensionless_params = {
         "Bo_l": Bo_l,
-        "phi_l": Φ_l,
+        "phi_l": phi_l,
         "Bo_g": Bo_g,
-        "phi_g": Φ_g,
+        "phi_g": phi_g,
         "psi": ψ,
         "nu": ν,
     }
@@ -568,23 +572,56 @@ def solve(params):
         c_T_outlet = x_T_outlet_dimless * c_T_inlet
 
         # Gas partial pressure at outlet (xi=1)
-        P_outlet_gas = P_0 * (1 - dimensionless_params["psi"])
-        P_T2_outlet_gas = y_T2_outlet_gas * P_outlet_gas
+        P_outlet = P_0 * (
+            1 - dimensionless_params["psi"]
+        )  # Derived from Eq. 8.4 at xi=1
+        P_T2_out = y_T2_outlet_gas * P_outlet
 
-        # Tritium extraction rate (mol/s)
-        extraction_rate = Q_l * (c_T_inlet - c_T_outlet)  # mol/s
+        # Mass transfer consistency check
+        N_A = const.N_A  # Avogadro's number, 1/mol
+        # Tritium molar flow rate into the column via liquid
+        n_T_in_liquid = c_T_inlet * Q_l * N_A  # Triton/s
 
-        # Gas velocity at outlet (xi=1)
-        u_g_outlet = u_g0 / (1 - dimensionless_params["psi"])
+        # Tritium molar flow rate out of the column via liquid
+        n_T_out_liquid = c_T_outlet * Q_l * N_A  # Tritons/s
+
+        # Tritium molar flow rate into the column via gas
+        n_T2_in_gas = (P_T2_in * Q_g / (R * T)) * N_A  # T2/s
+        n_T_in_gas = n_T2_in_gas * 2  # Triton/s
+
+        # Calculate outlet gas volumetric flow rate (gas expands as pressure drops)
+        Q_g_out = (P_0 * Q_g) / P_outlet
+        # Tritium molar flow rate out of the column via gas
+        n_T2_out_gas = (P_T2_out * Q_g_out / (R * T)) * N_A  # T2/s
+        n_T_out_gas = n_T2_out_gas * 2  # Triton/s
+
+        T_in = n_T_in_liquid + n_T_in_gas
+        T_out = n_T_out_liquid + n_T_out_gas
+
+        print(
+            f"Tritum in (liquid phase): {n_T_in_liquid:.4e} Tritons/s"
+            f", Tritium in (gas phase): {n_T_in_gas:.4e} Tritons/s"
+        )
+
+        print(
+            f"Tritium out (liquid phase): {n_T_out_liquid:.4e} Tritons/s"
+            f", Tritium out (gas phase): {n_T_out_gas:.4e} Tritons/s"
+        )
+
+        print(
+            f"Total Tritium in: {T_in:.4e} Tritons/s"
+            f", Total Tritium out: {T_out:.4e} Tritons/s"
+        )
 
         results = {
             "extraction_efficiency [%]": efficiency * 100,
-            "extraction_rate [mol/s]": extraction_rate,
+            "c_T_inlet [mol/m^3]": c_T_inlet,
             "c_T_outlet [mol/m^3]": c_T_outlet,
             "liquid_vol_flow [m^3/s]": Q_l,
-            "total_gas_P_outlet [Pa]": P_outlet_gas,
-            "P_T2_outlet_gas [Pa]": P_T2_outlet_gas,
-            "gas_vol_flow_outlet [m^3/s]": u_g_outlet * A_g,
+            "P_T2_inlet_gas [Pa]": P_T2_in,
+            "P_T2_outlet_gas [Pa]": P_T2_out,
+            "total_gas_P_outlet [Pa]": P_outlet,
+            "gas_vol_flow [m^3/s]": Q_g,
         }
 
     else:
@@ -623,10 +660,10 @@ class GLC(Function):
         }
         super().__init__(func=self.func)
 
-    def func(self, c_T_inlet, y_T2_inlet):
+    def func(self, c_T_inlet, P_T2_inlet):
         new_params = self.params.copy()
         new_params["c_T_inlet"] = c_T_inlet
-        new_params["y_T2_in"] = y_T2_inlet
+        new_params["P_T2_in"] = P_T2_inlet
 
         res = solve(new_params)
 
