@@ -1,27 +1,19 @@
 import React from 'react';
 import { Handle } from '@xyflow/react';
-import NodeWrapper from './NodeWrapper';
+import NodeWrapper from './nodecomponents/NodeWrapper';
 
 export function AmplifierNode({ data }) {
   return (
-    <NodeWrapper data={data}>
-      <div
-        style={{
-          width: 90,
-          height: 60,
-          background: data.nodeColor || "#DDE6ED",
-          color: "black",
-          borderRadius: 8,
-          padding: 8,
-          fontWeight: "bold",
-          position: "relative",
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+    <NodeWrapper
+      data={data}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      
         {/* Amplifier symbol */}
         <div
           style={{
@@ -34,7 +26,7 @@ export function AmplifierNode({ data }) {
         </div>
 
         {/* Optional label */}
-        {data.label && (
+        {/* {data.label && (
           <div
             style={{
               fontSize: "10px",
@@ -43,11 +35,10 @@ export function AmplifierNode({ data }) {
           >
             {data.label}
           </div>
-        )}
+        )} */}
 
         <Handle type="target" position="left" style={{ background: "#555" }} />
         <Handle type="source" position="right" style={{ background: "#555" }} />
-      </div>
     </NodeWrapper>
   );
 }

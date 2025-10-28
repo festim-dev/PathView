@@ -1,8 +1,8 @@
-@reference "../index.css";
+@reference "../../index.css";
 
 @layer components {
     .node {
-        @apply relative w-45 p-2.5 rounded-[8px] bg-[#DDE6ED] cursor-pointer;
+        @apply relative px-4 py-2.5 rounded-[8px] bg-[#DDE6ED] cursor-pointer;
         @apply text-black font-bold;
     }
 }
