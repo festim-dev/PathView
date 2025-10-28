@@ -64,6 +64,7 @@ export const nodeTypes = {
   ode: DynamicHandleNode,
   interface: DynamicHandleNode,
   switch: SwitchNode,
+  glc: createFunctionNode(2, 2),
 };
 
 export const nodeMathTypes = {
@@ -117,7 +118,7 @@ export const nodeCategories = {
     description: 'Filter and flow control nodes'
   },
   'Fuel Cycle': {
-    nodes: ['process', 'process_horizontal', 'bubbler', 'wall'],
+    nodes: ['process', 'process_horizontal', 'bubbler', 'wall', 'glc'],
     description: 'Fuel cycle specific nodes'
   },
   'Others': {
@@ -194,6 +195,7 @@ export const getNodeDisplayName = (nodeType) => {
     'samplehold': 'Sample Hold',
     'comparator': 'Comparator',
     'interface': 'Interface',
+    'glc': 'Gas-Liquid Contactor',
   };
 
   return displayNames[nodeType] || nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
