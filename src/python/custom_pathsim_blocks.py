@@ -592,27 +592,6 @@ def solve(params):
         n_T2_out_gas = (P_T2_out * Q_g_out / (R * T)) * N_A  # T2/s
         n_T_out_gas = n_T2_out_gas * 2  # Triton/s
 
-        T_in = n_T_in_liquid + n_T_in_gas
-        T_out = n_T_out_liquid + n_T_out_gas
-        print("\n")
-        print(f"Solver c_T_outlet: {c_T_outlet:.4e} mol/m^3")
-        print(f"Solver P_T2_outlet: {P_T2_out:.4e} Pa")
-
-        print(
-            f"Tritum in (liquid phase): {n_T_in_liquid / N_A:.4e} mol Tritons/s"
-            f", Tritium in (gas phase): {n_T_in_gas / N_A:.4e} mol Tritons/s"
-        )
-
-        print(
-            f"Tritium out (liquid phase): {n_T_out_liquid / N_A:.4e} mol Tritons/s"
-            f", Tritium out (gas phase): {n_T_out_gas / N_A:.4e} mol Tritons/s"
-        )
-
-        print(
-            f"Total Tritium in: {T_in / N_A:.4e} mol Tritons/s"
-            f", Total Tritium out: {T_out / N_A:.4e} mol Tritons/s"
-        )
-
         results = {
             "extraction_efficiency [%]": efficiency * 100,
             "c_T_inlet [mol/m^3]": c_T_inlet,
@@ -627,7 +606,7 @@ def solve(params):
         }
 
     else:
-        print("BVP solver failed to converge.")
+        raise RuntimeError("BVP solver did not converge.")
 
     return results
 
