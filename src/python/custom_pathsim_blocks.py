@@ -414,12 +414,12 @@ R = 8.314  # J/(mol·K), Universal gas constant  TODO read from const
 
 
 def solve(params):
-    def solve_tritium_extraction(dimensionless_params, y_T2_in):
+    def solve_tritium_extraction(dimensionless_params: dict, y_T2_in: float) -> dict:
         """
         Solves the BVP for tritium extraction in a bubble column.
 
         Args:
-            params (dict): A dictionary containing the dimensionless parameters:
+            dimensionless_params (dict): A dictionary containing the dimensionless parameters:
                         Bo_l, phi_l, Bo_g, phi_g, psi, nu.
             y_T2_in (float): Inlet tritium molar fraction in the gas phase, y_T2(0-).
 
@@ -604,19 +604,37 @@ def solve(params):
             "tritium_out_liquid [mol/s]": n_T_out_liquid / N_A,
             "tritium_out_gas [mol/s]": n_T_out_gas / N_A,
         }
-
+        return results
     else:
         raise RuntimeError("BVP solver did not converge.")
 
-    return results
 
-
-from pathsim.blocks import Function
-
-
-class GLC(Function):
+class GLC(pathsim.blocks.Function):
     """
-    This is the docs
+    Gas Liquid Contactor model block. Inherits from Function block.
+    Inputs: c_T_inlet [mol/m^3], P_T2_inlet [Pa]
+    Outputs: n_T_out_liquid [mol/s], n_T_out_gas [mol/s]
+
+    More details about the model can be found in: https://doi.org/10.13182/FST95-A30485
+
+    Args:
+        P_0: Operating pressure [Pa]
+        L: Column height [m]
+        u_l: Superficial liquid velocity [m/s]
+        u_g0: Superficial gas inlet velocity [m/s]
+        ε_g: Gas phase fraction [-]
+        ε_l: Liquid phase fraction [-]
+        E_g: Gas phase axial dispersion coefficient [m^2/s]
+        E_l: Liquid phase axial dispersion coefficient [m^2/s]
+        a: Specific interfacial area [m^2/m^3]
+        h_l: Liquid phase volumetric mass transfer coefficient [m/s]
+        ρ_l: Liquid density [kg/m^3]
+        K_s: Tritium solubility constant [mol/(m^3·Pa)^0.5]
+        Q_l: Liquid volumetric flow rate [m^3/s]
+        Q_g: Gas volumetric flow rate [m^3/s]
+        D: Column diameter [m]
+        T: Temperature [K]
+        g: Gravitational acceleration [m/s^2], default is 9.81
     """
 
     def __init__(
@@ -672,8 +690,5 @@ class GLC(Function):
 
         n_T_out_liquid = res["tritium_out_liquid [mol/s]"]
         n_T_out_gas = res["tritium_out_gas [mol/s]"]
-        print(
-            f"GLC block: c_T_outlet = {c_T_outlet:.4e} mol/m^3, P_T2_outlet = {P_T2_outlet:.4e} Pa"
-        )
 
         return n_T_out_liquid, n_T_out_gas
