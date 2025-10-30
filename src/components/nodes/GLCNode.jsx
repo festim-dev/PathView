@@ -40,13 +40,22 @@ export function GLCNode({ data }) {
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                P_T2_in
+                y_T2_in
             </div>
 
             <Handle type="target" position="left" id="c_T_inlet" style={{ background: '#555', top: '33%' }} />
-            <Handle type="target" position="left" id="P_T2_in" style={{ background: '#555', top: '66%' }} />
+            <Handle type="target" position="left" id="y_T2_in" style={{ background: '#555', top: '66%' }} />
 
-
+            <div style={{
+                right: '6px',
+                position: 'absolute',
+                top: '5%',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'right'
+            }}>
+                Efficiency
+            </div>
             <div style={{
                 right: '6px',
                 position: 'absolute',
@@ -71,6 +80,7 @@ export function GLCNode({ data }) {
 
             <Handle type="source" position="right" id="T_out_liquid" style={{ background: '#555', top: '33%' }} />
             <Handle type="source" position="right" id="T_out_gas" style={{ background: '#555', top: '66%' }} />
+            <Handle type="source" position="right" id="efficiency" style={{ background: '#555', top: '10%' }} />
         </div>
     );
 }

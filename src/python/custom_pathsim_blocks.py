@@ -410,11 +410,9 @@ import numpy as np
 from scipy.integrate import solve_bvp
 from scipy import constants as const
 
-# R = 8.314  # J/(mol·K), Universal gas constant  TODO read from const
-
 
 def solve(params):
-    def solve_tritium_extraction(dimensionless_params: dict, y_T2_in: float) -> dict:
+    def solve_tritium_extraction(dimensionless_params, y_T2_in, elements):
         """
         Solves the BVP for tritium extraction in a bubble column.
 
@@ -422,6 +420,7 @@ def solve(params):
             dimensionless_params (dict): A dictionary containing the dimensionless parameters:
                         Bo_l, phi_l, Bo_g, phi_g, psi, nu.
             y_T2_in (float): Inlet tritium molar fraction in the gas phase, y_T2(0-).
+            elements (int): Number of mesh elements for the solver.
 
         Returns:
             sol: The solution object from scipy.integrate.solve_bvp.
@@ -451,7 +450,7 @@ def solve(params):
             dS0_dxi = dx_T_dxi
 
             # Equation for d(S[1])/d(xi) = d^2(x_T)/d(xi)^2
-            dS1_dxi = Bo_l * (phi_l * theta - dx_T_dxi)
+            dS1_dxi = Bo_l * (phi_l * theta - dx_T_dxi)  # Eq. 9.1.4
 
             # Equation for d(S[2])/d(xi) = d(y_T2)/d(xi)
             dS2_dxi = dy_T2_dxi
@@ -461,9 +460,9 @@ def solve(params):
             denominator = 1 - psi * xi
             denominator = np.where(np.isclose(denominator, 0), 1e-9, denominator)
 
-            term1 = (1 + 2 * psi / Bo_g) * dy_T2_dxi  # Part of Eq. 9.3.3 (fourth line)
-            term2 = phi_g * theta  # Part of Eq. 9.3.3 (fourth line)
-            dS3_dxi = (Bo_g / denominator) * (term1 - term2)  # Eq. 9.3.3 (fourth line)
+            term1 = (1 + 2 * psi / Bo_g) * dy_T2_dxi
+            term2 = phi_g * theta
+            dS3_dxi = (Bo_g / denominator) * (term1 - term2)
 
             return np.vstack((dS0_dxi, dS1_dxi, dS2_dxi, dS3_dxi))
 
@@ -483,7 +482,7 @@ def solve(params):
             res2 = Sb[0] - (1 - (1 / Bo_l) * Sb[1])  # Eq. 10.2
 
             # At xi = 0: y_T2(0) = y_T2(0-) + (1/Bo_g) * dy_T2/d(xi)|_0
-            res3 = Sa[2] - (y_T2_in + (1 / Bo_g) * Sa[3])  # Eq. 10.3
+            res3 = Sa[2] - y_T2_in - (1 / Bo_g) * Sa[3]  # Eq. 10.3
 
             # At xi = 1: dy_T2/d(xi) = 0
             res4 = Sb[3]  # Eq. 10.4
@@ -491,22 +490,32 @@ def solve(params):
             return np.array([res1, res2, res3, res4])
 
         # Set up the mesh and an initial guess for the solver.
-        xi = np.linspace(0, 1, 51)
+        xi = np.linspace(0, 1, elements + 1)
 
-        # A flat initial guess is often good enough to get the solver started.
+        # An initial guess that is physically plausible can significantly help convergence.
+        # We expect liquid concentration (x_T) to decrease from inlet (xi=1) to outlet (xi=0).
+        # We expect gas concentration (y_T2) to increase from inlet (xi=0) to outlet (xi=1).
         y_guess = np.zeros((4, xi.size))
-        y_guess[0, :] = 0.8  # Guess for x_T
-        y_guess[2, :] = 1e-5  # Guess for y_T2
+        y_guess[0, :] = np.linspace(
+            0.5, 1.0, xi.size
+        )  # Guess for x_T (linear decrease)
+        y_guess[1, :] = -0.5  # Guess for dx_T/dxi
+        y_guess[2, :] = np.linspace(
+            y_T2_in, y_T2_in + 1e-4, xi.size
+        )  # Guess for y_T2 (linear increase)
+        y_guess[3, :] = 1e-4  # Guess for dy_T2/dxi
 
         # Run the BVP solver
-        sol = solve_bvp(ode_system, boundary_conditions, xi, y_guess, tol=1e-5)
+        sol = solve_bvp(
+            ode_system, boundary_conditions, xi, y_guess, tol=1e-5, max_nodes=10000
+        )
 
         return sol
 
     # Unpack parameters
     c_T_inlet = params["c_T_inlet"]
-    P_T2_in = params["P_T2_in"]
-    P_0 = params["P_0"]
+    y_T2_in = params["y_T2_in"]
+    P_outlet = params["P_outlet"]
     ρ_l = params["ρ_l"]
     K_s = params["K_s"]
 
@@ -527,6 +536,16 @@ def solve(params):
     g = params["g"]
     T = params["T"]
 
+    elements = params["elements"]  # Number of mesh elements for solver
+
+    # Calculate inlet pressure hydrostatically
+    P_0 = P_outlet + ρ_l * g * L
+
+    if P_0 <= 0:
+        raise ValueError(
+            f"Calculated inlet pressure P_0 must be positive, but got {P_0:.2e} Pa. Check P_outlet, rho_l, g, and L."
+        )
+
     # Calculate the superficial flow velocities
     A = np.pi * (D / 2) ** 2  # m^2, Cross-sectional area of the column
     u_g0 = Q_g / A  # m/s, superficial gas inlet velocity
@@ -543,8 +562,6 @@ def solve(params):
         0.5 * (const.R * T * c_T_inlet / P_0) * (a * h_l * L / u_g0)
     )  # Transfer units parameter, gas phase (Eq. 8.12)
 
-    y_T2_in = P_T2_in / P_0  # Inlet tritium molar fraction in gas phase
-
     dimensionless_params = {
         "Bo_l": Bo_l,
         "phi_l": phi_l,
@@ -555,7 +572,7 @@ def solve(params):
     }
 
     # Solve the model
-    solution = solve_tritium_extraction(dimensionless_params, y_T2_in)
+    solution = solve_tritium_extraction(dimensionless_params, y_T2_in, elements)
 
     # --- Results ---
     if solution.success:
@@ -583,6 +600,7 @@ def solve(params):
         n_T_out_liquid = c_T_outlet * Q_l * N_A  # Tritons/s
 
         # Tritium molar flow rate into the column via gas
+        P_T2_in = y_T2_in * P_0  # [Pa]
         n_T2_in_gas = (P_T2_in * Q_g / (const.R * T)) * N_A  # T2/s
         n_T_in_gas = n_T2_in_gas * 2  # Triton/s
 
@@ -591,6 +609,9 @@ def solve(params):
         # Tritium molar flow rate out of the column via gas
         n_T2_out_gas = (P_T2_out * Q_g_out / (const.R * T)) * N_A  # T2/s
         n_T_out_gas = n_T2_out_gas * 2  # Triton/s
+
+        T_in = n_T_in_liquid + n_T_in_gas
+        T_out = n_T_out_liquid + n_T_out_gas
 
         results = {
             "extraction_efficiency [%]": efficiency * 100,
@@ -618,7 +639,7 @@ class GLC(pathsim.blocks.Function):
     More details about the model can be found in: https://doi.org/10.13182/FST95-A30485
 
     Args:
-        P_0: Operating pressure [Pa]
+        P_outlet: Outlet operating pressure [Pa]
         L: Column height [m]
         u_l: Superficial liquid velocity [m/s]
         u_g0: Superficial gas inlet velocity [m/s]
@@ -639,16 +660,17 @@ class GLC(pathsim.blocks.Function):
 
     _port_map_in = {
         "c_T_inlet": 0,
-        "P_T2_in": 1,
+        "y_T2_in": 1,
     }
     _port_map_out = {
         "T_out_liquid": 0,
         "T_out_gas": 1,
+        "efficiency": 2,
     }
 
     def __init__(
         self,
-        P_0,
+        P_outlet,
         L,
         u_l,
         u_g0,
@@ -665,9 +687,10 @@ class GLC(pathsim.blocks.Function):
         D,
         T,
         g=9.81,
+        initial_nb_of_elements=20,
     ):
         self.params = {
-            "P_0": P_0,
+            "P_outlet": P_outlet,
             "L": L,
             "u_l": u_l,
             "u_g0": u_g0,
@@ -684,13 +707,14 @@ class GLC(pathsim.blocks.Function):
             "g": g,
             "D": D,
             "T": T,
+            "elements": initial_nb_of_elements,
         }
         super().__init__(func=self.func)
 
-    def func(self, c_T_inlet, P_T2_inlet):
+    def func(self, c_T_inlet, y_T2_inlet):
         new_params = self.params.copy()
         new_params["c_T_inlet"] = c_T_inlet
-        new_params["P_T2_in"] = P_T2_inlet
+        new_params["y_T2_in"] = y_T2_inlet
 
         res = solve(new_params)
 
@@ -699,5 +723,6 @@ class GLC(pathsim.blocks.Function):
 
         n_T_out_liquid = res["tritium_out_liquid [mol/s]"]
         n_T_out_gas = res["tritium_out_gas [mol/s]"]
+        eff = res["extraction_efficiency [%]"]
 
-        return n_T_out_liquid, n_T_out_gas
+        return n_T_out_liquid, n_T_out_gas, eff
