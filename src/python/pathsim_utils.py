@@ -519,7 +519,7 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
             return edge["targetHandle"]
 
     # TODO maybe we could directly use the targetHandle as a port alias for these:
-    if type(block) in (Function, ODE, pathsim.blocks.Switch, GLC):
+    if type(block) in (Function, ODE, pathsim.blocks.Switch):
         return int(edge["targetHandle"].replace("target-", ""))
     if isinstance(block, Adder):
         if block.operations:
@@ -564,7 +564,7 @@ def get_output_index(block: Block, edge: dict) -> int:
             )
         return output_index
     # TODO maybe we could directly use the targetHandle as a port alias for these:
-    if type(block) in (Function, ODE, GLC):
+    if type(block) in (Function, ODE):
         # Function and ODE outputs are always in order, so we can use the handle directly
         assert edge["sourceHandle"], edge
         return int(edge["sourceHandle"].replace("source-", ""))

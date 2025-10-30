@@ -637,6 +637,15 @@ class GLC(pathsim.blocks.Function):
         g: Gravitational acceleration [m/s^2], default is 9.81
     """
 
+    _port_map_in = {
+        "c_T_inlet": 0,
+        "P_T2_in": 1,
+    }
+    _port_map_out = {
+        "T_out_liquid": 0,
+        "T_out_gas": 1,
+    }
+
     def __init__(
         self,
         P_0,
