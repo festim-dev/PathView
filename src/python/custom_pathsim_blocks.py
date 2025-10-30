@@ -495,15 +495,18 @@ def solve(params):
         # An initial guess that is physically plausible can significantly help convergence.
         # We expect liquid concentration (x_T) to decrease from inlet (xi=1) to outlet (xi=0).
         # We expect gas concentration (y_T2) to increase from inlet (xi=0) to outlet (xi=1).
+        # y_guess = np.zeros((4, xi.size))
+        # y_guess[0, :] = np.linspace(
+        #     0.5, 1.0, xi.size
+        # )  # Guess for x_T (linear decrease)
+        # y_guess[1, :] = -0.5  # Guess for dx_T/dxi
+        # y_guess[2, :] = np.linspace(
+        #     y_T2_in, y_T2_in + 1e-4, xi.size
+        # )  # Guess for y_T2 (linear increase)
+        # y_guess[3, :] = 1e-4  # Guess for dy_T2/dxi
+
+        # a zero initial guess works better for low concentrations
         y_guess = np.zeros((4, xi.size))
-        y_guess[0, :] = np.linspace(
-            0.5, 1.0, xi.size
-        )  # Guess for x_T (linear decrease)
-        y_guess[1, :] = -0.5  # Guess for dx_T/dxi
-        y_guess[2, :] = np.linspace(
-            y_T2_in, y_T2_in + 1e-4, xi.size
-        )  # Guess for y_T2 (linear increase)
-        y_guess[3, :] = 1e-4  # Guess for dy_T2/dxi
 
         # Run the BVP solver
         sol = solve_bvp(
@@ -539,12 +542,8 @@ def solve(params):
     elements = params["elements"]  # Number of mesh elements for solver
 
     # Calculate inlet pressure hydrostatically
+    assert P_outlet > 0, "P_outlet must be greater than zero."
     P_0 = P_outlet + ρ_l * g * L
-
-    if P_0 <= 0:
-        raise ValueError(
-            f"Calculated inlet pressure P_0 must be positive, but got {P_0:.2e} Pa. Check P_outlet, rho_l, g, and L."
-        )
 
     # Calculate the superficial flow velocities
     A = np.pi * (D / 2) ** 2  # m^2, Cross-sectional area of the column
