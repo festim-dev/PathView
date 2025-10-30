@@ -16,6 +16,7 @@ import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
 import { DynamicHandleNode } from './components/nodes/DynamicHandleNode';
 import SwitchNode from './components/nodes/SwitchNode';
+import { GLCNode } from './components/nodes/GLCNode';
 
 // Node types mapping
 export const nodeTypes = {
@@ -64,7 +65,7 @@ export const nodeTypes = {
   ode: DynamicHandleNode,
   interface: DynamicHandleNode,
   switch: SwitchNode,
-  glc: createFunctionNode(2, 2),
+  glc: GLCNode,
 };
 
 export const nodeMathTypes = {
