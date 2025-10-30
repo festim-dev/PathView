@@ -410,7 +410,7 @@ import numpy as np
 from scipy.integrate import solve_bvp
 from scipy import constants as const
 
-R = 8.314  # J/(mol·K), Universal gas constant  TODO read from const
+# R = 8.314  # J/(mol·K), Universal gas constant  TODO read from const
 
 
 def solve(params):
@@ -540,7 +540,7 @@ def solve(params):
     phi_l = a * h_l * L / u_l  # Transfer units parameter, liquid phase (Eq. 8.11)
     Bo_g = u_g0 * L / (ε_g * E_g)  # Bodenstein number, gas phase (Eq. 8.10)
     phi_g = (
-        0.5 * (R * T * c_T_inlet / P_0) * (a * h_l * L / u_g0)
+        0.5 * (const.R * T * c_T_inlet / P_0) * (a * h_l * L / u_g0)
     )  # Transfer units parameter, gas phase (Eq. 8.12)
 
     y_T2_in = P_T2_in / P_0  # Inlet tritium molar fraction in gas phase
@@ -583,13 +583,13 @@ def solve(params):
         n_T_out_liquid = c_T_outlet * Q_l * N_A  # Tritons/s
 
         # Tritium molar flow rate into the column via gas
-        n_T2_in_gas = (P_T2_in * Q_g / (R * T)) * N_A  # T2/s
+        n_T2_in_gas = (P_T2_in * Q_g / (const.R * T)) * N_A  # T2/s
         n_T_in_gas = n_T2_in_gas * 2  # Triton/s
 
         # Calculate outlet gas volumetric flow rate (gas expands as pressure drops)
         Q_g_out = (P_0 * Q_g) / P_outlet
         # Tritium molar flow rate out of the column via gas
-        n_T2_out_gas = (P_T2_out * Q_g_out / (R * T)) * N_A  # T2/s
+        n_T2_out_gas = (P_T2_out * Q_g_out / (const.R * T)) * N_A  # T2/s
         n_T_out_gas = n_T2_out_gas * 2  # Triton/s
 
         results = {
