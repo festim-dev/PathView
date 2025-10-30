@@ -53,6 +53,7 @@ from .custom_pathsim_blocks import (
     Bubbler,
     FestimWall,
     Integrator,
+    GLC,
 )
 import inspect
 
@@ -134,6 +135,7 @@ map_str_to_object = {
     "fir": pathsim.blocks.FIR,
     "interface": pathsim.subsystem.Interface,
     "switch": pathsim.blocks.Switch,
+    "glc": GLC,
 }
 
 math_blocks = {
@@ -522,7 +524,7 @@ def get_input_index(block: Block, edge: dict, block_to_input_index: dict) -> int
     if isinstance(block, Adder):
         if block.operations:
             return int(edge["targetHandle"].replace("target-", ""))
-            
+
     # make sure that the target block has only one input port (ie. that targetHandle is None)
     assert edge["targetHandle"] is None, (
         f"Target block {block.id} has multiple input ports, "
@@ -566,7 +568,7 @@ def get_output_index(block: Block, edge: dict) -> int:
         # Function and ODE outputs are always in order, so we can use the handle directly
         assert edge["sourceHandle"], edge
         return int(edge["sourceHandle"].replace("source-", ""))
-    
+
     # make sure that the source block has only one output port (ie. that sourceHandle is None)
     assert edge["sourceHandle"] is None, (
         f"Source block {block.id} has multiple output ports, "
