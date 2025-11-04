@@ -409,6 +409,7 @@ class FestimWall(Block):
 import numpy as np
 from scipy.integrate import solve_bvp
 from scipy import constants as const
+from scipy.optimize import root_scalar
 
 
 def solve(params):
@@ -417,10 +418,9 @@ def solve(params):
         Solves the BVP for tritium extraction in a bubble column.
 
         Args:
-            dimensionless_params (dict): A dictionary containing the dimensionless parameters:
+            params (dict): A dictionary containing the dimensionless parameters:
                         Bo_l, phi_l, Bo_g, phi_g, psi, nu.
             y_T2_in (float): Inlet tritium molar fraction in the gas phase, y_T2(0-).
-            elements (int): Number of mesh elements for the solver.
 
         Returns:
             sol: The solution object from scipy.integrate.solve_bvp.
@@ -440,29 +440,32 @@ def solve(params):
             S[1] = dx_T/d(xi)
             S[2] = y_T2 (dimensionless gas concentration)
             S[3] = dy_T2/d(xi)
+
+            x_T = c_T / c_T(L+)
+            xi = z / L (dimensionless position)
             """
             x_T, dx_T_dxi, y_T2, dy_T2_dxi = S
 
-            # Dimensionless driving force theta. Eq. 8.8
-            theta = x_T - np.sqrt(np.maximum(0, (1 - psi * xi) * y_T2 / nu))
+            # Dimensionless driving force theta. Eq. 12
+            theta = x_T - np.sqrt(((1 - (psi * xi)) / nu) * y_T2)  # MATCHES PAPER
 
             # Equation for d(S[0])/d(xi) = d(x_T)/d(xi)
             dS0_dxi = dx_T_dxi
 
             # Equation for d(S[1])/d(xi) = d^2(x_T)/d(xi)^2
-            dS1_dxi = Bo_l * (phi_l * theta - dx_T_dxi)  # Eq. 9.1.4
+            dS1_dxi = Bo_l * (phi_l * theta - dx_T_dxi)
 
             # Equation for d(S[2])/d(xi) = d(y_T2)/d(xi)
             dS2_dxi = dy_T2_dxi
 
             # Equation for d(S[3])/d(xi) = d^2(y_T2)/d(xi)^2 from eq (11)
             # Avoid division by zero if (1 - psi * xi) is close to zero at xi=1
-            denominator = 1 - psi * xi
-            denominator = np.where(np.isclose(denominator, 0), 1e-9, denominator)
 
-            term1 = (1 + 2 * psi / Bo_g) * dy_T2_dxi
-            term2 = phi_g * theta
-            dS3_dxi = (Bo_g / denominator) * (term1 - term2)
+            term1 = (1 + 2 * psi / Bo_g) * dy_T2_dxi  # Part of Eq. 9.3.3 (fourth line)
+            term2 = phi_g * theta  # Part of Eq. 9.3.3 (fourth line)
+            dS3_dxi = (Bo_g / (1 - psi * xi)) * (
+                term1 - term2
+            )  # Eq. 9.3.3 (fourth line)
 
             return np.vstack((dS0_dxi, dS1_dxi, dS2_dxi, dS3_dxi))
 
@@ -492,25 +495,11 @@ def solve(params):
         # Set up the mesh and an initial guess for the solver.
         xi = np.linspace(0, 1, elements + 1)
 
-        # An initial guess that is physically plausible can significantly help convergence.
-        # We expect liquid concentration (x_T) to decrease from inlet (xi=1) to outlet (xi=0).
-        # We expect gas concentration (y_T2) to increase from inlet (xi=0) to outlet (xi=1).
-        # y_guess = np.zeros((4, xi.size))
-        # y_guess[0, :] = np.linspace(
-        #     0.5, 1.0, xi.size
-        # )  # Guess for x_T (linear decrease)
-        # y_guess[1, :] = -0.5  # Guess for dx_T/dxi
-        # y_guess[2, :] = np.linspace(
-        #     y_T2_in, y_T2_in + 1e-4, xi.size
-        # )  # Guess for y_T2 (linear increase)
-        # y_guess[3, :] = 1e-4  # Guess for dy_T2/dxi
-
-        # a zero initial guess works better for low concentrations
         y_guess = np.zeros((4, xi.size))
 
         # Run the BVP solver
         sol = solve_bvp(
-            ode_system, boundary_conditions, xi, y_guess, tol=1e-5, max_nodes=10000
+            ode_system, boundary_conditions, xi, y_guess, tol=1e-6, max_nodes=10000
         )
 
         return sol
@@ -518,56 +507,138 @@ def solve(params):
     # Unpack parameters
     c_T_inlet = params["c_T_inlet"]
     y_T2_in = params["y_T2_in"]
-    P_outlet = params["P_outlet"]
-    ρ_l = params["ρ_l"]
-    K_s = params["K_s"]
+    P_0 = params["P_0"]
 
     L = params["L"]
     D = params["D"]
-    ε_g = params["ε_g"]
 
-    Q_l = params["Q_l"]
-    Q_g = params["Q_g"]
-
-    a = params["a"]
-
-    E_g = params["E_g"]
-    E_l = params["E_l"]
-
-    h_l = params["h_l"]
+    flow_l = params["flow_l"]
+    u_g0 = params["u_g0"]
 
     g = params["g"]
     T = params["T"]
 
     elements = params["elements"]  # Number of mesh elements for solver
 
-    # Calculate inlet pressure hydrostatically
-    assert P_outlet > 0, "P_outlet must be greater than zero."
-    P_0 = P_outlet + ρ_l * g * L
+    # --- Constants ---
+    g = const.g  # m/s^2, Gravitational acceleration
+    R = const.R  # J/(mol·K), Universal gas constant
+    N_A = const.N_A  # 1/mol, Avogadro's number
+    M_LiPb = 2.875e-25  # Kg/molecule, Lipb molecular mass
+
+    # Calculate empirical correlations
+    ρ_l = 10.45e3 * (1 - 1.61e-4 * T)  # kg/m^3, Liquid (LiPb) density
+    σ_l = 0.52 - 0.11e-3 * T  # N/m, Surface tension, liquid (LiPb) - gas (He) interface
+    μ_l = 1.87e-4 * np.exp(11640 / (R * T))  # Pa.s, Dynamic viscosity of liquid LiPb
+    ν_l = μ_l / ρ_l  # m^2/s, Kinematic viscosity of liquid LiPb
+    D_T = 2.5e-7 * np.exp(
+        -27000 / (R * T)
+    )  # m^2/s, Tritium diffusion coefficient in liquid LiPb
+
+    K_s = 2.32e-8 * np.exp(
+        -1350 / (R * T)
+    )  # atfrac*Pa^0.5, Sievert's constant for tritium in liquid LiPb
+    K_s = K_s * (ρ_l / (M_LiPb * N_A))  # mol/(m^3·Pa^0.5)
+
+    A = np.pi * (D / 2) ** 2  # m^2, Cross-sectional area of the column
+
+    # Calculate the volumetric flow rates
+    Q_l = flow_l / ρ_l  # m^3/s, Volumetric flow rate of liquid phase
+    Q_g = u_g0 * A  # m^3/s, Volumetric flow rate of gas phase
 
     # Calculate the superficial flow velocities
-    A = np.pi * (D / 2) ** 2  # m^2, Cross-sectional area of the column
-    u_g0 = Q_g / A  # m/s, superficial gas inlet velocity
+    # u_g0 =  Q_g / A  # m/s, superficial gas inlet velocity
     u_l = Q_l / A  # m/s, superficial liquid inlet velocity
 
-    # Calculate dimensionless values
+    # Calculate Bond, Galilei, Schmidt and Froude numbers
+    Bn = (g * D**2 * ρ_l) / σ_l  # Bond number
+    Ga = (g * D**3) / ν_l**2  # Galilei number
+    Sc = ν_l / D_T  # Schmidt number
+    Fr = u_g0 / (g * D) ** 0.5  # Froude number
+
+    # Calculate dispersion coefficients
+    E_l = (D * u_g0) / (
+        (13 * Fr) / (1 + 6.5 * (Fr**0.8))
+    )  # m^2/s, Effective axial dispersion coefficient, liquid phase
+    E_g = (
+        0.2 * D**2
+    ) * u_g0  # m^2/s, Effective axial dispersion coefficient, gas phase
+
+    # Calculate gas hold-up (phase fraction) & mass transfer coefficient
+    C = 0.2 * (Bn ** (1 / 8)) * (Ga ** (1 / 12)) * Fr  # C = ε_g / (1 - ε_g)^4
+
+    def solveEqn(ε_g, C):
+        # Define the equation to solve
+        eqn = ε_g / (1 - ε_g) ** 4 - C
+        return eqn
+
+    ε_g_initial_guess = 0.1
+    try:
+        # bracket=[0.0001, 0.9999] tells it to *only* look in this range
+        sol = root_scalar(solveEqn, args=(C,), bracket=[0.00001, 0.99999])
+
+        # print(f"--- Using root_scalar (robust method) ---")
+        # print(f"C value was: {C}")
+        # if sol.converged:
+        #     print(f"Solved gas hold-up (εg): {sol.root:.6f}")
+        #     # Verify it
+        #     verification = sol.root / (1 - sol.root)**4
+        #     print(f"Verification (should equal C): {verification:.6f}")
+        # else:
+        #     print("Solver did not converge.")
+
+    except ValueError as e:
+        print(
+            f"Solver failed. This can happen if C is so large that no solution exists between 0 and 1."
+        )
+        print(f"Error: {e}")
+
+    ε_g = sol.root  # Gas phase fraction
     ε_l = 1 - ε_g  # Liquid phase fraction
-    ψ = (ρ_l * g * ε_l * L) / P_0  # Hydrostatic pressure ratio (Eq. 8.3)
-    ν = (c_T_inlet / K_s) ** 2 / P_0  # Tritium partial pressure ratio (Eq. 8.5)
-    Bo_l = u_l * L / (ε_l * E_l)  # Bodenstein number, liquid phase (Eq. 8.9)
-    phi_l = a * h_l * L / u_l  # Transfer units parameter, liquid phase (Eq. 8.11)
-    Bo_g = u_g0 * L / (ε_g * E_g)  # Bodenstein number, gas phase (Eq. 8.10)
-    phi_g = (
-        0.5 * (const.R * T * c_T_inlet / P_0) * (a * h_l * L / u_g0)
-    )  # Transfer units parameter, gas phase (Eq. 8.12)
+
+    # Calculate outlet pressure hydrostatically & check non-negative
+    P_outlet = P_0 - (ρ_l * (1 - ε_g) * g * L)
+
+    if P_outlet <= 0:
+        raise ValueError(
+            f"Calculated gas outlet pressure P_outlet must be positive, but got {P_outlet:.2e} Pa. Check P_0, rho_l, g, and L are realistic."
+        )
+
+    # Calculate interfacial area
+    d_b = (
+        26 * (Bn**-0.5) * (Ga**-0.12) * (Fr**-0.12)
+    ) * D  # m, Mean bubble diameter AGREES WITH PAPER
+    a = 6 * ε_g / d_b  # m^-1, Specific interfacial area, assuming spherical bubbles
+
+    # Calculate volumetric mass transfer coefficient, liquid-gas
+    h_l_a = (
+        D_T * (0.6 * Sc**0.5 * Bn**0.62 * Ga**0.31 * ε_g**1.1) / (D**2)
+    )  # Volumetric mass transfer coefficient, liquid-gas
+
+    h_l = h_l_a / a  # Mass transfer coefficient
+
+    # Calculate dimensionless values
+
+    # Hydrostatic pressure ratio (Eq. 8.3) # MATCHES PAPER
+    psi = (ρ_l * g * (1 - ε_g) * L) / P_0
+    # Tritium partial pressure ratio (Eq. 8.5) # MATCHES PAPER
+    nu = ((c_T_inlet / K_s) ** 2) / P_0
+    # Bodenstein number, liquid phase (Eq. 8.9) # MATCHES PAPER
+    Bo_l = u_l * L / (ε_l * E_l)
+    # Transfer units parameter, liquid phase (Eq. 8.11) # MATCHES PAPER
+    phi_l = a * h_l * L / u_l
+    # Bodenstein number, gas phase (Eq. 8.10) # MATCHES PAPER ASSUMING u_g0
+    Bo_g = u_g0 * L / (ε_g * E_g)
+    # Transfer units parameter, gas phase (Eq. 8.12) # MATCHES PAPER
+    phi_g = 0.5 * (R * T * c_T_inlet / P_0) * (a * h_l * L / u_g0)
 
     dimensionless_params = {
         "Bo_l": Bo_l,
         "phi_l": phi_l,
         "Bo_g": Bo_g,
         "phi_g": phi_g,
-        "psi": ψ,
-        "nu": ν,
+        "psi": psi,
+        "nu": nu,
     }
 
     # Solve the model
@@ -638,20 +709,10 @@ class GLC(pathsim.blocks.Function):
     More details about the model can be found in: https://doi.org/10.13182/FST95-A30485
 
     Args:
-        P_outlet: Outlet operating pressure [Pa]
+        P_0: Inlet operating pressure [Pa]
         L: Column height [m]
-        u_l: Superficial liquid velocity [m/s]
         u_g0: Superficial gas inlet velocity [m/s]
-        ε_g: Gas phase fraction [-]
-        ε_l: Liquid phase fraction [-]
-        E_g: Gas phase axial dispersion coefficient [m^2/s]
-        E_l: Liquid phase axial dispersion coefficient [m^2/s]
-        a: Specific interfacial area [m^2/m^3]
-        h_l: Liquid phase volumetric mass transfer coefficient [m/s]
-        ρ_l: Liquid density [kg/m^3]
-        K_s: Tritium solubility constant [mol/(m^3·Pa)^0.5]
         Q_l: Liquid volumetric flow rate [m^3/s]
-        Q_g: Gas volumetric flow rate [m^3/s]
         D: Column diameter [m]
         T: Temperature [K]
         g: Gravitational acceleration [m/s^2], default is 9.81
@@ -662,47 +723,27 @@ class GLC(pathsim.blocks.Function):
         "y_T2_in": 1,
     }
     _port_map_out = {
-        "T_out_liquid": 0,
-        "T_out_gas": 1,
+        "c_T_outlet": 0,
+        "P_T2_out_gas": 1,
         "efficiency": 2,
     }
 
     def __init__(
         self,
-        P_outlet,
+        P_0,
         L,
-        u_l,
         u_g0,
-        ε_g,
-        ε_l,
-        E_g,
-        E_l,
-        a,
-        h_l,
-        ρ_l,
-        K_s,
-        Q_l,
-        Q_g,
+        flow_l,
         D,
         T,
-        g=9.81,
+        g=const.g,
         initial_nb_of_elements=20,
     ):
         self.params = {
-            "P_outlet": P_outlet,
+            "P_0": P_0,
             "L": L,
-            "u_l": u_l,
             "u_g0": u_g0,
-            "ε_g": ε_g,
-            "ε_l": ε_l,
-            "E_g": E_g,
-            "E_l": E_l,
-            "a": a,
-            "h_l": h_l,
-            "ρ_l": ρ_l,
-            "K_s": K_s,
-            "Q_l": Q_l,
-            "Q_g": Q_g,
+            "flow_l": flow_l,
             "g": g,
             "D": D,
             "T": T,
@@ -724,4 +765,4 @@ class GLC(pathsim.blocks.Function):
         n_T_out_gas = res["tritium_out_gas [mol/s]"]
         eff = res["extraction_efficiency [%]"]
 
-        return n_T_out_liquid, n_T_out_gas, eff
+        return c_T_outlet, P_T2_outlet, eff

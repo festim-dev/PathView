@@ -64,7 +64,7 @@ export function GLCNode({ data }) {
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                T_out_liquid
+                c_T_oulet
             </div>
 
             <div style={{
@@ -75,11 +75,11 @@ export function GLCNode({ data }) {
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                T_out_gas
+                P_T2_out_gas
             </div>
 
-            <Handle type="source" position="right" id="T_out_liquid" style={{ background: '#555', top: '33%' }} />
-            <Handle type="source" position="right" id="T_out_gas" style={{ background: '#555', top: '66%' }} />
+            <Handle type="source" position="right" id="c_T_outlet" style={{ background: '#555', top: '33%' }} />
+            <Handle type="source" position="right" id="P_T2_out_gas" style={{ background: '#555', top: '66%' }} />
             <Handle type="source" position="right" id="efficiency" style={{ background: '#555', top: '10%' }} />
         </div>
     );
