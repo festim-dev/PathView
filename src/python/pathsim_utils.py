@@ -250,7 +250,7 @@ def make_global_variables(global_vars):
     return global_namespace
 
 
-def make_solver_params(solver_prms, eval_namespace=None):
+def make_solver_params(solver_prms: dict, eval_namespace=None):
     """
     Process and validate solver parameters from the graph data.
 
@@ -268,25 +268,27 @@ def make_solver_params(solver_prms, eval_namespace=None):
     Raises:
         ValueError: If invalid parameter values are provided or if solver type is unknown.
     """
-    extra_params = solver_prms.pop("extra_params", "")
+    prms = solver_prms.copy()
+    extra_params = prms.pop("extra_params", "")
     if extra_params == "":
         extra_params = {}
     else:
         extra_params = eval(extra_params, eval_namespace)
     assert isinstance(extra_params, dict), "extra_params must be a dictionary"
 
-    for k, v in solver_prms.items():
+    for k, v in prms.items():
         if k not in ["Solver", "log"]:
             if v == "":
                 # TODO get the default from pathsim._constants
-                solver_prms[k] = None
+                prms[k] = None
             else:
-                solver_prms[k] = eval(v, eval_namespace)
+                print(v, type(v))
+                prms[k] = eval(v, eval_namespace)
         elif k == "log":
             if v == "true":
-                solver_prms[k] = True
+                prms[k] = True
             elif v == "false":
-                solver_prms[k] = False
+                prms[k] = False
             else:
                 raise ValueError(
                     f"Invalid value for {k}: {v}. Must be 'true' or 'false'."
@@ -296,14 +298,14 @@ def make_solver_params(solver_prms, eval_namespace=None):
                 raise ValueError(
                     f"Invalid solver: {v}. Must be one of {list(NAME_TO_SOLVER.keys())}."
                 )
-            solver_prms[k] = NAME_TO_SOLVER[v]
+            prms[k] = NAME_TO_SOLVER[v]
 
     # remove solver duration from solver parameters
-    duration = float(solver_prms.pop("simulation_duration"))
+    duration = float(prms.pop("simulation_duration"))
 
-    assert not isinstance(solver_prms["Solver"], str), solver_prms["Solver"]
+    assert not isinstance(prms["Solver"], str), prms["Solver"]
 
-    return solver_prms, extra_params, duration
+    return prms, extra_params, duration
 
 
 def auto_block_construction(node: dict, eval_namespace: dict = None) -> Block:
