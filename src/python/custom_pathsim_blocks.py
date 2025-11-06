@@ -1,4 +1,4 @@
-from pathsim.blocks import Block, ODE
+from pathsim.blocks import Block, ODE, Wrapper
 import pathsim.blocks
 import pathsim.events
 from pathsim import Subsystem, Interface, Connection
@@ -299,18 +299,25 @@ class Bubbler(Subsystem):
 from pathsim.utils.register import Register
 
 
-class FestimWall(Block):
+class FestimWall(Wrapper):
     _port_map_out = {"flux_0": 0, "flux_L": 1}
     _port_map_in = {"c_0": 0, "c_L": 1}
 
     def __init__(
-        self, thickness, temperature, D_0, E_D, surface_area=1, n_vertices=100
+        self,
+        thickness,
+        temperature,
+        D_0,
+        E_D,
+        T,
+        surface_area=1,
+        n_vertices=100,
+        tau=0,
     ):
         try:
-            import festim as F
+            import festim
         except ImportError:
             raise ImportError("festim is needed for FestimWall node.")
-        super().__init__()
 
         self.inputs = Register(size=2, mapping=self._port_map_in)
         self.outputs = Register(size=2, mapping=self._port_map_out)
@@ -322,8 +329,10 @@ class FestimWall(Block):
         self.E_D = E_D
         self.n_vertices = n_vertices
         self.t = 0.0
+        self.stepsize = T
 
         self.initialise_festim_model()
+        super().__init__(T=T, tau=tau, func=self.func)
 
     def initialise_festim_model(self):
         import festim as F
@@ -355,7 +364,7 @@ class FestimWall(Block):
             atol=1e-10, rtol=1e-10, transient=True, final_time=1
         )
 
-        model.settings.stepsize = F.Stepsize(initial_value=1)
+        model.settings.stepsize = F.Stepsize(initial_value=self.stepsize)
 
         self.surface_flux_0 = F.SurfaceFlux(field=H, surface=left_surf)
         self.surface_flux_L = F.SurfaceFlux(field=H, surface=right_surf)
@@ -365,36 +374,21 @@ class FestimWall(Block):
 
         model.initialise()
 
-        self.dt = model.dt
         self.c_0 = model.boundary_conditions[0].value_fenics
         self.c_L = model.boundary_conditions[1].value_fenics
 
         self.model = model
 
-    def update_festim_model(self, c_0, c_L, stepsize):
+    def update_festim_model(self, c_0, c_L):
         self.c_0.value = c_0
         self.c_L.value = c_L
-        self.dt.value = stepsize
 
         self.model.iterate()
 
         return self.surface_flux_0.data[-1], self.surface_flux_L.data[-1]
 
-    def update(self, t):
-        # no internal algebraic operator -> early exit
-        # if self.op_alg is None:
-        #     return 0.0
-
-        # block inputs
-        c_0 = self.inputs["c_0"]
-        c_L = self.inputs["c_L"]
-
-        if t == 0.0:
-            flux_0, flux_L = 0, 0
-        else:
-            flux_0, flux_L = self.update_festim_model(
-                c_0=c_0, c_L=c_L, stepsize=t - self.t
-            )
+    def func(self, c_0, c_L):
+        flux_0, flux_L = self.update_festim_model(c_0=c_0, c_L=c_L)
 
         flux_0 *= self.surface_area
         flux_L *= self.surface_area
