@@ -1,0 +1,12 @@
+@reference "../index.css";
+@layer components {
+  /* Tab button base */
+  .tab-btn {
+    @apply py-2.5 px-5 m-5 bg-[#444] text-white border-none rounded-[5px] cursor-pointer;
+  }
+
+  /* Tab button active state */
+  .tab-btn.active {
+    @apply bg-[#78A083];
+  }
+}

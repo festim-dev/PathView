@@ -1,0 +1,67 @@
+@reference "../index.css";
+/* 
+For the scroll bar. 
+Also this behaves differently on Firefox vs Chrome and 
+I don't think the behaviour is fully "correct";
+I think there are some globals overwriting things
+
+I would recommend rewriting this in the future
+*/
+@layer components {
+    /* Custom scrollbar styles for sidebar */
+    .sidebar-scrollable {
+        scrollbar-width: thin;
+        scrollbar-color: #555 #1e1e2f;
+        @apply scroll-smooth;
+    }
+
+    .sidebar-scrollable::-webkit-scrollbar {
+        @apply w-2;
+    }
+
+    .sidebar-scrollable::-webkit-scrollbar-track {
+        @apply bg-[#1e1e2f] rounded-[4px];
+    }
+
+    .sidebar-scrollable::-webkit-scrollbar-thumb {
+        @apply bg-[#555] rounded-[4px] border border-[#1e1e2f];
+    }
+
+    .sidebar-scrollable::-webkit-scrollbar-thumb:hover {
+        @apply bg-[#666];
+    }
+
+    /* Ensure category descriptions are readable */
+    .sidebar-description {
+        @apply text-[#aaaaaa]! text-[11px]! italic! mb-2!;
+    }
+
+
+    /* Sidebar trigger button - strudel-flow style */
+    .sidebar-trigger {
+        /* Ghost button variant */
+        @apply bg-transparent! border-none rounded-[4px] relative;
+        @apply transition-colors duration-200 ease-in-out;
+    }
+
+
+    .sidebar-trigger:hover {
+        @apply bg-white/10!;
+    }
+
+    .sidebar-trigger svg {
+        @apply text-white transition-colors duration-200 ease-in-out;
+    }
+
+    .sidebar-trigger:hover svg {
+        @apply text-white!;
+    }
+
+    .sidebar-trigger:focus {
+        @apply outline-2 outline-offset-2 outline-solid outline-[#3b82f6];
+    }
+
+    .sidebar-trigger:active {
+        @apply scale-95;
+    }
+}
