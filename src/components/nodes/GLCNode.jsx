@@ -4,8 +4,8 @@ export function GLCNode({ data }) {
     return (
         <div
             style={{
-                width: 180,
-                height: 100,
+                width: 125,
+                height: 150,
                 background: data.nodeColor || '#DDE6ED',
                 color: 'black',
                 borderRadius: 0,
@@ -89,9 +89,21 @@ export function GLCNode({ data }) {
                 P_out_gas
             </div>
 
+            <div style={{
+                right: '6px',
+                position: 'absolute',
+                top: '85%',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'right'
+            }}>
+                n_T_out_gas
+            </div>
+
             <Handle type="source" position="right" id="c_T_outlet" style={{ background: '#555', top: '33%' }} />
             <Handle type="source" position="right" id="y_T2_out" style={{ background: '#555', top: '66%' }} />
             <Handle type="source" position="right" id="P_out_gas" style={{ background: '#555', top: '80%' }} />
+            <Handle type="source" position="right" id="n_T_out_gas" style={{ background: '#555', top: '93%' }} />
             <Handle type="source" position="right" id="efficiency" style={{ background: '#555', top: '10%' }} />
         </div>
     );
