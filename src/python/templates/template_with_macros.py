@@ -3,6 +3,7 @@ from pathsim import Simulation, Connection
 import numpy as np
 import matplotlib.pyplot as plt
 import pathview
+import pathsim_chem
 {# Import macros #}
 {% from 'block_macros.py' import create_block, create_integrator_block, create_bubbler_block, create_connections, create_event -%}
 
