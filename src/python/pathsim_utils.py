@@ -51,9 +51,8 @@ from .custom_pathsim_blocks import (
     Splitter3,
     FestimWall,
     Integrator,
-    GLC,
 )
-from pathsim_chem import Bubbler4, Splitter
+from pathsim_chem import Bubbler4, Splitter, GLC
 import inspect
 
 NAME_TO_SOLVER = {
