@@ -52,7 +52,7 @@ from .custom_pathsim_blocks import (
     FestimWall,
     Integrator,
 )
-from pathsim_chem import Bubbler4, Splitter
+from pathsim_chem import Bubbler4, Splitter, GLC
 import inspect
 
 NAME_TO_SOLVER = {
@@ -133,6 +133,7 @@ map_str_to_object = {
     "fir": pathsim.blocks.FIR,
     "interface": pathsim.subsystem.Interface,
     "switch": pathsim.blocks.Switch,
+    "glc": GLC,
 }
 
 math_blocks = {
