@@ -3,9 +3,9 @@ from pathview.custom_pathsim_blocks import (
     Process,
     Splitter2,
     Splitter3,
-    Bubbler,
     Integrator,
 )
+from pathsim_chem import Bubbler4
 
 import pathsim.blocks
 
@@ -137,7 +137,7 @@ def node_factory():
         ("splitter3", Splitter3),
         ("white_noise", pathsim.blocks.noise.WhiteNoise),
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
-        ("bubbler", Bubbler),
+        ("bubbler", Bubbler4),
         ("integrator", Integrator),
         ("scope", pathsim.blocks.Scope),
     ],
@@ -163,7 +163,7 @@ def test_auto_block_construction(node_factory, block_type, expected_class):
         ("process", Process),
         ("white_noise", pathsim.blocks.noise.WhiteNoise),
         ("pink_noise", pathsim.blocks.noise.PinkNoise),
-        ("bubbler", Bubbler),
+        ("bubbler", Bubbler4),
         ("integrator", Integrator),
     ],
 )

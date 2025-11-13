@@ -47,14 +47,13 @@ import pathsim.events
 from pathsim.blocks.noise import WhiteNoise, PinkNoise
 from .custom_pathsim_blocks import (
     Process,
-    Splitter,
     Splitter2,
     Splitter3,
-    Bubbler,
     FestimWall,
     Integrator,
     GLC,
 )
+from pathsim_chem import Bubbler4, Splitter
 import inspect
 
 NAME_TO_SOLVER = {
@@ -120,7 +119,7 @@ map_str_to_object = {
     "function2to2": Function,
     "delay": Delay,
     "ode": ODE,
-    "bubbler": Bubbler,
+    "bubbler": Bubbler4,
     "wall": FestimWall,
     "white_noise": WhiteNoise,
     "pink_noise": PinkNoise,

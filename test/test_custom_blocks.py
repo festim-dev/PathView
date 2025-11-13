@@ -1,11 +1,10 @@
 import pathsim.blocks
 from pathsim import Simulation, Connection
-from pathview.custom_pathsim_blocks import Bubbler
+from pathsim_chem import Bubbler4
 
 
 def test_bubbler():
-    my_bubbler = Bubbler()
-
+    my_bubbler = Bubbler4()
     source_soluble = pathsim.blocks.Constant(1)
     source_insoluble = pathsim.blocks.Constant(0.5)
     environment = pathsim.blocks.Integrator()
