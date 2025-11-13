@@ -18,6 +18,8 @@
         "n_vertices": "10",
         "surface_area": "",
         "temperature": "300",
+        "T": "0.1",
+        "tau": "0",
         "thickness": "2",
         "nodeColor": "#DDE6ED"
       },
@@ -63,6 +65,8 @@
         "surface_area": "",
         "temperature": "300",
         "thickness": "2",
+        "T": "0.1",
+        "tau": "0",
         "nodeColor": "#DDE6ED"
       },
       "measured": {
