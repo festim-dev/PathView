@@ -16,7 +16,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "@uiw/codemirror-theme-vscode": "^4.24.2",
     "@uiw/react-codemirror": "^4.24.2",
-    "@xyflow/react": "^12.8.1",
+    "@xyflow/react": "^12.9.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.553.0",

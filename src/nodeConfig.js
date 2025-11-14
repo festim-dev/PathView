@@ -16,6 +16,7 @@ import BubblerNode from './components/nodes/BubblerNode';
 import WallNode from './components/nodes/WallNode';
 import { DynamicHandleNode } from './components/nodes/DynamicHandleNode';
 import SwitchNode from './components/nodes/SwitchNode';
+import TestNode from './components/nodes/test_node';
 
 // Node types mapping
 export const nodeTypes = {
@@ -64,6 +65,7 @@ export const nodeTypes = {
   ode: DynamicHandleNode,
   interface: DynamicHandleNode,
   switch: SwitchNode,
+  test: TestNode,
 };
 
 export const nodeMathTypes = {
@@ -121,7 +123,7 @@ export const nodeCategories = {
     description: 'Fuel cycle specific nodes'
   },
   'Others': {
-    nodes: ['samplehold', 'comparator', 'switch', 'interface'],
+    nodes: ['samplehold', 'comparator', 'switch', 'interface', 'test'],
     description: 'Miscellaneous nodes'
   },
   'Output': {

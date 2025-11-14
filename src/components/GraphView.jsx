@@ -1,3 +1,5 @@
+import '@xyflow/react/dist/style.css';
+
 import { ReactFlow, Controls, MiniMap, Background } from '@xyflow/react';
 import ContextMenu from './ContextMenu';
 
