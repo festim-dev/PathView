@@ -18,6 +18,8 @@ import { DynamicHandleNode } from './components/nodes/DynamicHandleNode';
 import SwitchNode from './components/nodes/SwitchNode';
 import TestNode from './components/nodes/test_node';
 
+import { MathNode, SineNode, CosineNode } from './components/nodes/all-math-nodes';
+
 // Node types mapping
 export const nodeTypes = {
   process: ProcessNode,
@@ -69,22 +71,22 @@ export const nodeTypes = {
 };
 
 export const nodeMathTypes = {
-  sin: DefaultNode,
-  cos: DefaultNode,
-  sqrt: DefaultNode,
-  abs: DefaultNode,
-  pow: DefaultNode,
-  exp: DefaultNode,
-  log: DefaultNode,
-  log10: DefaultNode,
-  tan: DefaultNode,
-  sinh: DefaultNode,
-  cosh: DefaultNode,
-  tanh: DefaultNode,
-  atan: DefaultNode,
-  norm: DefaultNode,
-  mod: DefaultNode,
-  clip: DefaultNode,
+  sin: SineNode,
+  cos: CosineNode,
+  sqrt: MathNode,
+  abs: MathNode,
+  pow: MathNode,
+  exp: MathNode,
+  log: MathNode,
+  log10: MathNode,
+  tan: MathNode,
+  sinh: MathNode,
+  cosh: MathNode,
+  tanh: MathNode,
+  atan: MathNode,
+  norm: MathNode,
+  mod: MathNode,
+  clip: MathNode,
 }
 
 // add nodeMathTypes to nodeTypes
