@@ -22,6 +22,7 @@
     "lucide-react": "^0.553.0",
     "lz-string": "^1.5.0",
     "plotly.js": "^3.0.3",
+    "radix-ui": "^1.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-plotly.js": "^2.6.0",
