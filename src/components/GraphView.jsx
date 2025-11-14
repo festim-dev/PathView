@@ -14,6 +14,7 @@ export default function GraphView(props) {
         <div className="dndflow" style={{ flex: 1, position: 'relative' }}>
             <div className="reactflow-wrapper" ref={reactFlowWrapperRef} style={{ width: '100%', height: '100%' }}>
                 <ReactFlow
+                    colorMode="system"
                     ref={refEl}
                     nodes={nodes}
                     edges={edges}
