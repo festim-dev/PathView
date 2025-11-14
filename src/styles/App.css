@@ -20,12 +20,6 @@
   background-color: #0056b3 !important;
 }
 
-/* Node hover effects */
-.react-flow__node:hover>div {
-  border: 2px solid #78A083 !important;
-  box-shadow: 0 0 8px #78a08366;
-}
-
 /* Default border for divs */
 .react-flow__node>div {
   border: 2px solid #ccc !important;
