@@ -280,7 +280,6 @@ def make_solver_params(solver_prms: dict, eval_namespace=None):
                 # TODO get the default from pathsim._constants
                 prms[k] = None
             else:
-                print(v, type(v))
                 prms[k] = eval(v, eval_namespace)
         elif k == "log":
             if v == "true":
