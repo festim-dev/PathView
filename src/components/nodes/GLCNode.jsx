@@ -29,7 +29,7 @@ export function GLCNode({ data }) {
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                c_T_inlet
+                c_T_in
             </div>
 
             <div style={{
@@ -43,7 +43,7 @@ export function GLCNode({ data }) {
                 y_T2_in
             </div>
 
-            <Handle type="target" position="left" id="c_T_inlet" style={{ background: '#555', top: '33%' }} />
+            <Handle type="target" position="left" id="c_T_in" style={{ background: '#555', top: '33%' }} />
             <Handle type="target" position="left" id="y_T2_in" style={{ background: '#555', top: '66%' }} />
 
             <div style={{
@@ -86,7 +86,7 @@ export function GLCNode({ data }) {
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                P_out_gas
+                P_out
             </div>
 
             <div style={{
@@ -111,10 +111,10 @@ export function GLCNode({ data }) {
                 Q_g_out
             </div>
 
-            <Handle type="source" position="right" id="c_T_outlet" style={{ background: '#555', top: '5%' }} />
+            <Handle type="source" position="right" id="c_T_out" style={{ background: '#555', top: '5%' }} />
             <Handle type="source" position="right" id="y_T2_out" style={{ background: '#555', top: '20%' }} />
-            <Handle type="source" position="right" id="efficiency" style={{ background: '#555', top: '35%' }} />
-            <Handle type="source" position="right" id="P_out_gas" style={{ background: '#555', top: '65%' }} />
+            <Handle type="source" position="right" id="eff" style={{ background: '#555', top: '35%' }} />
+            <Handle type="source" position="right" id="P_out" style={{ background: '#555', top: '65%' }} />
             <Handle type="source" position="right" id="Q_l" style={{ background: '#555', top: '80%' }} />
             <Handle type="source" position="right" id="Q_g_out" style={{ background: '#555', top: '95%' }} />
         </div>
