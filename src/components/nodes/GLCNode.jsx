@@ -54,23 +54,12 @@ export function GLCNode({ data }) {
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                Efficiency
+                c_T_out
             </div>
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '25%',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textAlign: 'right'
-            }}>
-                c_T_oulet
-            </div>
-
-            <div style={{
-                right: '6px',
-                position: 'absolute',
-                top: '58%',
+                top: '20%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -81,7 +70,18 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '71%',
+                top: '35%',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'right'
+            }}>
+                efficiency
+            </div>
+
+            <div style={{
+                right: '6px',
+                position: 'absolute',
+                top: '65%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -92,19 +92,31 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '85%',
+                top: '80%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
             }}>
-                n_T_out_gas
+                Q_l
             </div>
 
-            <Handle type="source" position="right" id="c_T_outlet" style={{ background: '#555', top: '33%' }} />
-            <Handle type="source" position="right" id="y_T2_out" style={{ background: '#555', top: '66%' }} />
-            <Handle type="source" position="right" id="P_out_gas" style={{ background: '#555', top: '80%' }} />
-            <Handle type="source" position="right" id="n_T_out_gas" style={{ background: '#555', top: '93%' }} />
-            <Handle type="source" position="right" id="efficiency" style={{ background: '#555', top: '10%' }} />
+            <div style={{
+                right: '6px',
+                position: 'absolute',
+                top: '95%',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'right'
+            }}>
+                Q_g_out
+            </div>
+
+            <Handle type="source" position="right" id="c_T_outlet" style={{ background: '#555', top: '5%' }} />
+            <Handle type="source" position="right" id="y_T2_out" style={{ background: '#555', top: '20%' }} />
+            <Handle type="source" position="right" id="efficiency" style={{ background: '#555', top: '35%' }} />
+            <Handle type="source" position="right" id="P_out_gas" style={{ background: '#555', top: '65%' }} />
+            <Handle type="source" position="right" id="Q_l" style={{ background: '#555', top: '80%' }} />
+            <Handle type="source" position="right" id="Q_g_out" style={{ background: '#555', top: '95%' }} />
         </div>
     );
 }
