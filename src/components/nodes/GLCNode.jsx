@@ -24,7 +24,7 @@ export function GLCNode({ data }) {
             <div style={{
                 left: '6px',
                 position: 'absolute',
-                top: '25%',
+                top: '26%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -35,7 +35,7 @@ export function GLCNode({ data }) {
             <div style={{
                 left: '6px',
                 position: 'absolute',
-                top: '58%',
+                top: '59%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -49,7 +49,7 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '5%',
+                top: '-1%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -59,7 +59,7 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '20%',
+                top: '14%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -70,7 +70,7 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '35%',
+                top: '29%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -81,7 +81,7 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '65%',
+                top: '59%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -92,7 +92,7 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '80%',
+                top: '74%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -103,7 +103,7 @@ export function GLCNode({ data }) {
             <div style={{
                 right: '6px',
                 position: 'absolute',
-                top: '95%',
+                top: '89%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
