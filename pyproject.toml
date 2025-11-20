@@ -25,7 +25,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
     "pathsim>=0.8.2",
-    "pathsim-chem@git+https://github.com/pathsim/pathsim-chem@glc",
+    "pathsim-chem@git+https://github.com/pathsim/pathsim-chem@avg_velocity",
     "matplotlib>=3.7.0",
     "numpy>=1.24.0",
     "plotly>=6.0",
