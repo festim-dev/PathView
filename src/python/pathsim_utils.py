@@ -52,7 +52,7 @@ from .custom_pathsim_blocks import (
     FestimWall,
     Integrator,
 )
-from pathsim_chem import Bubbler4, Splitter
+from pathsim_chem import Bubbler4, Splitter, GLC
 import inspect
 
 NAME_TO_SOLVER = {
@@ -133,6 +133,7 @@ map_str_to_object = {
     "fir": pathsim.blocks.FIR,
     "interface": pathsim.subsystem.Interface,
     "switch": pathsim.blocks.Switch,
+    "glc": GLC,
 }
 
 math_blocks = {
@@ -279,7 +280,6 @@ def make_solver_params(solver_prms: dict, eval_namespace=None):
                 # TODO get the default from pathsim._constants
                 prms[k] = None
             else:
-                print(v, type(v))
                 prms[k] = eval(v, eval_namespace)
         elif k == "log":
             if v == "true":

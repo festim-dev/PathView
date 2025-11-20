@@ -37,7 +37,10 @@ class Process(ODE):
         outputs = [None, None]
         outputs[self._port_map_out["inv"]] = x
         outputs[self._port_map_out["mass_flow_rate"]] = mass_rate
-        # update the outputs
+
+        # make sure an array of size two is returned
+        outputs = [float(o) for o in outputs]
+
         self.outputs.update_from_array(outputs)
 
 
