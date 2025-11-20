@@ -24,7 +24,7 @@ export function GLCNode({ data }) {
             <div style={{
                 left: '6px',
                 position: 'absolute',
-                top: '26%',
+                top: '-1%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -35,7 +35,18 @@ export function GLCNode({ data }) {
             <div style={{
                 left: '6px',
                 position: 'absolute',
-                top: '59%',
+                top: '10%',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'right'
+            }}>
+                flow_l
+            </div>
+
+            <div style={{
+                left: '6px',
+                position: 'absolute',
+                top: '80%',
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textAlign: 'right'
@@ -43,8 +54,21 @@ export function GLCNode({ data }) {
                 y_T2_in
             </div>
 
-            <Handle type="target" position="left" id="c_T_in" style={{ background: '#555', top: '33%' }} />
-            <Handle type="target" position="left" id="y_T2_in" style={{ background: '#555', top: '66%' }} />
+            <div style={{
+                left: '6px',
+                position: 'absolute',
+                top: '90%',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'right'
+            }}>
+                flow_g
+            </div>
+
+            <Handle type="target" position="left" id="c_T_in" style={{ background: '#555', top: '5%' }} />
+            <Handle type="target" position="left" id="flow_l" style={{ background: '#555', top: '15%' }} />
+            <Handle type="target" position="left" id="y_T2_in" style={{ background: '#555', top: '85%' }} />
+            <Handle type="target" position="left" id="flow_g" style={{ background: '#555', top: '95%' }} />
 
             <div style={{
                 right: '6px',
