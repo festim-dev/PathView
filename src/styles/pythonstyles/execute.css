@@ -1,0 +1,29 @@
+@reference "../index.css";
+
+@layer components {
+  .execute-btn {
+    @apply bg-[#007acc] text-white border-none py-2 px-4 rounded-sm cursor-pointer text-sm;
+    @apply transition-[background-color] duration-200;
+  }
+
+  .execute-btn:hover:not(:disabled) {
+    @apply bg-[#005a9e];
+  }
+
+  .execute-btn:disabled {
+    @apply bg-[#555] cursor-not-allowed;
+  }
+  .execution-result {
+    @apply mt-2.5 p-3.75 rounded-sm;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+
+  .execution-result.success {
+    @apply bg-[#1e3a1e] border border-[#4caf50];
+  }
+
+  .execution-result.error {
+    @apply bg-[#3a1e1e] border border-[#f44336];
+  }
+}
+

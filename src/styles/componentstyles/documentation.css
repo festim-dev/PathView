@@ -1,0 +1,121 @@
+@reference "../index.css";
+
+/*  
+Since I don't think this is being used anywhere at the current moment;
+I asked GPT5 to convert the this specific file to use Tailwind 4.0
+
+Also I would recommend making documentation seperate from the main app
+for isolation. (By expanding on /docs instead of creating something extra
+for the main app)
+If needed, documentation can be inlined using 
+something like an iframe.
+
+For example, https://github.com/threlte/threlte
+Threlte's documentation is decoupled from its implementation;
+its implementation is under packages instead  
+*/
+@layer components {
+  /* Documentation HTML rendering styles for dark theme */
+  .documentation-content {
+    @apply text-[#e8e8e8]
+  }
+
+  .documentation-content p {
+    @apply my-[0.5em] mx-0 leading-[1.4];
+  }
+
+  .documentation-content :is(h1, h2, h3, h4, h5, h6) {
+    @apply text-white font-bold mt-[1em] mb-[.5em];
+  }
+
+  /* Headings */
+  .documentation-content h2 {
+    @apply text-[1.1em] border-b border-[#555] pb-[0.2em] font-bold;
+  }
+  .documentation-content h3 {
+    @apply text-[1.05em] font-bold;
+  }
+
+  /* Code blocks and inline code */
+  .documentation-content :is(pre, code, .literal) {
+    @apply bg-[#1a1a2e] rounded-[3px] font-mono text-[0.9em];
+  }
+  .documentation-content pre {
+    @apply border border-[#444] p-[0.8em] overflow-x-auto my-[0.5em];
+  }
+  .documentation-content code {
+    @apply px-[0.3em] py-[0.1em] text-[#ffd700];
+  }
+  /* Code inside pre inherits colors/background from pre */
+  .documentation-content pre code {
+    @apply bg-transparent p-0 text-[#e8e8e8];
+  }
+  /* “literal” spans (docutils) */
+  .documentation-content .literal {
+    @apply px-[0.3em] py-[0.1em] text-[#ffd700] rounded-[2px];
+  }
+
+  /* Lists */
+  .documentation-content :is(ul, ol) {
+    @apply my-[0.5em] pl-[1.5em];
+  }
+  .documentation-content li {
+    @apply my-[0.2em];
+  }
+
+  /* Blockquote */
+  .documentation-content blockquote {
+    @apply border-l-[3px] border-[#555] pl-[1em] my-[0.5em] italic text-[#ccc];
+  }
+
+  /* Tables */
+  .documentation-content table {
+    @apply border-collapse w-full my-[0.5em];
+  }
+  .documentation-content :is(th, td) {
+    @apply border border-[#555] p-[0.4em] text-left;
+  }
+  .documentation-content th {
+    @apply bg-[#333] font-bold;
+  }
+
+  /* Emphasis */
+  .documentation-content em {
+    @apply italic text-[#ddd];
+  }
+  .documentation-content strong {
+    @apply font-bold text-white;
+  }
+
+  /* Links */
+  .documentation-content a {
+    @apply text-[#78A083] underline;
+  }
+  .documentation-content a:hover {
+    @apply text-[#9bc49f];
+  }
+
+  /* Docutils-specific */
+  .documentation-content .field-list {
+    @apply my-[0.5em];
+  }
+  .documentation-content .field-name {
+    @apply font-bold text-white;
+  }
+  .documentation-content .field-body {
+    @apply ml-[1em];
+  }
+
+  .documentation-content :is(.note, .warning, .tip) {
+    @apply bg-[#2a2a3e] pl-3.5 pr-2 py-[0.8em] my-[0.5em] rounded-r-[3px] border-l-4 border-[#78A083];
+  }
+  .documentation-content .warning {
+    @apply border-l-[#e74c3c];
+  }
+  .documentation-content :is(.note, .warning, .tip) .first {
+    @apply mt-0;
+  }
+  .documentation-content :is(.note, .warning, .tip) .last {
+    @apply mb-0;
+  }
+}

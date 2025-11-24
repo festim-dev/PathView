@@ -341,6 +341,7 @@ const DnDFlow = () => {
 
       // Create node data with label and initialize all expected fields as empty strings
       let nodeData = {
+        id: newNodeId,
         label: `${type} ${newNodeId}`,
         nodeColor: '#DDE6ED' // Default node color
       };
@@ -1094,37 +1095,54 @@ const DnDFlow = () => {
   }, [selectedEdge, selectedNode, copiedNode, duplicateNode, setCopyFeedback]);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* Tab Navigation */}
-      <TopBar activeTab={activeTab} setActiveTab={setActiveTab} versionInfo={versionInfo} />
+      <TopBar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        versionInfo={versionInfo}
+      />
 
       {/* Graph Editor Tab */}
-      {activeTab === 'graph' && (
-        <div style={{ display: 'flex', flex: 1, height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
+      {activeTab === "graph" && (
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            height: "calc(100vh - 50px)",
+            overflow: "hidden",
+          }}
+        >
           {/* Sidebar */}
           <div
-            data-sidebar-state={sidebarVisible ? 'expanded' : 'collapsed'}
+            data-sidebar-state={sidebarVisible ? "expanded" : "collapsed"}
             className="sidebar-container"
             style={{
-              position: 'relative',
-              width: sidebarVisible ? '250px' : '0px',
-              height: '100%',
-              transition: 'width 0.5s ease',
-              overflow: 'hidden'
+              position: "relative",
+              width: sidebarVisible ? "250px" : "0px",
+              height: "100%",
+              transition: "width 0.5s ease",
+              overflow: "hidden",
             }}
           >
             <div
               style={{
-                position: 'fixed',
-                left: sidebarVisible ? '0px' : '-250px',
-                top: '50px', // Account for top bar height
-                width: '250px',
-                height: 'calc(100vh - 50px)',
-                transition: 'left 0.5s ease',
+                position: "fixed",
+                left: sidebarVisible ? "0px" : "-250px",
+                top: "50px", // Account for top bar height
+                width: "250px",
+                height: "calc(100vh - 50px)",
+                transition: "left 0.5s ease",
                 zIndex: 10,
-                borderRight: '1px solid #ccc',
-                backgroundColor: '#1e1e2f'
+                borderRight: "1px solid #ccc",
+                backgroundColor: "#1e1e2f",
               }}
             >
               <Sidebar />
@@ -1132,7 +1150,7 @@ const DnDFlow = () => {
           </div>
 
           {/* Main content area that moves with sidebar */}
-          <div style={{ position: 'relative', flex: 1, height: '100%' }}>
+          <div style={{ position: "relative", flex: 1, height: "100%" }}>
             <GraphView
               refEl={ref}
               reactFlowWrapperRef={reactFlowWrapper}
@@ -1153,13 +1171,23 @@ const DnDFlow = () => {
               duplicateNode={duplicateNode}
               copyFeedback={copyFeedback}
               ui={{
-                selectedNode, selectedEdge,
-                deleteSelectedNode, deleteSelectedEdge,
-                saveGraph, loadGraph, resetGraph, saveToPython, runPathsim,
+                selectedNode,
+                selectedEdge,
+                deleteSelectedNode,
+                deleteSelectedEdge,
+                saveGraph,
+                loadGraph,
+                resetGraph,
+                saveToPython,
+                runPathsim,
                 shareGraphURL,
-                dockOpen, setDockOpen, onToggleLogs,
-                showKeyboardShortcuts, setShowKeyboardShortcuts,
-                sidebarVisible, setSidebarVisible,
+                dockOpen,
+                setDockOpen,
+                onToggleLogs,
+                showKeyboardShortcuts,
+                setShowKeyboardShortcuts,
+                sidebarVisible,
+                setSidebarVisible,
               }}
             />
 
@@ -1197,42 +1225,38 @@ const DnDFlow = () => {
       )}
 
       {/* Events tab */}
-      {activeTab === 'events' && <EventsTab events={events} setEvents={setEvents} />}
+      {activeTab === "events" && (
+        <EventsTab events={events} setEvents={setEvents} />
+      )}
 
       {/* Solver Parameters Tab */}
-      {
-        activeTab === 'solver' && (
-          <SolverPanel
-            solverParams={solverParams}
-            setSolverParams={setSolverParams}
-            setActiveTab={setActiveTab}
-          />
-        )
-      }
+      {activeTab === "solver" && (
+        <SolverPanel
+          solverParams={solverParams}
+          setSolverParams={setSolverParams}
+          setActiveTab={setActiveTab}
+        />
+      )}
 
       {/* Global Variables Tab */}
-      {
-        activeTab === 'globals' && (
-          <GlobalVariablesTab
-            globalVariables={globalVariables}
-            setGlobalVariables={setGlobalVariables}
-            setActiveTab={setActiveTab}
-            pythonCode={pythonCode}
-            setPythonCode={setPythonCode}
-          />
-        )
-      }
+      {activeTab === "globals" && (
+        <GlobalVariablesTab
+          globalVariables={globalVariables}
+          setGlobalVariables={setGlobalVariables}
+          setActiveTab={setActiveTab}
+          pythonCode={pythonCode}
+          setPythonCode={setPythonCode}
+        />
+      )}
 
       {/* Results Tab */}
-      {
-        activeTab === 'results' && (
-          <ResultsPanel
-            simulationResults={simulationResults}
-            downloadHtml={downloadHtml}
-            downloadCsv={downloadCsv}
-          />
-        )
-      }
+      {activeTab === "results" && (
+        <ResultsPanel
+          simulationResults={simulationResults}
+          downloadHtml={downloadHtml}
+          downloadCsv={downloadCsv}
+        />
+      )}
 
       {/* Share URL Modal */}
       <ShareModal
@@ -1241,8 +1265,7 @@ const DnDFlow = () => {
         shareableURL={shareableURL}
         urlMetadata={urlMetadata}
       />
-
-    </div >
+    </div>
   );
 }
 
